@@ -1,0 +1,29 @@
+custom-autocomplete {
+  display: block;
+  position: relative;
+
+  .input {
+    display: block;
+    padding: 8px;
+    font-size: 16px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 8px;
+    margin: 0;
+    position: absolute;
+    background: green;
+
+    display: none;
+
+    :focus-within & {
+      display: block;
+    }
+  }
+
+
+  li {
+    text-align: left;
+  }
+}
