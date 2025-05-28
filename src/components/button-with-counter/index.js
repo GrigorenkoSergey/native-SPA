@@ -9,13 +9,16 @@ class ButtonWithCounter extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = template;
+
+    this.counterContainer = this.querySelector(".counter");
+
     this.updateCounter(0);
     this.querySelector("button").addEventListener('click', () => this.updateCounter(1))
   }
 
   updateCounter(diff) {
     this.counter += diff;
-    this.querySelector(".counter").textContent = this.counter;
+    this.counterContainer.textContent = this.counter;
   }
 }
 
