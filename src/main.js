@@ -1,24 +1,14 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import template from "./template.html?raw";
 import "./components/button-with-counter"
+import "./components/my-app";
 
-class MyApp extends HTMLElement {
-  connectedCallback() {
-    const { viteLogo, jsLogo } = this.dataset;
-
-    this.innerHTML = template;
-
-    this.querySelector(".logo").src = viteLogo;
-    this.querySelector(".vanilla").src = jsLogo;
-  }
-}
-
-customElements.define("my-app", MyApp)
+import javascriptLogo from '/javascript.svg'
+import viteLogo from '/vite.svg'
 
 document.querySelector('#app').innerHTML = `
   <my-app
-    data-vite-logo=${viteLogo} 
-    data-js-logo=${javascriptLogo}>
-  </my-app>`;
+    vite-logo=${viteLogo} 
+    js-logo=${javascriptLogo}
+  >
+    <button-with-counter></button-with-counter>
+  </my-app>
+  `;
