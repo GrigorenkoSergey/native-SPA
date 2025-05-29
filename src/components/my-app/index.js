@@ -14,6 +14,8 @@ class MyApp extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (!newValue) return;
+    
     if (name === "vite-logo") this.querySelector(".logo").src = newValue;
     if (name === "js-logo") this.querySelector(".vanilla").src = newValue;
   }

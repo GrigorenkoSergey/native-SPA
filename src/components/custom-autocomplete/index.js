@@ -4,12 +4,19 @@ import template from "./template.html?raw";
 import { listenClickOutsideOnce } from "../../utils/listenClickOutsideOnce";
 
 class CustomAutocomplete extends HTMLElement {
+  constructor() {
+    super();
+    this.options = [];
+  }
+
   connectedCallback() {
     this.innerHTML = template;
     this.input = this.querySelector("input");
 
     this.addEventListener("click", this.handleClick.bind(this));
     this.input.addEventListener("input", this.handleInput.bind(this));
+
+    this.render();
   }
 
   handleClick(event) {
@@ -32,6 +39,18 @@ class CustomAutocomplete extends HTMLElement {
       if (isMatch) item.style.display = "";
       else item.style.display = "none";
     })
+  }
+
+  render() {
+    const lis = this.options.map((item) => `<li data-value=${item.value}>${item.label}</li>`);
+    const ul = this.querySelector("ul");
+    ul.replaceChildren([])
+    ul.insertAdjacentHTML("afterbegin", lis.join(""));
+  }
+
+  setOptions(options) {
+    this.options = options;
+    this.render();
   }
 }
 
