@@ -8,18 +8,30 @@ class CustomAutocomplete extends HTMLElement {
     this.innerHTML = template;
     this.input = this.querySelector("input");
 
-    this.addEventListener("click", this.handleClick);
+    this.addEventListener("click", this.handleClick.bind(this));
+    this.input.addEventListener("input", this.handleInput.bind(this));
   }
 
   handleClick(event) {
-    const { target } = event;
     this.classList.add("expanded");
-
     listenClickOutsideOnce(this, (element) => element.classList.remove("expanded"));
 
+    const { target } = event;
     if (target.tagName === "LI") {
       this.input.value = target.textContent;
     }
+  }
+
+  handleInput(event) {
+    const input = event.target.value;
+    const lis = this.querySelectorAll("li");
+
+    lis.forEach(item => {
+      const isMatch = item.textContent.includes(input);
+
+      if (isMatch) item.style.display = "";
+      else item.style.display = "none";
+    })
   }
 }
 
