@@ -5,12 +5,9 @@ import "./components/custom-autocomplete";
 import javascriptLogo from '/javascript.svg'
 import viteLogo from '/vite.svg'
 
-document.querySelector('#app').innerHTML = `
-  <my-app
-    vite-logo=${viteLogo} 
-    js-logo=${javascriptLogo}
-  >
-    <button-with-counter></button-with-counter>
-    <custom-autocomplete></custom-autocomplete>
-  </my-app>
-  `;
+const app = document.getElementById("app");
+
+const myApp = app.querySelector("my-app");
+
+myApp.setAttribute("vite-logo", viteLogo);
+myApp.setAttribute("js-logo", javascriptLogo);

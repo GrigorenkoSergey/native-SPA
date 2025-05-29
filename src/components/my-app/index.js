@@ -3,16 +3,19 @@ import './style.css'
 import template from "./template.html?raw";
 
 class MyApp extends HTMLElement {
-  connectedCallback() {
-    const viteLogo = this.getAttribute("vite-logo");
-    const jsLogo = this.getAttribute("js-logo");
+  static get observedAttributes() {
+    return ["vite-logo", "js-logo"];
+  }
 
+  connectedCallback() {
     const children = [...this.children];
     this.innerHTML = template;
-
-    this.querySelector(".logo").src = viteLogo;
-    this.querySelector(".vanilla").src = jsLogo;
     this.querySelector(".card").append(...children);
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === "vite-logo") this.querySelector(".logo").src = newValue;
+    if (name === "js-logo") this.querySelector(".vanilla").src = newValue;
   }
 }
 
