@@ -1,4 +1,3 @@
-import "./components/button-with-counter"
 import "./components/my-app";
 import "./components/custom-autocomplete";
 

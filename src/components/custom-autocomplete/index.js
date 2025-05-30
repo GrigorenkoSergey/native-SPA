@@ -42,6 +42,7 @@ class CustomAutocomplete extends HTMLElement {
   }
 
   render() {
+    this.input.value = "";
     const lis = this.options.map((item) => `<li data-value=${item.value}>${item.label}</li>`);
     const ul = this.querySelector("ul");
     ul.replaceChildren([])
