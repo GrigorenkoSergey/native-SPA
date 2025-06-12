@@ -4,7 +4,7 @@ import template from "./template.html?raw";
 import { listenClickOutsideOnce } from "../../utils/listenClickOutsideOnce";
 
 const liClasses = {
-  keyboardFocused: "keyboard-focused"
+  keyboardFocused: "keyboard-focused",
 };
 
 const getKeyboardSelected = ctx => ctx.querySelector("." + liClasses.keyboardFocused);

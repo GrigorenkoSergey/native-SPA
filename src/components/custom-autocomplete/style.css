@@ -23,6 +23,10 @@ custom-autocomplete {
     text-align: left;
     cursor: pointer;
     padding: 8px;
+
+    &.selected {
+      background-color: orange;
+    }
   }
 
   /* hovering and selecting by keyboard */
