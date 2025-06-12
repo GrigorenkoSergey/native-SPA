@@ -1,5 +1,4 @@
-
-import './style.css'
+import "./style.css";
 import template from "./template.html?raw";
 
 class MyApp extends HTMLElement {
@@ -15,10 +14,10 @@ class MyApp extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (!newValue) return;
-    
+
     if (name === "vite-logo") this.querySelector(".logo").src = newValue;
     if (name === "js-logo") this.querySelector(".vanilla").src = newValue;
   }
 }
 
-customElements.define("my-app", MyApp)
+customElements.define("my-app", MyApp);
