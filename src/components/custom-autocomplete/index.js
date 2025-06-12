@@ -7,8 +7,6 @@ const liClasses = {
   keyboardFocused: "keyboard-focused",
 };
 
-const getKeyboardSelected = ctx => ctx.querySelector("." + liClasses.keyboardFocused);
-
 const removeKeyBoardFocusedClass = ctx => {
   const lis = Array.from(ctx.ul.querySelectorAll("li") || []);
   lis.forEach(item => item.classList.remove(liClasses.keyboardFocused));
@@ -32,7 +30,7 @@ class CustomAutocomplete extends HTMLElement {
     if (!this.listenersWereAdded) {
       this.addEventListener("click", this.handleClick.bind(this));
       this.input.addEventListener("input", this.handleInput.bind(this));
-      // this.addEventListener("keydown", this.handleKeydown.bind(this));
+      this.addEventListener("keydown", this.handleKeydown.bind(this));
       // this.addEventListener("pointermove", this.handlePointerMove.bind(this));
     }
 
@@ -77,23 +75,18 @@ class CustomAutocomplete extends HTMLElement {
     this.isEditing = false;
   }
 
-  selectItem(item) {
-    this.input.value = item.textContent;
-    this.classList.remove("expanded");
-  }
-
   handleKeydown(event) {
-    this.classList.add("expanded");
+    this.isOpen = true;
 
     const { key } = event;
     if (key === "ArrowDown" || key === "ArrowUp") {
       return this.handleArrowKeydown(event);
     }
 
-    if (key === "Enter") {
-      const currentFocused = getKeyboardSelected(this);
-      if (currentFocused) this.selectItem(currentFocused);
-    }
+    // if (key === "Enter") {
+    //   const currentFocused = getKeyboardSelected(this);
+    //   if (currentFocused) this.selectItem(currentFocused);
+    // }
   }
 
   handleArrowKeydown(event) {
@@ -104,8 +97,6 @@ class CustomAutocomplete extends HTMLElement {
       ul.querySelector("." + liClasses.keyboardFocused) ||
       ul.querySelector("li:hover") ||
       ul.querySelector(`[data-value='${this.input.value}']`);
-
-    removeKeyBoardFocusedClass(this);
 
     let elementToHighlight;
 
@@ -121,7 +112,9 @@ class CustomAutocomplete extends HTMLElement {
       else elementToHighlight = startPoint.previousElementSibling;
     }
 
-    elementToHighlight.classList.add(liClasses.keyboardFocused);
+    this.keyboardSelected = elementToHighlight;
+    this.render();
+    this.keyboardSelected = undefined;
   }
 
   handlePointerMove() {
@@ -139,6 +132,7 @@ class CustomAutocomplete extends HTMLElement {
 
     lis.forEach(li => {
       this._visualizeSelected(li, value);
+      this._visualizeKeyboardSelected(li);
       this._filterOnInput(li);
     });
   }
@@ -146,6 +140,11 @@ class CustomAutocomplete extends HTMLElement {
   _visualizeSelected(li, value) {
     if (li.dataset.value === value) li.classList.add("selected");
     else li.classList.remove("selected");
+  }
+
+  _visualizeKeyboardSelected(li) {
+    if (this.keyboardSelected === li) li.classList.add(liClasses.keyboardFocused);
+    else li.classList.remove(liClasses.keyboardFocused);
   }
 
   _filterOnInput(li) {
