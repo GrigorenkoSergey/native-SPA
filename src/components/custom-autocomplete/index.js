@@ -17,6 +17,7 @@ const removeKeyBoardFocusedClass = ctx => {
 class CustomAutocomplete extends HTMLElement {
   constructor() {
     super();
+    this.isOpen = false;
     this.options = [];
     this.listenersWereAdded = false;
   }
@@ -25,29 +26,31 @@ class CustomAutocomplete extends HTMLElement {
     this.innerHTML = template;
     this.input = this.querySelector("input");
     this.ul = this.querySelector("ul");
+    this.value = "";
 
     if (!this.listenersWereAdded) {
       this.addEventListener("click", this.handleClick.bind(this));
-      this.input.addEventListener("input", this.handleInput.bind(this));
-      this.addEventListener("keydown", this.handleKeydown.bind(this));
-      this.addEventListener("pointermove", this.handlePointerMove.bind(this));
+      // this.input.addEventListener("input", this.handleInput.bind(this));
+      // this.addEventListener("keydown", this.handleKeydown.bind(this));
+      // this.addEventListener("pointermove", this.handlePointerMove.bind(this));
     }
 
     this.listenersWereAdded = true;
-    this.render();
+    this.init();
   }
 
   handleClick(event) {
-    this.classList.add("expanded");
+    this.isOpen = true;
 
-    const ctx = this;
-    listenClickOutsideOnce(ctx, element => {
-      element.classList.remove("expanded");
-      getKeyboardSelected(ctx).classList.remove(liClasses.keyboardFocused);
+    listenClickOutsideOnce(this, () => {
+      this.isOpen = false;
+      this.render();
     });
 
     const { target } = event;
-    if (target.tagName === "LI") this.selectItem(target);
+    if (target.tagName === "LI") this.value = target.dataset.value;
+
+    this.render();
   }
 
   selectItem(item) {
@@ -114,16 +117,31 @@ class CustomAutocomplete extends HTMLElement {
   }
 
   render() {
-    this.input.value = "";
+    const { isOpen, value, ul } = this;
+    this.input.value = value;
 
+    if (isOpen) this.classList.add("expanded");
+    else this.classList.remove("expanded");
+
+    const lis = Array.from(ul.querySelectorAll("li") || []);
+    lis.forEach(li => {
+      if (li.dataset.value === value) li.classList.add("selected");
+      else li.classList.remove("selected");
+    });
+  }
+
+  init() {
+    this.input.value = "";
+    // TODO а если понадобятся более сложные списки, с иконками, например?
     const lis = this.options.map(item => `<li data-value=${item.value}>${item.label}</li>`);
+
     this.ul.replaceChildren([]);
     this.ul.insertAdjacentHTML("afterbegin", lis.join(""));
   }
 
   setOptions(options) {
     this.options = options;
-    this.render();
+    this.init();
   }
 }
 
