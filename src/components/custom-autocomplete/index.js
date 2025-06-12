@@ -83,20 +83,21 @@ class CustomAutocomplete extends HTMLElement {
       return this.handleArrowKeydown(event);
     }
 
-    // if (key === "Enter") {
-    //   const currentFocused = getKeyboardSelected(this);
-    //   if (currentFocused) this.selectItem(currentFocused);
-    // }
+    if (key === "Enter") {
+      const currentPointed = this._getCurrentPointedElement();
+      if (!currentPointed) return;
+
+      this.value = currentPointed.dataset.value;
+      this.isOpen = false;
+      return this.render();
+    }
   }
 
   handleArrowKeydown(event) {
     const { key } = event;
     const ul = this.ul;
 
-    const startPoint =
-      ul.querySelector("." + liClasses.keyboardFocused) ||
-      ul.querySelector("li:hover") ||
-      ul.querySelector(`[data-value='${this.input.value}']`);
+    const startPoint = this._getCurrentPointedElement();
 
     let elementToHighlight;
 
@@ -135,6 +136,16 @@ class CustomAutocomplete extends HTMLElement {
       this._visualizeKeyboardSelected(li);
       this._filterOnInput(li);
     });
+  }
+
+  _getCurrentPointedElement() {
+    const { ul } = this;
+
+    return (
+      ul.querySelector("." + liClasses.keyboardFocused) ||
+      ul.querySelector("li:hover") ||
+      ul.querySelector(`[data-value='${this.input.value}']`)
+    );
   }
 
   _visualizeSelected(li, value) {
