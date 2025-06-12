@@ -17,20 +17,21 @@ const removeKeyBoardFocusedClass = ctx => {
 class CustomAutocomplete extends HTMLElement {
   constructor() {
     super();
-    this.isOpen = false;
     this.options = [];
+    this.isOpen = false;
+    this.value = "";
     this.listenersWereAdded = false;
+    this.isEditing = false;
   }
 
   connectedCallback() {
     this.innerHTML = template;
     this.input = this.querySelector("input");
     this.ul = this.querySelector("ul");
-    this.value = "";
 
     if (!this.listenersWereAdded) {
       this.addEventListener("click", this.handleClick.bind(this));
-      // this.input.addEventListener("input", this.handleInput.bind(this));
+      this.input.addEventListener("input", this.handleInput.bind(this));
       // this.addEventListener("keydown", this.handleKeydown.bind(this));
       // this.addEventListener("pointermove", this.handlePointerMove.bind(this));
     }
@@ -44,6 +45,9 @@ class CustomAutocomplete extends HTMLElement {
 
     listenClickOutsideOnce(this, () => {
       this.isOpen = false;
+      this.isEditing = false;
+      if (this.input.value === "") this.value = "";
+
       this.render();
     });
 
@@ -51,6 +55,12 @@ class CustomAutocomplete extends HTMLElement {
     if (target.tagName === "LI") this.value = target.dataset.value;
 
     this.render();
+  }
+
+  handleInput() {
+    this.isEditing = true;
+    this.render();
+    this.isEditing = false;
   }
 
   selectItem(item) {
@@ -104,29 +114,26 @@ class CustomAutocomplete extends HTMLElement {
     removeKeyBoardFocusedClass(this);
   }
 
-  handleInput(event) {
-    const input = event.target.value;
-    const lis = this.querySelectorAll("li");
-
-    lis.forEach(item => {
-      const isMatch = item.textContent.includes(input);
-
-      if (isMatch) item.style.display = "";
-      else item.style.display = "none";
-    });
-  }
-
   render() {
-    const { isOpen, value, ul } = this;
-    this.input.value = value;
+    const { value } = this;
+    if (!this.isEditing) this.input.value = value;
 
-    if (isOpen) this.classList.add("expanded");
+    if (this.isOpen) this.classList.add("expanded");
     else this.classList.remove("expanded");
 
-    const lis = Array.from(ul.querySelectorAll("li") || []);
+    const lis = Array.from(this.ul.querySelectorAll("li") || []);
+
     lis.forEach(li => {
       if (li.dataset.value === value) li.classList.add("selected");
       else li.classList.remove("selected");
+
+      if (!this.isEditing) li.style.display = "";
+      else {
+        const inputValue = this.input.value;
+        const isMatch = li.textContent.includes(inputValue);
+        if (isMatch) li.style.display = "";
+        else li.style.display = "none";
+      }
     });
   }
 
