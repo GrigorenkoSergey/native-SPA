@@ -40,6 +40,20 @@ class CustomAutocomplete extends HTMLElement {
     this.init();
   }
 
+  init() {
+    this.input.value = "";
+    // TODO а если понадобятся более сложные списки, с иконками, например?
+    const lis = this.options.map(item => `<li data-value=${item.value}>${item.label}</li>`);
+
+    this.ul.replaceChildren([]);
+    this.ul.insertAdjacentHTML("afterbegin", lis.join(""));
+  }
+
+  setOptions(options) {
+    this.options = options;
+    this.init();
+  }
+
   handleClick(event) {
     this.isOpen = true;
 
@@ -124,31 +138,24 @@ class CustomAutocomplete extends HTMLElement {
     const lis = Array.from(this.ul.querySelectorAll("li") || []);
 
     lis.forEach(li => {
-      if (li.dataset.value === value) li.classList.add("selected");
-      else li.classList.remove("selected");
-
-      if (!this.isEditing) li.style.display = "";
-      else {
-        const inputValue = this.input.value;
-        const isMatch = li.textContent.includes(inputValue);
-        if (isMatch) li.style.display = "";
-        else li.style.display = "none";
-      }
+      this._visualizeSelected(li, value);
+      this._filterOnInput(li);
     });
   }
 
-  init() {
-    this.input.value = "";
-    // TODO а если понадобятся более сложные списки, с иконками, например?
-    const lis = this.options.map(item => `<li data-value=${item.value}>${item.label}</li>`);
-
-    this.ul.replaceChildren([]);
-    this.ul.insertAdjacentHTML("afterbegin", lis.join(""));
+  _visualizeSelected(li, value) {
+    if (li.dataset.value === value) li.classList.add("selected");
+    else li.classList.remove("selected");
   }
 
-  setOptions(options) {
-    this.options = options;
-    this.init();
+  _filterOnInput(li) {
+    if (!this.isEditing) li.style.display = "";
+    else {
+      const inputValue = this.input.value;
+      const isMatch = li.textContent.includes(inputValue);
+      if (isMatch) li.style.display = "";
+      else li.style.display = "none";
+    }
   }
 }
 
