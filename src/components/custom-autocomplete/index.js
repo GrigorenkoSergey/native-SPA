@@ -3,13 +3,12 @@ import template from "./template.html?raw";
 
 import { listenClickOutsideOnce } from "../../utils/listenClickOutsideOnce";
 
-const liClasses = {
-  keyboardFocused: "keyboard-focused",
+const ulClasses = {
+  expanded: "expanded",
 };
 
-const removeKeyBoardFocusedClass = ctx => {
-  const lis = Array.from(ctx.ul.querySelectorAll("li") || []);
-  lis.forEach(item => item.classList.remove(liClasses.keyboardFocused));
+const liClasses = {
+  keyboardFocused: "keyboard-focused",
 };
 
 class CustomAutocomplete extends HTMLElement {
@@ -31,7 +30,7 @@ class CustomAutocomplete extends HTMLElement {
       this.addEventListener("click", this.handleClick.bind(this));
       this.input.addEventListener("input", this.handleInput.bind(this));
       this.addEventListener("keydown", this.handleKeydown.bind(this));
-      // this.addEventListener("pointermove", this.handlePointerMove.bind(this));
+      this.addEventListener("pointermove", this.handlePointerMove.bind(this));
     }
 
     this.listenersWereAdded = true;
@@ -64,7 +63,10 @@ class CustomAutocomplete extends HTMLElement {
     });
 
     const { target } = event;
-    if (target.tagName === "LI") this.value = target.dataset.value;
+    if (target.tagName === "LI") {
+      this.value = target.dataset.value;
+      this.isOpen = false;
+    }
 
     this.render();
   }
@@ -95,9 +97,9 @@ class CustomAutocomplete extends HTMLElement {
 
   handleArrowKeydown(event) {
     const { key } = event;
-    const ul = this.ul;
 
     const startPoint = this._getCurrentPointedElement();
+    const ul = this.ul;
 
     let elementToHighlight;
 
@@ -119,15 +121,16 @@ class CustomAutocomplete extends HTMLElement {
   }
 
   handlePointerMove() {
-    removeKeyBoardFocusedClass(this);
+    this.keyboardSelected = undefined;
+    this.render();
   }
 
   render() {
     const { value } = this;
     if (!this.isEditing) this.input.value = value;
 
-    if (this.isOpen) this.classList.add("expanded");
-    else this.classList.remove("expanded");
+    if (this.isOpen) this.classList.add(ulClasses.expanded);
+    else this.classList.remove(ulClasses.expanded);
 
     const lis = Array.from(this.ul.querySelectorAll("li") || []);
 
