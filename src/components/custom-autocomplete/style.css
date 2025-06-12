@@ -19,15 +19,22 @@ custom-autocomplete {
     display: none;
   }
 
-
   li {
     text-align: left;
     cursor: pointer;
     padding: 8px;
+  }
 
-    &:hover {
-      background-color: red;
+  /* hovering and selecting by keyboard */
+  ul:has(li.keyboard-focused) {
+    li:hover:not(.keyboard-focused) {
+      background-color: unset;
     }
+  }
+
+  li:hover,
+  li.keyboard-focused {
+    background-color: red;
   }
 }
 
