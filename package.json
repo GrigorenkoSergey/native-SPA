@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev-storybook": "vite --open /src/stories/custom-autocomplete/stories.html",
     "build": "vite build",
     "preview": "vite preview"
   },

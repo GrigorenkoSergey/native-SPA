@@ -34,7 +34,7 @@ class CustomAutocomplete extends HTMLElement {
   }
 
   renderLi(item) {
-    return `<li data-value=${item.value}>${item.label}</li>`;
+    return `<li data-value=${item}>${item}</li>`;
   }
 
   init() {
