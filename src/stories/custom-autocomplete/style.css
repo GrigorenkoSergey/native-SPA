@@ -1,23 +1,20 @@
 .hero-wiki-link {
   background-color: rgb(78, 110, 158);
   text-decoration: none;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   width: 20px;
   height: 20px;
   border-radius: 50%;
-
   padding: 4px;
-  margin-left: 10px;
+  margin-left: auto;
 }
 
 custom-autocomplete {
   max-width: 300px;
 }
 
-section {
+.example-customizing {
   display: flex;
 }

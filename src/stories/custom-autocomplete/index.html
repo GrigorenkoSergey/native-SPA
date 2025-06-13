@@ -10,23 +10,37 @@
 
   <body>
     <storybook-layout>
-      <h3>Базовый вариант</h3>
-      <p>Поддерживает фильтрацию, выделение с клавиатуры. Для добавления
-        первоначальных опций необходимо их добавить вручную:
-      <pre>const autocomplete = document.querySelector("custom-autocomplete");
-autocomplete.setOptions([1, 2, 3, 4, 5]);</pre>
-      </p>
-      <custom-autocomplete class="basic"></custom-autocomplete>
+      <section>
+        <h3>Базовый вариант</h3>
 
-      <h3>Кастомизированные опции</h3>
-      <p>По умолчанию компонент принимает простейшие опции
-        вида<code>string[]</code>. Однако, список можно настроить дополнительно.
-        Для этого нужно переопределить свойство <code>element.renderLi</code>.
-        Функция принимает элемент опции, и должна вернуть элемент списка LI в виде
-        с нужным атрибутом <code>data-value</code>, по которому будет осуществлена
-        фильтрация и выбор.</p>
-      <p>Пример:
-<pre>const withCustomizedLi = document.querySelector(".customized-li");
+        <p>Поддерживает фильтрацию, выделение с клавиатуры. Для добавления
+          первоначальных опций необходимо их добавить вручную:
+<pre>const autocomplete = document.querySelector("custom-autocomplete");
+autocomplete.setOptions([1, 2, 3, 4, 5]);</pre>
+        </p>
+
+        <custom-autocomplete class="basic"></custom-autocomplete>
+      </section>
+
+      <section>
+        <h3>Кастомизированные опции</h3>
+        <p>По умолчанию компонент принимает простейшие опции
+          вида<code>string[]</code>. Однако, список можно настроить
+          дополнительно.
+          Для этого нужно переопределить свойство
+          <code>element.renderLi</code>.
+          Функция принимает элемент опции, и должна вернуть элемент списка LI
+          в
+          виде
+          с нужным атрибутом <code>data-value</code>, по которому будет
+          осуществлена
+          фильтрация и выбор.
+          <br />
+          <br />
+          Пример:
+        </p>
+        <div class="example-customizing">
+          <pre>const withCustomizedLi = document.querySelector(".customized-li");
 
 withCustomizedLi.renderLi = li => `\
 &lt;li data-value=${li.value}>
@@ -60,8 +74,11 @@ withCustomizedLi.setOptions(
   },
 );
 </pre>
-      </p>
-      <custom-autocomplete class="customized-li"></custom-autocomplete>
+          </p>
+
+          <custom-autocomplete class="customized-li"></custom-autocomplete>
+        </div>
+      </section>
     </storybook-layout>
 
 

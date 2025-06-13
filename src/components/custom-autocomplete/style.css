@@ -21,9 +21,11 @@ custom-autocomplete {
   }
 
   li {
-    text-align: left;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+
     padding: 8px;
+    cursor: pointer;
 
     &.selected {
       background-color: orange;

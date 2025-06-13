@@ -166,8 +166,8 @@ class CustomAutocomplete extends HTMLElement {
   _filterOnInput(li) {
     if (!this.isEditing) li.style.display = "";
     else {
-      const inputValue = this.input.value;
-      const isMatch = li.textContent.includes(inputValue);
+      const inputValue = this.input.value.toLowerCase();
+      const isMatch = li.textContent.toLowerCase().includes(inputValue);
       if (isMatch) li.style.display = "";
       else li.style.display = "none";
     }
