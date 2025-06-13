@@ -30,7 +30,6 @@ class CustomAutocomplete extends HTMLElement {
       this.addEventListener("click", this.handleClick.bind(this));
       this.input.addEventListener("input", this.handleInput.bind(this));
       this.addEventListener("keydown", this.handleKeydown.bind(this));
-      this.addEventListener("pointermove", this.handlePointerMove.bind(this));
     }
 
     this.listenersWereAdded = true;
@@ -118,6 +117,8 @@ class CustomAutocomplete extends HTMLElement {
     this.keyboardSelected = elementToHighlight;
     this.render();
     this.keyboardSelected = undefined;
+
+    this.addEventListener("pointermove", this.handlePointerMove.bind(this), { once: true });
   }
 
   handlePointerMove() {
