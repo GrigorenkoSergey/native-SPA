@@ -36,10 +36,13 @@ class CustomAutocomplete extends HTMLElement {
     this.init();
   }
 
+  renderLi(item) {
+    return `<li data-value=${item.value}>${item.label}</li>`;
+  }
+
   init() {
     this.input.value = "";
-    // TODO а если понадобятся более сложные списки, с иконками, например?
-    const lis = this.options.map(item => `<li data-value=${item.value}>${item.label}</li>`);
+    const lis = this.options.map(item => this.renderLi(item));
 
     this.ul.replaceChildren([]);
     this.ul.insertAdjacentHTML("afterbegin", lis.join(""));
@@ -172,5 +175,11 @@ class CustomAutocomplete extends HTMLElement {
     }
   }
 }
+
+// TODO поэкспериментировать с видимостью методов элемента,
+// возможно вынести служеные функции наверх, или переопределить свойства элемента.
+
+// TODO добавить сверху описание поля (legend)
+// TODO добавить стрелочку
 
 customElements.define("custom-autocomplete", CustomAutocomplete);
