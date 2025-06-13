@@ -13,6 +13,9 @@
 
 custom-autocomplete {
   max-width: 300px;
+  a {
+    color: white;
+  }
 }
 
 .example-customizing {

@@ -33,6 +33,7 @@ const basic = document.querySelector(".basic");
 basic.setOptions(ulPossibleOptions[optionsIndex]);
 
 const withCustomizedLi = document.querySelector(".customized-li");
+
 withCustomizedLi.renderLi = li => `\
 <li data-value=${li.value}>
   ${li.value}
@@ -41,4 +42,5 @@ withCustomizedLi.renderLi = li => `\
     class="hero-wiki-link">?</a>
 </li>
 `;
+
 withCustomizedLi.setOptions(ulPossibleOptions[1]);

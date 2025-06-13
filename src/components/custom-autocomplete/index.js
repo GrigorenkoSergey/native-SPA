@@ -3,6 +3,14 @@ import template from "./template.html?raw";
 
 import { listenClickOutsideOnce } from "../../utils/listenClickOutsideOnce";
 
+// TODO дать возможность показывать элементы списков как есть, т.е. с непосредственно переданными li
+
+// TODO поэкспериментировать с видимостью методов элемента,
+// возможно вынести служеные функции наверх, или переопределить свойства элемента.
+
+// TODO добавить сверху описание поля (legend)
+// TODO добавить стрелочку и крестик
+
 const ulClasses = {
   expanded: "expanded",
 };
@@ -73,7 +81,7 @@ class CustomAutocomplete extends HTMLElement {
   handleInput() {
     this.isEditing = true;
     this.render();
-    this.isEditing = false;
+    this.input.onblur = () => (this.isEditing = false);
   }
 
   handleKeydown(event) {
@@ -90,6 +98,8 @@ class CustomAutocomplete extends HTMLElement {
 
       this.value = currentPointed.dataset.value;
       this.isOpen = false;
+      this.isEditing = false;
+
       return this.render();
     }
   }
@@ -101,18 +111,32 @@ class CustomAutocomplete extends HTMLElement {
     const startPoint = this._getCurrentPointedElement();
     const ul = this.ul;
 
+    let firstVisible = ul.firstElementChild;
+    while (firstVisible && firstVisible.clientHeight === 0) firstVisible = firstVisible.nextElementSibling;
+
+    let lastVisible = ul.lastElementChild;
+    while (lastVisible && lastVisible.clientHeight === 0) lastVisible = lastVisible.previousElementSibling;
+
     let elementToHighlight;
 
     if (key === "ArrowDown") {
-      if (!startPoint) elementToHighlight = ul.firstElementChild;
-      else if (startPoint === ul.lastElementChild) elementToHighlight = ul.lastElementChild;
-      else elementToHighlight = startPoint.nextElementSibling;
+      if (!startPoint) elementToHighlight = firstVisible;
+      else if (startPoint === lastVisible) elementToHighlight = lastVisible;
+      else {
+        let elem = startPoint.nextElementSibling;
+        while (elem && elem.clientHeight === 0) elem = elem.nextElementSibling;
+        elementToHighlight = elem;
+      }
     }
 
     if (key === "ArrowUp") {
-      if (!startPoint) elementToHighlight = ul.lastElementChild;
-      else if (startPoint === ul.firstElementChild) elementToHighlight = ul.firstElementChild;
-      else elementToHighlight = startPoint.previousElementSibling;
+      if (!startPoint) elementToHighlight = lastVisible;
+      else if (startPoint === firstVisible) elementToHighlight = firstVisible;
+      else {
+        let elem = startPoint.previousElementSibling;
+        while (elem && elem.clientHeight === 0) elem = elem.previousElementSibling;
+        elementToHighlight = elem;
+      }
     }
 
     this.keyboardSelected = elementToHighlight;
@@ -173,11 +197,5 @@ class CustomAutocomplete extends HTMLElement {
     }
   }
 }
-
-// TODO поэкспериментировать с видимостью методов элемента,
-// возможно вынести служеные функции наверх, или переопределить свойства элемента.
-
-// TODO добавить сверху описание поля (legend)
-// TODO добавить стрелочку и крестик
 
 customElements.define("custom-autocomplete", CustomAutocomplete);
