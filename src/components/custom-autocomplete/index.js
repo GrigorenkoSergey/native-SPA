@@ -17,7 +17,6 @@ class CustomAutocomplete extends HTMLElement {
     this.options = [];
     this.isOpen = false;
     this.value = "";
-    this.listenersWereAdded = false;
     this.isEditing = false;
   }
 
@@ -26,13 +25,11 @@ class CustomAutocomplete extends HTMLElement {
     this.input = this.querySelector("input");
     this.ul = this.querySelector("ul");
 
-    if (!this.listenersWereAdded) {
-      this.addEventListener("click", this.handleClick.bind(this));
-      this.input.addEventListener("input", this.handleInput.bind(this));
-      this.addEventListener("keydown", this.handleKeydown.bind(this));
-    }
+    // предпочтительно через свойство, чтобы не очищать лишний раз обработчики
+    this.onclick = event => this.handleClick(event);
+    this.input.oninput = event => this.handleInput(event);
+    this.onkeydown = event => this.handleKeydown(event);
 
-    this.listenersWereAdded = true;
     this.init();
   }
 
@@ -98,8 +95,9 @@ class CustomAutocomplete extends HTMLElement {
   }
 
   handleArrowKeydown(event) {
-    const { key } = event;
+    event.preventDefault(); // чтобы курсор не двигался
 
+    const { key } = event;
     const startPoint = this._getCurrentPointedElement();
     const ul = this.ul;
 
@@ -180,6 +178,6 @@ class CustomAutocomplete extends HTMLElement {
 // возможно вынести служеные функции наверх, или переопределить свойства элемента.
 
 // TODO добавить сверху описание поля (legend)
-// TODO добавить стрелочку
+// TODO добавить стрелочку и крестик
 
 customElements.define("custom-autocomplete", CustomAutocomplete);
