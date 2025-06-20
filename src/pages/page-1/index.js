@@ -1,3 +1,13 @@
-import template from "./template.html?raw";
+import { makeObservable } from "../../utils/state";
 
-export default template;
+export default () => {
+  const state = makeObservable({
+    inputValue: "",
+  });
+
+  const input = document.querySelector("input");
+  input.addEventListener("input", event => {
+    console.log(event.target.value);
+    state.inputValue = event.target.value;
+  });
+};

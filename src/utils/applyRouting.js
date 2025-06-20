@@ -18,13 +18,15 @@ const buildPage = async url => {
   };
 
   const insertHTML = async () => {
-    const template = (await import(page)).default;
+    const response = await fetch(page + "/template.html");
+    const template = await response.text();
+
     const pageContainer = document.querySelector(PAGE_CONTENT_CONTAINER);
     pageContainer.innerHTML = template;
   };
 
   const executeScript = async () => {
-    const logic = (await import(page + "/script.js")).default;
+    const logic = (await import(page + "/index.js")).default;
     await logic?.();
   };
 
