@@ -1,14 +1,36 @@
 const RELATIVE_PATH_TO_PAGES_DIR = "../pages";
 const PAGE_CONTENT_CONTAINER = "main";
+const PAGE_CSS_CONTAINER_ID = "page-css";
 
 const buildPage = async url => {
   const { pathname, search } = new URL(url);
   const page = RELATIVE_PATH_TO_PAGES_DIR + pathname + search;
 
-  const content = (await import(/* @vite-ignore */ page)).default;
+  const insertCSS = async () => {
+    const pageCssContainer = document.getElementById(PAGE_CSS_CONTAINER_ID);
+    if (pageCssContainer) pageCssContainer.remove();
 
-  const pageContainer = document.querySelector(PAGE_CONTENT_CONTAINER);
-  pageContainer.innerHTML = content;
+    const link = document.createElement("link");
+    link.id = PAGE_CSS_CONTAINER_ID;
+    link.rel = "stylesheet";
+    link.href = page + "/style.css";
+    document.head.appendChild(link);
+  };
+
+  const insertHTML = async () => {
+    const template = (await import(page)).default;
+    const pageContainer = document.querySelector(PAGE_CONTENT_CONTAINER);
+    pageContainer.innerHTML = template;
+  };
+
+  const executeScript = async () => {
+    const logic = (await import(page + "/script.js")).default;
+    await logic?.();
+  };
+
+  await insertCSS();
+  await insertHTML();
+  await executeScript();
 };
 
 document.addEventListener("DOMContentLoaded", () => buildPage(window.location.href));
