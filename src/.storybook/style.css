@@ -1,4 +1,4 @@
-storybook-layout {
+.storybook-layout {
   display: grid;
   grid-template-columns: min(200px, 25%) auto;
   gap: 10px;

@@ -1,2 +1,20 @@
 import "./components/app-nav";
-import "./utils/applyRouting";
+import { applyRouting } from "./utils/applyRouting";
+
+const getPageLogic = async pathToPageFromPagesDir => {
+  switch (pathToPageFromPagesDir) {
+    case "page-1":
+      return (await import("./pages/page-1/index.js")).default;
+    case "page-1/page-1-deeper-page":
+      return (await import("./pages/page-1/page-1-deeper-page/index.js")).default;
+    case "page-2":
+      return (await import("./pages/page-2/index.js")).default;
+    default:
+      return (await import("./pages/page-404/index.js")).default;
+  }
+};
+
+applyRouting({
+  getPageLogic,
+  base: import.meta.env.BASE_URL,
+});
