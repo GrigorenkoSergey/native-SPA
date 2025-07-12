@@ -3,9 +3,8 @@
 
   <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>custom-autocomplete</title>
+    <title>Document</title>
   </head>
 
   <body>
@@ -15,7 +14,7 @@
 
         <p>Поддерживает фильтрацию, выделение с клавиатуры. Для добавления
           первоначальных опций необходимо их добавить вручную:
-<pre>const autocomplete = document.querySelector("custom-autocomplete");
+        <pre>const autocomplete = document.querySelector("custom-autocomplete");
 autocomplete.setOptions([1, 2, 3, 4, 5]);</pre>
         </p>
 
@@ -24,11 +23,15 @@ autocomplete.setOptions([1, 2, 3, 4, 5]);</pre>
 
       <section>
         <h3>Кастомизированные опции</h3>
-        <p>По умолчанию компонент принимает простейшие опции вида<code>string[]</code>. 
-          Однако, список можно настроить дополнительно.  Для этого нужно переопределить свойство <code>element.renderLi</code>.  
-          Функция принимает элемент опции, и должна вернуть элемент списка LI в виде строки с нужным атрибутом <code>data-value</code>, 
-          по которому будет осуществлена фильтрация и выбор.  
-          <br /> 
+        <p>По умолчанию компонент принимает простейшие опции
+          вида<code>string[]</code>.
+          Однако, список можно настроить дополнительно. Для этого нужно
+          переопределить свойство <code>element.renderLi</code>.
+          Функция принимает элемент опции, и должна вернуть элемент списка LI в
+          виде
+          строки с нужным атрибутом <code>data-value</code>,
+          по которому будет осуществлена фильтрация и выбор.
+          <br />
           <br />
           Пример:
         </p>
