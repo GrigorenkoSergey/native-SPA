@@ -18,7 +18,7 @@ const buildPage = async url => {
   };
 
   const insertHTML = async () => {
-    const response = await fetch(page + "/template.html");
+    const response = await fetch(page + "/template.html", { cache: "force-cache" });
     const template = await response.text();
 
     const pageContainer = document.querySelector(PAGE_CONTENT_CONTAINER);
@@ -26,7 +26,7 @@ const buildPage = async url => {
   };
 
   const executeScript = async () => {
-    const logic = (await import(page + "/index.js")).default;
+    const logic = (await import(page + "/index.js", { cache: "force-cache" })).default;
     await logic?.();
   };
 

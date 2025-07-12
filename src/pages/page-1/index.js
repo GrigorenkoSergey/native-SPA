@@ -1,8 +1,6 @@
-import { makeObservable } from "../../utils/state";
+import { store } from "../../stores/store";
 
-const store = makeObservable({
-  inputValue: "",
-});
+console.log("page-1");
 
 export default () => {
   const input = document.querySelector("input");
@@ -13,17 +11,6 @@ export default () => {
   output.textContent = store.inputValue;
 
   store.connect(output, ({ observable, listener }) => {
-    console.log("fun");
     listener.textContent = observable.inputValue;
   });
-
-  const btn = document.querySelector("button");
-  btn.addEventListener(
-    "click",
-    () => {
-      output.remove();
-      output = null;
-    },
-    { once: true },
-  );
 };
