@@ -1,68 +1,38 @@
-const makeObservable = obj =>
-  new Proxy(obj, {
+const makeObservable = obj => {
+  let store = {
+    ...obj,
+
+    listeners: new Map(),
+
+    connect(listener, callback) {
+      const ref = new WeakRef(listener);
+      this.listeners.set(ref, callback);
+
+      return () => this.listeners.delete(ref);
+    },
+
+    notify({ observable, prop, value }) {
+      this.listeners.forEach((callback, ref) => {
+        const listener = ref.deref();
+        if (!listener) return this.listeners.delete(ref);
+
+        callback({ observable, listener, prop, value });
+      });
+    },
+  };
+
+  store = new Proxy(store, {
     set(...args) {
-      const [target, key, value] = args;
-      console.log("Установка свойства ", key);
-      console.log("Значение ", value);
+      const [observable, prop, value] = args;
+      queueMicrotask(() => observable.notify({ observable, prop, value }));
 
       return Reflect.set(...args);
     },
   });
 
-console.clear();
-
-let store = {
-  listeners: new Map(),
-
-  connect(listener, func) {
-    const ref = new WeakRef(listener);
-    this.listeners.set(ref, func);
-
-    return () => this.listeners.delete(ref);
-  },
-
-  notify({ target, prop, value }) {
-    this.listeners.forEach((f, ref) => {
-      const listener = ref.deref();
-      if (!listener) return this.listeners.delete(ref);
-
-      f({ target, listener, prop, value });
-    });
-  },
+  return store;
 };
 
-store = new Proxy(store, {
-  set(...args) {
-    const [target, prop, value] = args;
-
-    if (prop === "listeners" || prop === "connect" || prop === "notify") {
-      throw new Error("Нельзя переписать служебные свойства");
-    }
-
-    queueMicrotask(() => target.notify({ target, prop, value }));
-
-    return Reflect.set(...args);
-  },
-});
-/**
- * HTML
-  <input type="text">
-  <output></output>
-  <br />
-  <button>remove store</button>
- */
-
-/**
-const input = document.querySelector("input");
-input.addEventListener("input", event => store.inputValue = event.target.value)
-const output = document.querySelector("output");
-
-const clearup = store.connect(output, ({target, listener}) => {
-  console.log("func")
-  listener.textContent = target.inputValue;
-})
-
-// output.remove();
-*/
+console.clear();
 
 export { makeObservable };
