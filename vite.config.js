@@ -13,5 +13,7 @@ export default defineConfig({
         main: path.resolve(__dirname, isStorybook ? "src/.storybook/index.html" : "src/index.html"),
       },
     },
+    outDir: path.resolve(__dirname, "dist"),
+    emptyOutDir: true,
   },
 });

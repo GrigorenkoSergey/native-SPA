@@ -7,9 +7,13 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
-
       - name: Install and build
         run: |
           npm install
@@ -20,8 +24,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-
-permissions:
-  contents: write 
-  pages: write   
-  id-token: write
