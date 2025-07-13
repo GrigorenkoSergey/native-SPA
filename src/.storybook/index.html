@@ -6,14 +6,23 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./reset.css">
     <link ref="stylesheet" id="page-css">
   </head>
 
   <body>
-    <div id="app">
-      <main>
-        <h1>Сторибук</h1>
-      </main>
+    <div class="storybook-layout">
+      <nav class="storybook-layout__nav">
+        <h2>Components</h2>
+
+        <ul class="storybook-layout__ul">
+          <li><a href="./custom-autocomplete">custom-autocomplete</a>
+          </li>
+        </ul>
+      </nav>
+
+      <main class="storybook-layout__main"></main>
     </div>
     <script type="module" src="./index.js"></script>
     <script type="module" id="page-script"></script>

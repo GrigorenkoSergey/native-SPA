@@ -1,8 +1,7 @@
 import { applyRouting } from "../utils/applyRouting";
-import "../components/storybook-layout";
 
 applyRouting({
-  relativePathToPagedDir: "./",
+  relativePathToPagesDir: "",
   defaultPage: "/custom-autocomplete",
   page404: "/custom-autocomplete",
 });

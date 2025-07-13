@@ -1,10 +1,12 @@
-import "../../components/storybook-layout";
 import "../../components/custom-autocomplete";
-import "./style.css";
 
 export default () => {
-  const options1 = ["Опция-1", "Опция-2", "Опция-3", "Опция-4", "Опция-5"];
-  const options2 = [
+  const basic = document.querySelector(".basic");
+  const basicOptions = ["Опция-1", "Опция-2", "Опция-3", "Опция-4", "Опция-5"];
+  basic.setOptions(basicOptions);
+
+  const withCustomizedLi = document.querySelector(".customized-li");
+  const customizedOptions = [
     {
       value: "Винни-Пух",
       wiki: "https://en.wikipedia.org/wiki/Winnie-the-Pooh",
@@ -27,14 +29,6 @@ export default () => {
     },
   ];
 
-  let optionsIndex = 0;
-  const ulPossibleOptions = [options1, options2];
-
-  const basic = document.querySelector(".basic");
-  basic.setOptions(ulPossibleOptions[optionsIndex]);
-
-  const withCustomizedLi = document.querySelector(".customized-li");
-
   withCustomizedLi.renderLi = li => `\
 <li data-value=${li.value}>
   ${li.value}
@@ -44,5 +38,5 @@ export default () => {
 </li>
 `;
 
-  withCustomizedLi.setOptions(ulPossibleOptions[1]);
+  withCustomizedLi.setOptions(customizedOptions);
 };

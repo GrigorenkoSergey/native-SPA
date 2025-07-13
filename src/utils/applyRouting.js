@@ -1,7 +1,7 @@
 const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
 
 export const applyRouting = ({
-  relativePathToPagedDir = "../pages",
+  relativePathToPagesDir = "../pages",
   pageContentContainer = "main",
   pageCssContainerID = "page-css",
   defaultPage = "/page-1",
@@ -15,7 +15,7 @@ export const applyRouting = ({
       return (window.location.href = defaultPage);
     }
 
-    const page = relativePathToPagedDir + pathname + search;
+    const page = relativePathToPagesDir + pathname + search;
 
     const insertHTML = async () => {
       const response = await fetch(page + "/template.html", { cache: "force-cache" });
