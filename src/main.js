@@ -1,2 +1,4 @@
 import "./components/app-nav";
-import "./utils/applyRouting";
+import { applyRouting } from "./utils/applyRouting";
+
+applyRouting({});
