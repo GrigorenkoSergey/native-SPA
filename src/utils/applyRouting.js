@@ -1,51 +1,43 @@
 const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
 
+const getPageJS = async pathname => {
+  switch (pathname) {
+    case "/page-1":
+      return (await import("../pages/page-1/index.js")).default;
+    case "/page-2":
+      return (await import("../pages/page-2/index.js")).default;
+    default:
+      return (await import("../pages/page-404/index.js")).default;
+  }
+};
+
 export const applyRouting = ({
   relativePathToPagesDir = "../pages",
   pageContentContainer = "main",
-  pageCssContainerID = "page-css",
   defaultPage = "/page-1",
   page404 = "/page-404",
 }) => {
   const buildPage = async (url, attempt = 0) => {
     if (attempt > MAX_ATTEMPTS_TO_LOAD_RESOURCE) return;
 
-    const { pathname, search } = new URL(url);
+    const { pathname, search, origin } = new URL(url);
     if (pathname === "/") {
-      return (window.location.href = defaultPage);
+      const defaultUrl = origin + defaultPage;
+      window.history.replaceState(null, "", defaultUrl);
+      return buildPage(defaultUrl, attempt + 1);
     }
 
     const page = relativePathToPagesDir + pathname + search;
 
-    const insertHTML = async () => {
+    try {
       const response = await fetch(page + "/template.html", { cache: "force-cache" });
       const template = await response.text();
 
       const pageContainer = document.querySelector(pageContentContainer);
       pageContainer.innerHTML = template;
-    };
 
-    const insertCSS = async () => {
-      const pageCssContainer = document.getElementById(pageCssContainerID);
-      if (pageCssContainer) pageCssContainer.remove();
-
-      const link = document.createElement("link");
-      link.id = pageCssContainerID;
-      link.rel = "stylesheet";
-      link.href = page + "/style.css";
-      document.head.appendChild(link);
-    };
-
-    const executeScript = async () => {
-      const response = await import(/* @vite-ignore */ page + "/index.js", { cache: "force-cache" });
-      const logic = response.default;
-      await logic?.();
-    };
-
-    try {
-      await insertHTML();
-      await insertCSS();
-      await executeScript();
+      const logic = await getPageJS(pathname);
+      logic?.();
     } catch {
       buildPage(window.location.origin + page404, attempt + 1);
     }
