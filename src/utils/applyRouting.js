@@ -53,6 +53,7 @@ export const applyRouting = ({
     buildPage(href);
   });
 
+  // cfoo
   document.addEventListener("click", async event => {
     const link = event.target.closest("a");
     if (!link) return;
