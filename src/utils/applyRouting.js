@@ -1,3 +1,5 @@
+import { events } from "../constants/events";
+
 const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
 
 export const applyRouting = ({
@@ -45,19 +47,35 @@ export const applyRouting = ({
   });
 
   window.addEventListener("popstate", event => {
-    buildPage(event.target.location.href);
+    const { href } = event.target.location;
+    if (href.includes("#")) return;
+
+    buildPage(href);
   });
 
   document.addEventListener("click", async event => {
     const link = event.target.closest("a");
     if (!link) return;
 
-    const isExternalLink = new URL(link.href).origin !== window.location.origin;
+    const linkUrl = new URL(link.href);
+    const isExternalLink = linkUrl.origin !== window.location.origin;
     if (isExternalLink) return;
+
+    const isAnchor = link.getAttribute("href").startsWith("#");
+    if (isAnchor) return;
 
     event.preventDefault();
 
     const newUrl = new URL(link.href, window.location.href);
     window.history.pushState(null, "", newUrl.href);
+
+    window.dispatchEvent(
+      new CustomEvent(events.CHANGE_PAGE, {
+        detail: {
+          prev: window.location.href,
+          next: newUrl.href,
+        },
+      }),
+    );
   });
 };

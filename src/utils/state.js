@@ -7,8 +7,13 @@ const makeObservable = obj => {
     connect(listener, callback) {
       const ref = new WeakRef(listener);
       this.listeners.set(ref, callback);
+    },
 
-      return () => this.listeners.delete(ref);
+    disconnect(listener) {
+      this.listeners.forEach((callback, ref) => {
+        const currentListener = ref.deref();
+        if (currentListener === listener) this.listeners.delete(ref);
+      });
     },
 
     notify({ observable, prop, value }) {

@@ -1,3 +1,4 @@
+import { events } from "../../constants/events";
 import { store } from "../../stores/store";
 import "./style.css";
 
@@ -13,5 +14,9 @@ export default () => {
 
   store.connect(output, ({ observable, listener }) => {
     listener.textContent = observable.inputValue;
+  });
+
+  window.addEventListener(events.CHANGE_PAGE, () => {
+    store.disconnect(output);
   });
 };
