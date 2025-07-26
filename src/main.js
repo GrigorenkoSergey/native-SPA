@@ -14,4 +14,5 @@ const getPageLogic = async pathname => {
 
 applyRouting({
   getPageLogic,
+  base: "/native-SPA/",
 });

@@ -8,21 +8,28 @@ export const applyRouting = ({
   getPageLogic,
   defaultPage = "/page-1",
   page404 = "/page-404",
+  base = "/",
 }) => {
   const buildPage = async (url, attempt = 0) => {
     if (attempt > MAX_ATTEMPTS_TO_LOAD_RESOURCE) return;
 
-    const { pathname, search, origin } = new URL(url);
+    let { pathname, search, origin } = new URL(url);
+
+    // Убираем base из начала pathname, если он там есть
+    if (pathname.startsWith(base)) {
+      pathname = pathname.substring(base.length - 1);
+    }
+
     if (pathname === "/") {
-      const defaultUrl = origin + defaultPage;
+      const defaultUrl = origin + base + defaultPage.substring(1);
       window.history.replaceState(null, "", defaultUrl);
       return buildPage(defaultUrl, attempt + 1);
     }
 
-    const page = relativePathToPagesDir + pathname + search;
+    const pageUrl = base + relativePathToPagesDir.substring(2) + pathname + search;
 
     try {
-      const response = await fetch(page + "/template.html", { cache: "force-cache" });
+      const response = await fetch(pageUrl + "/template.html", { cache: "force-cache" });
       const template = await response.text();
 
       const pageContainer = document.querySelector(pageContentContainer);
