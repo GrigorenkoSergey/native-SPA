@@ -33,6 +33,4 @@ const makeObservable = obj => {
   return store;
 };
 
-console.clear();
-
 export { makeObservable };

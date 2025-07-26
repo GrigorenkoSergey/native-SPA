@@ -1,19 +1,9 @@
 const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
 
-const getPageJS = async pathname => {
-  switch (pathname) {
-    case "/page-1":
-      return (await import("../pages/page-1/index.js")).default;
-    case "/page-2":
-      return (await import("../pages/page-2/index.js")).default;
-    default:
-      return (await import("../pages/page-404/index.js")).default;
-  }
-};
-
 export const applyRouting = ({
   relativePathToPagesDir = "../pages",
   pageContentContainer = "main",
+  getPageLogic,
   defaultPage = "/page-1",
   page404 = "/page-404",
 }) => {
@@ -36,7 +26,7 @@ export const applyRouting = ({
       const pageContainer = document.querySelector(pageContentContainer);
       pageContainer.innerHTML = template;
 
-      const logic = await getPageJS(pathname);
+      const logic = await getPageLogic(pathname);
       logic?.();
     } catch {
       buildPage(window.location.origin + page404, attempt + 1);

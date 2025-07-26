@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev-storybook": "IS_STORYBOOK=true vite --open /.storybook/",
+    "dev-storybook": "IS_STORYBOOK=true vite",
     "build": "vite build",
+    "build-storybook": "IS_STORYBOOK=true vite build",
     "preview": "vite preview"
   },
   "devDependencies": {

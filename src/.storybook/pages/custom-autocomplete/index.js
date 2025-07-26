@@ -1,4 +1,5 @@
-import "../../components/custom-autocomplete";
+import "../../../components/custom-autocomplete";
+import "./style.css";
 
 export default () => {
   const basic = document.querySelector(".basic");
