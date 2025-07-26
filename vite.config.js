@@ -13,6 +13,7 @@ const pageDirs = fs
   .map(dir => dir.name);
 
 export default defineConfig({
+  base: "/native-SPA/",
   root: path.resolve(__dirname, isStorybook ? "src/.storybook" : "src"),
 
   build: {
