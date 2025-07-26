@@ -3,10 +3,8 @@ import { defineConfig } from "vite";
 import fs from "fs";
 import path from "path";
 
-const isStorybook = Boolean(process.env.IS_STORYBOOK);
-
 const pagesDirName = "pages";
-const pathToPages = path.resolve(__dirname, isStorybook ? `src/.storybook/${pagesDirName}/` : `src/${pagesDirName}/`);
+const pathToPages = path.resolve(__dirname, `src/${pagesDirName}/`);
 const pageDirs = fs
   .readdirSync(pathToPages, { withFileTypes: true })
   .filter(x => x.isDirectory())
@@ -14,12 +12,11 @@ const pageDirs = fs
 
 export default defineConfig({
   base: "/native-SPA/",
-  root: path.resolve(__dirname, isStorybook ? "src/.storybook" : "src"),
 
   build: {
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, isStorybook ? "src/.storybook/index.html" : "src/index.html"),
+        main: path.resolve(__dirname, "src/index.html"),
         ...pageDirs.map(name => path.resolve(pathToPages, `${name}/template.html`)),
       },
       output: {
