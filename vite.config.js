@@ -11,13 +11,16 @@ const pageDirs = fs
   .map(dir => dir.name);
 
 export default defineConfig({
-  base: "/native-SPA/",
+  root: "src",
 
   build: {
+    outDir: "../dist",
+    emptyOutDir: true,
     rollupOptions: {
       input: {
+        // Пути к файлам должны быть абсолютными или относительными `root`
         main: path.resolve(__dirname, "src/index.html"),
-        ...pageDirs.map(name => path.resolve(pathToPages, `${name}/template.html`)),
+        ...Object.fromEntries(pageDirs.map(name => [name, path.resolve(pathToPages, `${name}/template.html`)])),
       },
       output: {
         entryFileNames: chunkInfo => {
@@ -26,7 +29,5 @@ export default defineConfig({
         },
       },
     },
-    outDir: path.resolve(__dirname, "dist"),
-    emptyOutDir: true,
   },
 });
