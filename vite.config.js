@@ -12,6 +12,7 @@ const pageDirs = fs
 
 export default defineConfig({
   root: "src",
+  base: "/native-SPA/",
 
   build: {
     outDir: "../dist",
