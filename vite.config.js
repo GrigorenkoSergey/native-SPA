@@ -7,10 +7,28 @@ const isStorybook = Boolean(process.env.IS_STORYBOOK);
 
 const pagesDirName = "pages";
 const pathToPages = path.resolve(__dirname, `src/${pagesDirName}/`);
-const pageDirs = fs
-  .readdirSync(pathToPages, { withFileTypes: true })
-  .filter(x => x.isDirectory())
-  .map(dir => dir.name);
+
+const getPageInputs = (dir, root) => {
+  const entries = {};
+  const dirents = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const dirent of dirents) {
+    const fullPath = path.join(dir, dirent.name);
+
+    if (dirent.isDirectory()) {
+      const templatePath = path.join(fullPath, "template.html");
+      if (fs.existsSync(templatePath)) {
+        const relativePath = path.relative(root, fullPath);
+        entries[relativePath] = templatePath;
+      }
+      Object.assign(entries, getPageInputs(fullPath, root));
+    }
+  }
+
+  return entries;
+};
+
+const pageInputs = getPageInputs(pathToPages, pathToPages);
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -26,7 +44,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: {
           main: path.resolve(__dirname, isStorybook ? "src/.storybook/index.html" : "src/index.html"),
-          ...Object.fromEntries(pageDirs.map(name => [name, path.resolve(pathToPages, `${name}/template.html`)])),
+          ...pageInputs,
         },
         output: {
           entryFileNames: chunkInfo => {
