@@ -5,6 +5,11 @@ const makeObservable = obj => {
     listeners: new Map(),
 
     connect(listener, callback) {
+      /**
+       * Введем слабые ссылки как защиту от дурака.
+       * По-хорошему, необходимо очищать память при переходах между страницами (если хранилище общее),
+       * удалять подписки, когда подписчик уничтожен и т.д.
+       */
       const ref = new WeakRef(listener);
       this.listeners.set(ref, callback);
     },
@@ -16,6 +21,10 @@ const makeObservable = obj => {
       });
     },
 
+    /**
+     * Для того, чтобы не препятствовать сборщику мусора удалять подписки уничтоженных подписчиков,
+     * желательно обращаться к слушателю через свойство listener.
+     */
     notify({ observable, prop, value }) {
       this.listeners.forEach((callback, ref) => {
         const listener = ref.deref();
