@@ -64,7 +64,7 @@ export const applyRouting = ({
   window.addEventListener("popstate", event => {
     const { href } = event.target.location;
     if (href.includes("#")) return;
-    if (href !== window.location.href) buildPage(href);
+    buildPage(href);
   });
 
   document.addEventListener("click", async event => {
