@@ -5,6 +5,10 @@ const PAGES_DIR = "pages/";
 
 const base = import.meta.env.VITE_BASE_URL || "/";
 
+/*
+ При действительном изменении страницы в пределах проекта, добавим событие смены страницы для очистки памяти при
+ переходах по различным страницам
+*/
 export const applyRouting = ({
   getPageLogic,
   pageContentContainer = "main",
@@ -51,8 +55,7 @@ export const applyRouting = ({
   window.history.pushState = new Proxy(window.history.pushState, {
     async apply(...args) {
       const url = args[2][2];
-      // TODO учесть, что перемещения могут быть в пределах одной страницы..
-      buildPage(url);
+      if (url !== window.location.href) buildPage(url);
 
       return Reflect.apply(...args);
     },
@@ -61,9 +64,7 @@ export const applyRouting = ({
   window.addEventListener("popstate", event => {
     const { href } = event.target.location;
     if (href.includes("#")) return;
-    // TODO учесть, что перемещения могут быть в пределах одной страницы..
-
-    buildPage(href);
+    if (href !== window.location.href) buildPage(href);
   });
 
   document.addEventListener("click", async event => {
@@ -79,16 +80,23 @@ export const applyRouting = ({
 
     event.preventDefault();
 
+    const currentHref = window.location.href;
+    const currentPathname = new URL(window.location.href);
+
     const newUrl = new URL(link.href, window.location.href);
     window.history.pushState(null, "", newUrl.href);
 
-    window.dispatchEvent(
-      new CustomEvent(events.CHANGE_PAGE, {
-        detail: {
-          prev: window.location.href,
-          next: newUrl.href,
-        },
-      }),
-    );
+    const newPathname = new URL(newUrl.href).pathname;
+
+    if (currentPathname !== newPathname) {
+      window.dispatchEvent(
+        new CustomEvent(events.CHANGE_PAGE, {
+          detail: {
+            prev: currentHref,
+            next: newUrl.href,
+          },
+        }),
+      );
+    }
   });
 };
