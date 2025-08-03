@@ -29,13 +29,12 @@ test("Циклическая зависимость", () => {
   derive(() => {
     a.value = -b.value;
   });
-
-  b.value = 2;
-  expect(a.value).toBe(-2);
-
   derive(() => {
     b.value = -a.value;
   });
+
+  b.value = 2;
+  expect(a.value).toBe(-2);
 
   a.value = 1;
   expect(b.value).toBe(-1);
@@ -56,6 +55,10 @@ test("Сложная цепочка вычисления зависимых св
   const store = makeObservable({ a: 1, b: 2, c: 4 });
 
   derive(() => {
+    store.a = store.b - 1;
+  });
+
+  derive(() => {
     store.b = store.a + 1;
   });
 
@@ -63,9 +66,21 @@ test("Сложная цепочка вычисления зависимых св
     store.c = store.b * 2;
   });
 
+  derive(() => {
+    store.b = store.c / 2;
+  });
+
   store.a = 2;
   expect(store.b).toBe(3);
   expect(store.c).toBe(6);
+
+  store.b = 4;
+  expect(store.a).toBe(3);
+  expect(store.c).toBe(8);
+
+  store.c = 12;
+  expect(store.b).toBe(6);
+  expect(store.a).toBe(5);
 });
 
 test.skip("Тест на асинхнорщину", () => {});
