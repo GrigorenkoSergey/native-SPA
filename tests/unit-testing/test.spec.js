@@ -83,4 +83,23 @@ test("Сложная цепочка вычисления зависимых св
   expect(store.a).toBe(5);
 });
 
+test("Цепочка вычислений зависимостей в разных сторах", () => {
+  const storeA = makeObservable({ a: 1, b: 2, c: 3 });
+  const storeB = makeObservable({ d: 1, e: 2 });
+
+  derive(() => {
+    storeB.d = storeA.a + 1;
+  });
+  derive(() => {
+    storeA.c = storeB.d * 5;
+  });
+
+  expect(storeB.d).toBe(2);
+  expect(storeA.c).toBe(10);
+
+  storeA.a = 10;
+  expect(storeB.d).toBe(11);
+  expect(storeA.c).toBe(55);
+});
+
 test.skip("Тест на асинхнорщину", () => {});
