@@ -19,11 +19,18 @@ const makeObservable = obj => {
       }
 
       if (prop in observableProps) {
-        if (issuers.has(target)) return defaultReturn;
+        let propsInCurrentChain = issuers.get(target);
 
-        issuers.add(target);
+        if (!propsInCurrentChain) {
+          propsInCurrentChain = new Set();
+          issuers.set(target, propsInCurrentChain);
+        }
+
+        if (propsInCurrentChain.has(prop)) return defaultReturn;
+
+        propsInCurrentChain.add(prop);
         observableProps[prop].forEach(cb => cb({ target, prop, value }));
-        issuers.delete(target);
+        propsInCurrentChain.delete(prop);
       }
 
       return defaultReturn;
