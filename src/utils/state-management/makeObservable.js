@@ -8,16 +8,22 @@ const makeObservable = obj => {
       const [target, prop, value] = args;
       const defaultReturn = Reflect.set(...args);
 
-      const { isDerivingLogicAnalisis, derivingCallback } = flowState;
+      const { isDerivingLogicAnalisis, derivingCallback, issuers } = flowState;
 
       if (isDerivingLogicAnalisis) {
-        observableProps[prop] = observableProps[prop].filter(cb => cb !== derivingCallback);
+        if (prop in observableProps) {
+          observableProps[prop] = observableProps[prop].filter(cb => cb !== derivingCallback);
+        }
 
         return defaultReturn;
       }
 
       if (prop in observableProps) {
+        if (issuers.has(target)) return defaultReturn;
+
+        issuers.add(target);
         observableProps[prop].forEach(cb => cb({ target, prop, value }));
+        issuers.delete(target);
       }
 
       return defaultReturn;
