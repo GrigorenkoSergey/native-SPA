@@ -1,14 +1,14 @@
-import { flowState } from "./flowState";
+import { variables } from "./variables";
 // TODO как быть с асинхронщиной?
 
 export const derive = callback => {
-  flowState.isDerivingLogicAnalisis = true;
-  flowState.derivingCallback = callback;
+  variables.isDerivingLogicAnalisis = true;
+  variables.derivingCallback = callback;
 
   const result = callback();
 
-  flowState.isDerivingLogicAnalisis = false;
-  flowState.derivingCallback = null;
+  variables.isDerivingLogicAnalisis = false;
+  variables.derivingCallback = null;
 
   return result;
 };

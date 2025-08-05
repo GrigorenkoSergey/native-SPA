@@ -22,6 +22,24 @@ test("Простейшая подписка", () => {
   expect(a.value).toBe(2);
 });
 
+test("Несколько обращений к свойству в одном сторе (обработчик добавляется только один раз)", () => {
+  const store = makeObservable({ value: 0 });
+  let a;
+  let b;
+
+  let calls = 0;
+  derive(() => {
+    a = store.value;
+    b = store.value + 1;
+    calls++;
+  });
+
+  store.value = 1;
+  expect(a).toBe(1);
+  expect(b).toBe(2);
+  expect(calls).toBe(2);
+});
+
 test("Циклическая зависимость", () => {
   const a = makeObservable({ value: 0, store: "a" });
   const b = makeObservable({ value: 0, store: "b" });

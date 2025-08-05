@@ -1,4 +1,4 @@
-import { flowState } from "./flowState";
+import { variables } from "./variables";
 
 const makeObservable = obj => {
   const observableProps = {};
@@ -8,7 +8,7 @@ const makeObservable = obj => {
       const [target, prop, value] = args;
       const defaultReturn = Reflect.set(...args);
 
-      const { isDerivingLogicAnalisis, derivingCallback, issuers } = flowState;
+      const { isDerivingLogicAnalisis, derivingCallback, issuers } = variables;
 
       if (isDerivingLogicAnalisis) {
         if (prop in observableProps) {
@@ -37,13 +37,15 @@ const makeObservable = obj => {
     },
 
     get(...args) {
-      const { isDerivingLogicAnalisis, derivingCallback } = flowState;
+      const { isDerivingLogicAnalisis, derivingCallback } = variables;
 
       if (isDerivingLogicAnalisis) {
         const prop = args[1];
         if (!(prop in observableProps)) observableProps[prop] = [];
 
-        observableProps[prop].push(derivingCallback);
+        if (observableProps[prop].at(-1) !== derivingCallback) {
+          observableProps[prop].push(derivingCallback);
+        }
       }
 
       return Reflect.get(...args);
