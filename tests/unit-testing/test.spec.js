@@ -121,3 +121,50 @@ test("Цепочка вычислений зависимостей в разны
 });
 
 test.skip("Тест на асинхнорщину", () => {});
+
+test("Отключение наблюдения", () => {
+  const storeA = makeObservable({ value: 1 });
+
+  let b;
+  const teardown = derive(() => {
+    b = storeA.value * 2;
+  });
+
+  storeA.value = 2;
+  expect(b).toBe(4);
+
+  storeA.value = 3;
+  expect(b).toBe(6);
+
+  teardown();
+  storeA.value = 1;
+  expect(b).toBe(6);
+});
+
+test("Отключение наблюдения у несколькоих объектов (в derive несколько свойств)", () => {
+  const storeA = makeObservable({ a: 1 });
+  const storeB = makeObservable({ b: 1 });
+
+  let calls = 0;
+
+  let result;
+  const teardown = derive(() => {
+    result = storeA.a + storeB.b;
+    calls++;
+  });
+
+  storeA.a = 2;
+  expect(result).toBe(3);
+  expect(calls).toBe(2);
+
+  storeB.b = 3;
+  expect(result).toBe(5);
+  expect(calls).toBe(3);
+
+  teardown();
+
+  storeA.a = 1;
+  storeB.b = 2;
+  expect(result).toBe(5);
+  expect(calls).toBe(3);
+});

@@ -3,7 +3,7 @@ import { variables } from "./variables";
 const makeObservable = obj => {
   const observableProps = {};
 
-  return new Proxy(obj, {
+  const proxy = new Proxy(obj, {
     set(...args) {
       const [target, prop, value] = args;
       const defaultReturn = Reflect.set(...args);
@@ -51,6 +51,11 @@ const makeObservable = obj => {
       return Reflect.get(...args);
     },
   });
+
+  const { observables } = variables;
+  observables.set(proxy, observableProps);
+
+  return proxy;
 };
 
 export { makeObservable };
