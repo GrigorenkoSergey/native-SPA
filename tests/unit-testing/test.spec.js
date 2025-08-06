@@ -126,7 +126,7 @@ test("Отключение наблюдения", () => {
   const storeA = makeObservable({ value: 1 });
 
   let b;
-  const teardown = derive(() => {
+  const cleanup = derive(() => {
     b = storeA.value * 2;
   });
 
@@ -136,7 +136,7 @@ test("Отключение наблюдения", () => {
   storeA.value = 3;
   expect(b).toBe(6);
 
-  teardown();
+  cleanup();
   storeA.value = 1;
   expect(b).toBe(6);
 });
@@ -148,7 +148,7 @@ test("Отключение наблюдения у несколькоих объ
   let calls = 0;
 
   let result;
-  const teardown = derive(() => {
+  const cleanup = derive(() => {
     result = storeA.a + storeB.b;
     calls++;
   });
@@ -161,7 +161,7 @@ test("Отключение наблюдения у несколькоих объ
   expect(result).toBe(5);
   expect(calls).toBe(3);
 
-  teardown();
+  cleanup();
 
   storeA.a = 1;
   storeB.b = 2;

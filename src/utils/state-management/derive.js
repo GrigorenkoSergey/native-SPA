@@ -10,7 +10,7 @@ export const derive = callback => {
   variables.isDerivingLogicAnalisis = false;
   variables.derivingCallback = null;
 
-  const teardown = () => {
+  const cleanup = () => {
     variables.observables.forEach(observableProps => {
       for (const prop in observableProps) {
         observableProps[prop] = observableProps[prop].filter(cb => cb !== callback);
@@ -18,5 +18,5 @@ export const derive = callback => {
     });
   };
 
-  return teardown;
+  return cleanup;
 };
