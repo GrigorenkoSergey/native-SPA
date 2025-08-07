@@ -168,3 +168,72 @@ test("Отключение наблюдения у несколькоих объ
   expect(result).toBe(5);
   expect(calls).toBe(3);
 });
+
+test.describe("Обработка ошибок", () => {
+  test("Если произошла ошибка в одной из derive-функций, система откатывается к последнему стабильному состоянию", () => {
+    const storeA = makeObservable({ value: 0 });
+
+    let b;
+    let c;
+
+    const fn = value => {
+      if (value % 2) throw new Error();
+
+      return value;
+    };
+
+    derive(() => {
+      b = fn(storeA.value) + 1;
+      c = fn(storeA.value) + 2;
+    });
+
+    test.step("Удачная установка свойства", () => {
+      storeA.value = 10;
+      expect(b).toBe(11);
+      expect(c).toBe(12);
+    });
+
+    test.step("Неудачная установка. Вычисляемые при изменениях значения остались нетронутыми", () => {
+      storeA.value = 11;
+      expect(storeA.value).toBe(10);
+      expect(b).toBe(11);
+      expect(c).toBe(12);
+    });
+  });
+
+  test("При сложной цепочке результат промежуточных значений так же игнорируется", () => {
+    const storeA = makeObservable({ a: 0 });
+    const storeB = makeObservable({ b: 0 });
+
+    let b;
+    let c;
+    let d;
+
+    derive(() => {
+      b = storeA.a + 1;
+      storeB.b = storeA.a * 2;
+    });
+
+    derive(() => {
+      c = storeB.b + 1;
+    });
+
+    derive(() => {
+      d = storeB.b;
+      if (b === 11) throw new Error();
+    });
+
+    storeA.a = 2;
+    expect(b).toBe(3);
+    expect(storeB.b).toBe(4);
+    expect(c).toBe(5);
+    expect(d).toBe(4);
+
+    storeA.a = 10;
+    expect(b).toBe(3);
+    expect(storeB.b).toBe(4);
+    expect(c).toBe(5);
+    expect(d).toBe(4);
+    expect(storeA.a).toBe(2);
+  });
+});

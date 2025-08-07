@@ -6,6 +6,8 @@ const makeObservable = obj => {
   const proxy = new Proxy(obj, {
     set(...args) {
       const [target, prop, value] = args;
+      const oldValue = target[prop];
+
       const defaultReturn = Reflect.set(...args);
 
       const { isDerivingLogicAnalisis, derivingCallback, issuers } = variables;
@@ -29,7 +31,16 @@ const makeObservable = obj => {
         if (propsInCurrentChain.has(prop)) return defaultReturn;
 
         propsInCurrentChain.add(prop);
-        observableProps[prop].forEach(cb => cb({ target, prop, value }));
+
+        try {
+          observableProps[prop].forEach(cb => cb({ target, prop, value }));
+        } catch (error) {
+          target[prop] = oldValue;
+          observableProps[prop].forEach(cb => cb({ target, prop, value: oldValue }));
+
+          if (propsInCurrentChain.size > 1) throw error;
+        }
+
         propsInCurrentChain.delete(prop);
       }
 
