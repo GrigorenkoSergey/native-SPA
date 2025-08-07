@@ -39,6 +39,7 @@ const makeObservable = obj => {
           observableProps[prop].forEach(cb => cb({ target, prop, value: oldValue }));
 
           if (propsInCurrentChain.size > 1) throw error;
+          else console.error(error);
         }
 
         propsInCurrentChain.delete(prop);
