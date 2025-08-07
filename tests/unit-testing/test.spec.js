@@ -249,5 +249,23 @@ test.describe("Обработка ошибок", () => {
 });
 
 test.describe("Асинхронщина", () => {
+  const pause = ms => new Promise(res => setTimeout(res), ms);
 
+  test("Запуск асинхронных функций возможен в принципе", async () => {
+    const storeA = makeObservable({ a: 1 });
+
+    let b;
+    derive(async () => {
+      const origin = storeA.a;
+
+      const fn = async () => {
+        await pause(100);
+        b = origin;
+      };
+
+      fn();
+    });
+
+    expect(() => expect(b).toBe(2)).toPass();
+  });
 });
