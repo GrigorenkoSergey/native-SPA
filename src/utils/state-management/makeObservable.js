@@ -32,14 +32,16 @@ const makeObservable = obj => {
 
         propsInCurrentChain.add(prop);
 
-        try {
+        if (propsInCurrentChain.size === 1) {
+          try {
+            observableProps[prop].forEach(cb => cb({ target, prop, value }));
+          } catch (error) {
+            target[prop] = oldValue;
+            observableProps[prop].forEach(cb => cb({ target, prop, value: oldValue }));
+            console.error(error);
+          }
+        } else {
           observableProps[prop].forEach(cb => cb({ target, prop, value }));
-        } catch (error) {
-          target[prop] = oldValue;
-          observableProps[prop].forEach(cb => cb({ target, prop, value: oldValue }));
-
-          if (propsInCurrentChain.size > 1) throw error;
-          else console.error(error);
         }
 
         propsInCurrentChain.delete(prop);
