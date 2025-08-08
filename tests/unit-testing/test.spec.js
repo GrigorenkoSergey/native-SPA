@@ -259,7 +259,9 @@ test.describe("Асинхронщина", () => {
       const origin = storeA.a;
 
       const fn = async () => {
-        await pause(100);
+        await pause(10);
+
+        if (storeA.a !== origin) return;
         b = origin;
       };
 
@@ -267,5 +269,62 @@ test.describe("Асинхронщина", () => {
     });
 
     expect(() => expect(b).toBe(2)).toPass();
+  });
+
+  test("Батчинг", async () => {
+    const storeA = makeObservable({ a: 1 });
+    const storeB = makeObservable({ b: 1 });
+
+    const batchEffects = (cb, asyncFunc = setTimeout, clearup = clearTimeout) => {
+      let timerId = -1;
+      let isFirstCall = true;
+
+      return derive(() => {
+        clearup(timerId);
+
+        if (isFirstCall) {
+          cb();
+          isFirstCall = false;
+        }
+
+        timerId = asyncFunc(cb);
+      });
+    };
+
+    const callResults = [];
+    const cleanup = batchEffects(() => {
+      const storeValuesPair = [storeA.a, storeB.b];
+      callResults.push(storeValuesPair);
+    });
+
+    storeA.a = 10;
+    storeB.b = 10;
+
+    storeA.a = 5;
+    storeB.b = 5;
+
+    storeA.a = 0;
+    storeB.b = 1;
+
+    expect(callResults.length).toBe(1);
+    await expect(() => {
+      expect(callResults.length).toBe(2);
+      const lastCallResult = callResults.at(-1);
+      const [a, b] = lastCallResult;
+
+      expect(a === 0 && b === 1).toBe(true);
+    }).toPass();
+
+    await test.step("Очистка эффекта", async () => {
+      cleanup();
+      storeA.a = 10;
+
+      await pause(100);
+      const lastCallResult = callResults.at(-1);
+      const [a, b] = lastCallResult;
+
+      expect(callResults.length).toBe(2);
+      expect(a === 0 && b === 1).toBe(true);
+    });
   });
 });
