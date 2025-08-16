@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 import { makeObservable } from "../../src/utils/state-management/makeObservable";
+import { batchEffects } from "../../src/utils/state-management/batchEffects";
 import { derive } from "../../src/utils/state-management/derive";
 
 test.describe("Базовая логика", () => {
@@ -274,22 +275,6 @@ test.describe("Асинхронщина", () => {
   test("Батчинг", async () => {
     const storeA = makeObservable({ a: 1 });
     const storeB = makeObservable({ b: 1 });
-
-    const batchEffects = (cb, asyncFunc = setTimeout, clearup = clearTimeout) => {
-      let timerId = -1;
-      let isFirstCall = true;
-
-      return derive(() => {
-        clearup(timerId);
-
-        if (isFirstCall) {
-          cb();
-          isFirstCall = false;
-        }
-
-        timerId = asyncFunc(cb);
-      });
-    };
 
     const callResults = [];
     const cleanup = batchEffects(() => {
