@@ -3,6 +3,8 @@ import { defineConfig, loadEnv } from "vite";
 import fs from "fs";
 import path from "path";
 
+const commonTemplate = fs.readFileSync(path.resolve(__dirname, "src/index-template.html"), "utf-8");
+
 const isStorybook = Boolean(process.env.IS_STORYBOOK);
 
 const pagesDirName = "pages";
@@ -16,7 +18,7 @@ const getPageInputs = (dir, root) => {
     const fullPath = path.join(dir, dirent.name);
 
     if (dirent.isDirectory()) {
-      const templatePath = path.join(fullPath, "template.html");
+      const templatePath = path.join(fullPath, "index.html");
       if (fs.existsSync(templatePath)) {
         const relativePath = path.relative(root, fullPath);
         entries[relativePath] = templatePath;
@@ -30,6 +32,15 @@ const getPageInputs = (dir, root) => {
 
 const pageInputs = getPageInputs(pathToPages, pathToPages);
 
+const htmlPlugin = () => {
+  return {
+    name: "apply-common-html-part",
+    transformIndexHtml(html) {
+      return commonTemplate.replace("{{content}}", html);
+    },
+  };
+};
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
@@ -37,6 +48,7 @@ export default defineConfig(({ mode }) => {
     root: isStorybook ? "src/.storybook" : "src",
     base: isStorybook ? "/" : env.VITE_BASE_URL,
     envDir: "..",
+    plugins: [htmlPlugin()],
 
     build: {
       outDir: "../dist",

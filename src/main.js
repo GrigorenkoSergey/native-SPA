@@ -1,4 +1,3 @@
-import "./components/app-nav";
 import { applyRouting } from "./utils/applyRouting";
 
 const getPageLogic = async pathToPageFromPagesDir => {
