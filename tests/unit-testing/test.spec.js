@@ -1,13 +1,13 @@
 import { test, expect } from "@playwright/test";
 
-import { makeObservable } from "../../src/utils/state-management/makeObservable";
+import { createStore } from "../../src/utils/state-management/createStore";
 import { batchEffects } from "../../src/utils/state-management/batchEffects";
 import { derive } from "../../src/utils/state-management/derive";
 
 test.describe("Базовая логика", () => {
   test("Простейшая подписка", () => {
     let a = { value: 0 };
-    a = makeObservable(a);
+    a = createStore(a);
 
     let b;
     derive(() => {
@@ -25,7 +25,7 @@ test.describe("Базовая логика", () => {
   });
 
   test("Несколько обращений к свойству в одном сторе (обработчик добавляется только один раз)", () => {
-    const store = makeObservable({ value: 0 });
+    const store = createStore({ value: 0 });
     let a;
     let b;
 
@@ -43,8 +43,8 @@ test.describe("Базовая логика", () => {
   });
 
   test("Циклическая зависимость", () => {
-    const a = makeObservable({ value: 0, store: "a" });
-    const b = makeObservable({ value: 0, store: "b" });
+    const a = createStore({ value: 0, store: "a" });
+    const b = createStore({ value: 0, store: "b" });
 
     derive(() => {
       a.value = -b.value;
@@ -61,7 +61,7 @@ test.describe("Базовая логика", () => {
   });
 
   test("Зависимость свойства в одном сторе от другого", () => {
-    const a = makeObservable({ prop: 1, derivedProp: 2 });
+    const a = createStore({ prop: 1, derivedProp: 2 });
 
     derive(() => {
       a.derivedProp = a.prop + 1;
@@ -72,7 +72,7 @@ test.describe("Базовая логика", () => {
   });
 
   test("Сложная цепочка вычисления зависимых свойств в одном сторе", () => {
-    const store = makeObservable({ a: 1, b: 2, c: 4 });
+    const store = createStore({ a: 1, b: 2, c: 4 });
 
     derive(() => {
       store.a = store.b - 1;
@@ -104,8 +104,8 @@ test.describe("Базовая логика", () => {
   });
 
   test("Цепочка вычислений зависимостей в разных сторах", () => {
-    const storeA = makeObservable({ a: 1, b: 2, c: 3 });
-    const storeB = makeObservable({ d: 1, e: 2 });
+    const storeA = createStore({ a: 1, b: 2, c: 3 });
+    const storeB = createStore({ d: 1, e: 2 });
 
     derive(() => {
       storeB.d = storeA.a + 1;
@@ -123,7 +123,7 @@ test.describe("Базовая логика", () => {
   });
 
   test("Отключение наблюдения", () => {
-    const storeA = makeObservable({ value: 1 });
+    const storeA = createStore({ value: 1 });
 
     let b;
     const cleanup = derive(() => {
@@ -142,8 +142,8 @@ test.describe("Базовая логика", () => {
   });
 
   test("Отключение наблюдения у несколькоих объектов (в derive несколько свойств)", () => {
-    const storeA = makeObservable({ a: 1 });
-    const storeB = makeObservable({ b: 1 });
+    const storeA = createStore({ a: 1 });
+    const storeB = createStore({ b: 1 });
 
     let calls = 0;
 
@@ -182,7 +182,7 @@ test.describe("Обработка ошибок", () => {
   });
 
   test("Если произошла ошибка в одной из derive-функций, система откатывается к последнему стабильному состоянию", () => {
-    const storeA = makeObservable({ value: 0 });
+    const storeA = createStore({ value: 0 });
 
     let b;
     let c;
@@ -213,8 +213,8 @@ test.describe("Обработка ошибок", () => {
   });
 
   test("При сложной цепочке результат промежуточных значений так же игнорируется", () => {
-    const storeA = makeObservable({ a: 0 });
-    const storeB = makeObservable({ b: 0 });
+    const storeA = createStore({ a: 0 });
+    const storeB = createStore({ b: 0 });
 
     let b;
     let c;
@@ -253,7 +253,7 @@ test.describe("Асинхронщина", () => {
   const pause = ms => new Promise(res => setTimeout(res), ms);
 
   test("Запуск асинхронных функций возможен в принципе", async () => {
-    const storeA = makeObservable({ a: 1 });
+    const storeA = createStore({ a: 1 });
 
     let b;
     derive(async () => {
@@ -273,8 +273,8 @@ test.describe("Асинхронщина", () => {
   });
 
   test("Батчинг", async () => {
-    const storeA = makeObservable({ a: 1 });
-    const storeB = makeObservable({ b: 1 });
+    const storeA = createStore({ a: 1 });
+    const storeB = createStore({ b: 1 });
 
     const callResults = [];
     const cleanup = batchEffects(() => {

@@ -1,6 +1,6 @@
 import { variables } from "./variables";
 
-const makeObservable = obj => {
+const createStore = obj => {
   const observableProps = {};
 
   const proxy = new Proxy(obj, {
@@ -72,4 +72,4 @@ const makeObservable = obj => {
   return proxy;
 };
 
-export { makeObservable };
+export { createStore };
