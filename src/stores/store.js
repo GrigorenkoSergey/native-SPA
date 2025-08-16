@@ -1,6 +1,6 @@
-import { makeObservable } from "../utils/makeObservable";
+import { createStore } from "../utils/state-management/createStore";
 console.log("init common store");
 
-export const store = makeObservable({
+export const store = createStore({
   inputValue: "",
 });

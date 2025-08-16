@@ -8,10 +8,13 @@
     "dev-storybook": "IS_STORYBOOK=true vite",
     "build": "vite build && cp dist/index.html dist/404.html",
     "build-storybook": "IS_STORYBOOK=true vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "npx playwright test --project=chromium"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
+    "@playwright/test": "^1.54.1",
+    "@types/node": "^24.1.0",
     "eslint": "^9.28.0",
     "eslint-plugin-prettier": "^5.4.1",
     "globals": "^16.2.0",

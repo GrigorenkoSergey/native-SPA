@@ -1,4 +1,4 @@
-const makeObservable = obj => {
+const createStore = obj => {
   let store = {
     ...obj,
 
@@ -47,4 +47,4 @@ const makeObservable = obj => {
   return store;
 };
 
-export { makeObservable };
+export { createStore };
