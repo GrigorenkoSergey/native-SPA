@@ -32,11 +32,15 @@ const getPageInputs = (dir, root) => {
 
 const pageInputs = getPageInputs(pathToPages, pathToPages);
 
-const htmlPlugin = () => {
+const htmlPlugin = env => {
   return {
     name: "apply-common-html-part",
     transformIndexHtml(html) {
-      return commonTemplate.replace("{{content}}", html);
+      const variableToValue = {
+        base: env.VITE_BASE_URL + pagesDirName + "/",
+        content: html,
+      };
+      return commonTemplate.replace(/\{\{(\w+)\}\}/g, (match, variable) => variableToValue[variable]);
     },
   };
 };
@@ -48,7 +52,7 @@ export default defineConfig(({ mode }) => {
     root: isStorybook ? "src/.storybook" : "src",
     base: isStorybook ? "/" : env.VITE_BASE_URL,
     envDir: "..",
-    plugins: [htmlPlugin()],
+    plugins: [htmlPlugin(env)],
 
     build: {
       outDir: "../dist",
