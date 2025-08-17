@@ -6,64 +6,18 @@ const fs = require("fs");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
-const isStorybook = Boolean(process.env.IS_STORYBOOK);
 const pagesDirName = "pages";
-const pathToPages = path.resolve(__dirname, `src/${pagesDirName}/`);
 const commonTemplate = fs.readFileSync(path.resolve(__dirname, "src/page-template.html"), "utf-8");
 
-// Функция для получения входных точек (аналогично Vite)
-const getPageInputs = (dir, root) => {
-  const entries = {};
-  const htmlPlugins = [];
-  const dirents = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const dirent of dirents) {
-    const fullPath = path.join(dir, dirent.name);
-
-    if (dirent.isDirectory()) {
-      const templatePath = path.join(fullPath, "index.html");
-
-      if (fs.existsSync(templatePath)) {
-        const relativePath = path.relative(root, fullPath);
-        const entryName = relativePath.replace(/\\/g, "/");
-
-        // Создаем entry point для каждой страницы
-        entries[entryName] = path.join(fullPath, "index.js");
-
-        // Создаем HTML плагин для каждой страницы
-        htmlPlugins.push(
-          new HtmlWebpackPlugin({
-            filename: `${entryName}/index.html`,
-            template: templatePath,
-            chunks: [entryName],
-            minify: true,
-            templateParameters: {
-              base: process.env.BASE_URL + pagesDirName + "/",
-              content: fs.readFileSync(templatePath, "utf-8"),
-            },
-          }),
-        );
-      }
-      const subDirResults = getPageInputs(fullPath, root);
-      Object.assign(entries, subDirResults.entries);
-      htmlPlugins.push(...subDirResults.htmlPlugins);
-    }
-  }
-
-  return { entries, htmlPlugins };
-};
-
-// const { entries, htmlPlugins } = getPageInputs(pathToPages, pathToPages);
-
 module.exports = env => {
-  const isProd = env.mode === "production";
   const base = process.env.BASE_URL + pagesDirName + "/";
 
   return {
     mode: env.mode || "development",
     entry: {
-      main: "./src/main.js",
-      page: "./src/pages/page-1/index.js",
+      // main: "./src/main.js",
+      "page-1": "./src/pages/page-1/index.js",
+      "page-2": "./src/pages/page-2/index.js",
 
       // ...entries,
     },
@@ -81,11 +35,15 @@ module.exports = env => {
       },
       hot: true,
       historyApiFallback: {
+        // verbose: true,
         rewrites: [
-          { from: /./, to: `${base}index.html` }, // Все запросы → index.html
+          {
+            from: /^\/native-SPA\/pages\/([a-zA-Z0-9-]+)\/?$/,
+            to: context => `/native-SPA/pages/pages/${context.match[1]}/index.html`,
+          },
         ],
       },
-      open: [base],
+      open: [`${base}page-1/`],
     },
     module: {
       rules: [
@@ -96,14 +54,11 @@ module.exports = env => {
             preprocessor: content => {
               const params = { base, content };
               return commonTemplate.replace(/\{\{(\w+)\}\}/g, (match, variable) => {
-                console.log("match", match);
-                console.log("params", params);
-                return params[variable] || (console.log("var", variable), "foo");
+                return params[variable] || match;
               });
             },
           },
         },
-        // JS (Babel)
         {
           test: /\.(js|jsx)$/,
           exclude: /node_modules/,
@@ -114,12 +69,10 @@ module.exports = env => {
             },
           },
         },
-
-        // CSS/SCSS
         {
           test: /\.(css|scss)$/,
           use: [
-            isProd ? MiniCssExtractPlugin.loader : "style-loader",
+            "style-loader",
             {
               loader: "css-loader",
               options: { modules: { auto: true } },
@@ -127,8 +80,6 @@ module.exports = env => {
             "postcss-loader",
           ],
         },
-
-        // Изображения
         {
           test: /\.(png|svg|jpg|jpeg|gif)$/,
           type: "asset/resource",
@@ -137,17 +88,23 @@ module.exports = env => {
     },
     plugins: [
       new CleanWebpackPlugin(),
+      // new HtmlWebpackPlugin({
+      //   filename: "index.html",
+      //   template: "./src/index.html",
+      //   chunks: ["main"],
+      // }),
       new HtmlWebpackPlugin({
-        filename: "index.html",
-        template: "./src/index.html",
-        chunks: ["main"],
+        filename: "pages/page-1/index.html",
+        template: "./src/pages/page-1/index.html",
+        chunks: ["page-1"],
       }),
-      isProd &&
-        new MiniCssExtractPlugin({
-          filename: "[name].[contenthash].css",
-        }),
+      new HtmlWebpackPlugin({
+        filename: "pages/page-2/index.html",
+        template: "./src/pages/page-2/index.html",
+        chunks: ["page-2"],
+      }),
       // ...htmlPlugins,
-    ].filter(Boolean),
+    ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
