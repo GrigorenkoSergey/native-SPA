@@ -16,4 +16,6 @@ const logic = () => {
   });
 };
 
+logic();
+
 export default logic;

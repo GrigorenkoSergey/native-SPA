@@ -3,7 +3,7 @@ import { defineConfig, loadEnv } from "vite";
 import fs from "fs";
 import path from "path";
 
-const commonTemplate = fs.readFileSync(path.resolve(__dirname, "src/index-template.html"), "utf-8");
+const commonTemplate = fs.readFileSync(path.resolve(__dirname, "src/page-template.html"), "utf-8");
 
 const isStorybook = Boolean(process.env.IS_STORYBOOK);
 
