@@ -1,4 +1,4 @@
-import { events } from "../constants/events";
+import { events } from "../constants/events.js";
 
 const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
 const PAGES_DIR = "pages/";

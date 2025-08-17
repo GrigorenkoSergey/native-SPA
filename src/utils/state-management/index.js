@@ -1,5 +1,5 @@
-import { createStore } from "./createStore";
-import { derive } from "./derive";
-import { batchEffects } from "./batchEffects";
+import { createStore } from "./createStore.js";
+import { derive } from "./derive.js";
+import { batchEffects } from "./batchEffects.js";
 
 export { createStore, derive, batchEffects };

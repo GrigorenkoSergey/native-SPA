@@ -1,7 +1,7 @@
 import "./style.css";
 import template from "./template.html?raw";
 
-import { listenClickOutsideOnce } from "../../utils/listenClickOutsideOnce";
+import { listenClickOutsideOnce } from "../../utils/listenClickOutsideOnce.js";
 
 // TODO дать возможность показывать элементы списков как есть, т.е. с непосредственно переданными li
 

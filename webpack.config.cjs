@@ -56,12 +56,14 @@ const getPageInputs = (dir, root) => {
 // const { entries, htmlPlugins } = getPageInputs(pathToPages, pathToPages);
 
 module.exports = env => {
+  const isProd = env.mode === "production";
   const base = process.env.BASE_URL + pagesDirName + "/";
 
   return {
     mode: env.mode || "development",
     entry: {
       main: "./src/main.js",
+      page: "./src/pages/page-1/index.js",
 
       // ...entries,
     },
@@ -101,6 +103,36 @@ module.exports = env => {
             },
           },
         },
+        // JS (Babel)
+        {
+          test: /\.(js|jsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: "babel-loader",
+            options: {
+              presets: ["@babel/preset-env"],
+            },
+          },
+        },
+
+        // CSS/SCSS
+        {
+          test: /\.(css|scss)$/,
+          use: [
+            isProd ? MiniCssExtractPlugin.loader : "style-loader",
+            {
+              loader: "css-loader",
+              options: { modules: { auto: true } },
+            },
+            "postcss-loader",
+          ],
+        },
+
+        // Изображения
+        {
+          test: /\.(png|svg|jpg|jpeg|gif)$/,
+          type: "asset/resource",
+        },
       ],
     },
     plugins: [
@@ -110,8 +142,12 @@ module.exports = env => {
         template: "./src/index.html",
         chunks: ["main"],
       }),
+      isProd &&
+        new MiniCssExtractPlugin({
+          filename: "[name].[contenthash].css",
+        }),
       // ...htmlPlugins,
-    ],
+    ].filter(Boolean),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),

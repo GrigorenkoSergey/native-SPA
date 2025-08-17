@@ -1,5 +1,5 @@
-import { store } from "../../stores/store";
-import { derive } from "../../utils/state-management";
+import { store } from "../../stores/store.js";
+import { derive } from "../../utils/state-management/index.js";
 import "./style.css";
 
 console.log("page-1");
