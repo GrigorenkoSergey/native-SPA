@@ -2,23 +2,27 @@
   "name": "web-components",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
-    "dev": "vite",
-    "dev-storybook": "IS_STORYBOOK=true vite",
-    "build": "vite build && cp dist/index.html dist/404.html",
-    "build-storybook": "IS_STORYBOOK=true vite build",
-    "preview": "vite preview",
+    "dev": "webpack serve --mode development --env mode=development",
+    "build": "webpack --mode production --env mode=production",
     "test": "npx playwright test --project=chromium"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.1.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "dotenv": "^17.2.1",
     "eslint": "^9.28.0",
     "eslint-plugin-prettier": "^5.4.1",
     "globals": "^16.2.0",
+    "html-loader": "^5.1.0",
+    "html-webpack-plugin": "^5.6.4",
     "prettier": "^3.5.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "webpack": "^5.101.2",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
   }
 }

@@ -1,5 +1,5 @@
 // import { applyRouting } from "./utils/applyRouting";
-window.location.href = "./page-1/";
+// window.location.href = "./page-1/";
 
 console.log("main");
 // const getPageLogic = async pathToPageFromPagesDir => {
