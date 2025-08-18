@@ -7,4 +7,4 @@ const logic = () => {
   span.textContent = store.inputValue;
 };
 
-export default logic
+export default logic;
