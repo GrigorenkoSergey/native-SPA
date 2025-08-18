@@ -15,7 +15,7 @@ module.exports = env => {
   return {
     mode: env.mode || "development",
     entry: {
-      // main: "./src/main.js",
+      main: "./src/main.js",
       "page-1": "./src/pages/page-1/index.js",
       "page-2": "./src/pages/page-2/index.js",
 
@@ -35,11 +35,10 @@ module.exports = env => {
       },
       hot: true,
       historyApiFallback: {
-        // verbose: true,
         rewrites: [
           {
-            from: /^\/native-SPA\/pages\/([a-zA-Z0-9-]+)\/?$/,
-            to: context => `/native-SPA/pages/pages/${context.match[1]}/index.html`,
+            from: new RegExp(base + "([a-zA-Z0-9-]+)"),
+            to: context => `${base}pages/${context.match[1]}/index.html`,
           },
         ],
       },
@@ -88,20 +87,15 @@ module.exports = env => {
     },
     plugins: [
       new CleanWebpackPlugin(),
-      // new HtmlWebpackPlugin({
-      //   filename: "index.html",
-      //   template: "./src/index.html",
-      //   chunks: ["main"],
-      // }),
       new HtmlWebpackPlugin({
         filename: "pages/page-1/index.html",
         template: "./src/pages/page-1/index.html",
-        chunks: ["page-1"],
+        chunks: ["main", "page-1"],
       }),
       new HtmlWebpackPlugin({
         filename: "pages/page-2/index.html",
         template: "./src/pages/page-2/index.html",
-        chunks: ["page-2"],
+        chunks: ["main", "page-2"],
       }),
       // ...htmlPlugins,
     ],
