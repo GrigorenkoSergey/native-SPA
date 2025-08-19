@@ -1,4 +1,5 @@
 import { store } from "../../stores/store.js";
+import "./style.css";
 
 console.log("page-2");
 

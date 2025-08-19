@@ -4,6 +4,7 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 const pagesDirName = "pages";
@@ -33,10 +34,12 @@ const getPageInputs = (dir, root) => {
 const pageInputs = getPageInputs(pathToPages, pathToPages);
 
 module.exports = env => {
-  const base = process.env.BASE_URL + pagesDirName + "/";
+  // const base = process.env.BASE_URL + pagesDirName + "/";
+  const base = process.env.BASE_URL;
 
   return {
     mode: env.mode || "development",
+    devtool: env.mode === "production" ? false : "source-map",
     entry: {
       main: "./src/main.js",
       ...pageInputs,
@@ -59,7 +62,7 @@ module.exports = env => {
         rewrites: [
           {
             from: new RegExp(base + "(.+)"),
-            to: context => `${base}pages/${context.match[1]}index.html`,
+            to: context => `${base}pages/${context.match[1].replace(/index\.html$/, "")}index.html`,
           },
         ],
       },
@@ -92,7 +95,7 @@ module.exports = env => {
         {
           test: /\.(css|scss)$/,
           use: [
-            "style-loader",
+            MiniCssExtractPlugin.loader,
             {
               loader: "css-loader",
               options: { modules: { auto: true } },
@@ -108,6 +111,12 @@ module.exports = env => {
     },
     plugins: [
       new CleanWebpackPlugin(),
+      new MiniCssExtractPlugin({
+        filename: chunkData => {
+          const name = chunkData.chunk.name;
+          return name === "main" ? "[name].[contenthash].css" : `${pagesDirName}/${name}/index.[contenthash].css`;
+        },
+      }),
       ...Object.entries(pageInputs).map(
         ([pageChunk, fullPath]) =>
           new HtmlWebpackPlugin({
