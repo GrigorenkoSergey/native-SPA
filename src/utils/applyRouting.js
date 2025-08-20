@@ -1,7 +1,6 @@
 import { events } from "../constants/events.js";
 
 const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
-const PAGES_DIR = "pages/";
 
 const base = document.querySelector("base").href;
 
@@ -9,16 +8,10 @@ const base = document.querySelector("base").href;
  При действительном изменении страницы в пределах проекта, добавим событие смены страницы для очистки памяти при
  переходах по различным страницам
 */
-export const applyRouting = ({
-  // getPageLogic,
-  // pageContentContainer = "main",
-  defaultPage = "page-1",
-  // page404 = "page-404",
-}) => {
+export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
   const buildPage = async (url, attempt = 0) => {
     if (attempt > MAX_ATTEMPTS_TO_LOAD_RESOURCE) return;
 
-    // debugger;
     const { pathname } = new URL(url);
 
     if (pathname === base) {
@@ -28,25 +21,22 @@ export const applyRouting = ({
     }
 
     const pageTemplateUrl = url + "index.html";
-    console.log(pageTemplateUrl);
-    // const scriptSrc = url + "index.";
-    // const pageScriptUrl = [...document.scripts].find(script => script.src.includes(scriptSrc));
 
     try {
-      const response = await fetch(pageTemplateUrl, { cache: "force-cache" });
-      // const response = await fetch(pageTemplateUrl, { cache: "no-cache" });
-      // const response = await fetch(pageTemplateUrl);
+      const response = await fetch(pageTemplateUrl);
       const template = await response.text();
-      console.log("template", template);
 
-      // document.writeln(template);
       document.documentElement.innerHTML = template;
-      // document.innerHTML = template;
 
-      // const logic = await getPageLogic(pathToPageFromPagesDir);
-      // logic?.();
-    } catch {
-      // buildPage(window.location.origin + page404, attempt + 1);
+      const scriptSrc = url + "index.";
+      const pageScriptElement = [...document.scripts].find(script => script.src.includes(scriptSrc));
+
+      if (pageScriptElement) {
+        const logic = (await import(/* webpackIgnore: true */ pageScriptElement.src)).default;
+        logic?.();
+      }
+    } catch (error) {
+      console.error(`Failed to load page ${url}`, error);
     }
   };
 

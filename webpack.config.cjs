@@ -66,7 +66,7 @@ module.exports = env => {
           },
         ],
       },
-      open: [`${base}page-1/`],
+      open: [`${base}pages/page-1/`],
     },
     module: {
       rules: [
