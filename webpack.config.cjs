@@ -34,7 +34,6 @@ const getPageInputs = (dir, root) => {
 const pageInputs = getPageInputs(pathToPages, pathToPages);
 
 module.exports = env => {
-  // const base = process.env.BASE_URL + pagesDirName + "/";
   const base = process.env.BASE_URL;
 
   return {
@@ -51,6 +50,10 @@ module.exports = env => {
         return name === "main" ? "[name].[contenthash].js" : `${pagesDirName}/${name}/index.[contenthash].js`;
       },
       publicPath: base,
+      library: {
+        // работает только совместно со строкой experiments + scriptLoading
+        type: "module",
+      },
     },
     devServer: {
       static: {
@@ -67,6 +70,10 @@ module.exports = env => {
         ],
       },
       open: [`${base}pages/page-1/`],
+    },
+    experiments: {
+      // работает только совместно со строкой library + scriptLoading
+      outputModule: true,
     },
     module: {
       rules: [
@@ -88,7 +95,7 @@ module.exports = env => {
           use: {
             loader: "babel-loader",
             options: {
-              presets: ["@babel/preset-env"],
+              presets: [["@babel/preset-env", { modules: false }]],
             },
           },
         },
@@ -124,6 +131,8 @@ module.exports = env => {
             filename: fullPath.replace(/.+?src\/(.+)/, (m, p) => p.replace(".js", ".html")),
             template: fullPath.replace(".js", ".html"),
             chunks: ["main", pageChunk],
+            // работает только совместно со строкой library + experiments
+            scriptLoading: "module",
           }),
       ),
     ],

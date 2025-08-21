@@ -8,4 +8,6 @@ const logic = () => {
   span.textContent = store.inputValue;
 };
 
+logic();
+
 export default logic;
