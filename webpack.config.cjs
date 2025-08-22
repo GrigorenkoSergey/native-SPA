@@ -37,8 +37,7 @@ module.exports = env => {
   const base = process.env.BASE_URL;
 
   return {
-    // mode: env.mode || "development",
-    mode: "none",
+    mode: env.mode || "development",
     devtool: env.mode === "production" ? false : "source-map",
     entry: {
       main: "./src/main.js",
