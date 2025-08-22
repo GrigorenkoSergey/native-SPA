@@ -37,11 +37,14 @@ module.exports = env => {
   const base = process.env.BASE_URL;
 
   return {
-    mode: env.mode || "development",
+    // mode: env.mode || "development",
+    mode: "none",
     devtool: env.mode === "production" ? false : "source-map",
     entry: {
       main: "./src/main.js",
       ...pageInputs,
+      stores: "./src/stores/store.js",
+      "state-management": "./src/utils/state-management/index.js",
     },
     output: {
       path: path.resolve(__dirname, "dist"),
@@ -52,11 +55,17 @@ module.exports = env => {
         return name === "main" ? "[name].js" : `${pagesDirName}/${name}/index.js`;
       },
       publicPath: base,
-      library: {
-        // работает только совместно со строкой experiments + scriptLoading
-        type: "module",
-      },
+      // library: {
+      //   // работает только совместно со строкой experiments + scriptLoading
+      //   type: "module",
+      // },
     },
+    externals: {
+      // Для ES-модулей используем специальный синтаксис
+      store: "module /native-SPA/pages/stores/index.js",
+      "state-management": "module /native-SPA/pages/state-management/index.js",
+    },
+    externalsType: "module", // Критически важно для ES-модулей
     devServer: {
       static: {
         directory: path.join(__dirname, "dist"),
@@ -119,7 +128,7 @@ module.exports = env => {
       ],
     },
     plugins: [
-      // new CleanWebpackPlugin(),
+      new CleanWebpackPlugin(),
       new MiniCssExtractPlugin({
         filename: chunkData => {
           const name = chunkData.chunk.name;
@@ -132,7 +141,7 @@ module.exports = env => {
             // удалим все, что идет до src
             filename: fullPath.replace(/.+?src\/(.+)/, (m, p) => p.replace(".js", ".html")),
             template: fullPath.replace(".js", ".html"),
-            chunks: ["main", pageChunk],
+            chunks: ["main", pageChunk, ...(pageChunk === 'page-1' ? ['stores', 'state-management'] : [])],
             // работает только совместно со строкой library + experiments
             scriptLoading: "module",
           }),
@@ -144,17 +153,10 @@ module.exports = env => {
       },
     },
     optimization: {
-      splitChunks: {
-        chunks: "all",
-        minSize: 0,
-        cacheGroups: {
-          common: {
-            test: /\/src\/(utils|stores)/,
-            name: "common",
-            chunks: "all",
-          },
-        },
-      },
+      minimize: false, // Отключаем минификацию
+      concatenateModules: false, // Отключаем объединение модулей
+      usedExports: false, // Отключаем tree shaking
+      splitChunks: false, // Полностью отключаем разделение чанков
     },
   };
 };

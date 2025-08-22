@@ -1,4 +1,4 @@
-import { store } from "../../stores/store.js";
+import { store } from "store";
 import "./style.css";
 
 window.store2 = store;
