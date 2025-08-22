@@ -1,6 +1,7 @@
 import { store } from "../../stores/store.js";
 import "./style.css";
 
+window.store2 = store;
 console.log("page-2");
 
 const logic = () => {
@@ -8,6 +9,4 @@ const logic = () => {
   span.textContent = store.inputValue;
 };
 
-logic();
-
-export default logic;
+if (window) window.logic = logic;

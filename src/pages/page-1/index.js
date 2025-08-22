@@ -4,6 +4,7 @@ import "./style.css";
 
 console.log("page-1");
 
+window.store1 = store;
 const logic = () => {
   const input = document.querySelector("input");
   input.value = store.inputValue;
@@ -16,6 +17,10 @@ const logic = () => {
   });
 };
 
-logic();
+const newScript = document.createElement("script");
+newScript.src = "http://localhost:8081/native-SPA/pages/page-2/index.js";
 
-export default logic;
+newScript.type = "module";
+document.head.append(newScript);
+
+if (window) window.logic = logic;

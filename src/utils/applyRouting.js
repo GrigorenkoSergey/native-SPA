@@ -3,12 +3,15 @@ import { events } from "../constants/events.js";
 const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
 
 const base = document.querySelector("base").href;
+const pageLogics = {};
 
 /*
  При действительном изменении страницы в пределах проекта, добавим событие смены страницы для очистки памяти при
  переходах по различным страницам
 */
 export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
+  if (!window) return;
+
   const buildPage = async (url, attempt = 0) => {
     if (attempt > MAX_ATTEMPTS_TO_LOAD_RESOURCE) return;
 
@@ -30,11 +33,18 @@ export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
 
       const scriptSrc = url + "index.";
       const pageScriptElement = [...document.scripts].find(script => script.src.includes(scriptSrc));
+      pageScriptElement.remove();
 
-      if (pageScriptElement) {
-        const logic = (await import(/* webpackIgnore: true */ pageScriptElement.src)).default;
-        logic?.();
-      }
+      const scriptKey = pageScriptElement.src;
+
+      const newScript = document.createElement("script");
+      newScript.src = scriptKey;
+      newScript.type = "module";
+      document.head.append(newScript);
+
+      // if (!(scriptKey in pageLogics)) pageLogics[scriptKey] = window.logic;
+
+      // pageLogics[scriptKey]?.();
     } catch (error) {
       console.error(`Failed to load page ${url}`, error);
     }

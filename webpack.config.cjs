@@ -46,8 +46,10 @@ module.exports = env => {
     output: {
       path: path.resolve(__dirname, "dist"),
       filename: chunkData => {
-        const name = chunkData.chunk.name;
-        return name === "main" ? "[name].[contenthash].js" : `${pagesDirName}/${name}/index.[contenthash].js`;
+        const name = chunkData.chunk.name || "internal";
+        // return name === "main" ? "[name].[contenthash].js" : `${pagesDirName}/${name}/index.[contenthash].js`;
+        if (name === "internal") return "[name].[contenthash].js";
+        return name === "main" ? "[name].js" : `${pagesDirName}/${name}/index.js`;
       },
       publicPath: base,
       library: {
@@ -89,16 +91,16 @@ module.exports = env => {
             },
           },
         },
-        {
-          test: /\.(js|jsx)$/,
-          exclude: /node_modules/,
-          use: {
-            loader: "babel-loader",
-            options: {
-              presets: [["@babel/preset-env", { modules: false }]],
-            },
-          },
-        },
+        // {
+        //   test: /\.(js|jsx)$/,
+        //   exclude: /node_modules/,
+        //   use: {
+        //     loader: "babel-loader",
+        //     options: {
+        //       presets: [["@babel/preset-env"]],
+        //     },
+        //   },
+        // },
         {
           test: /\.(css|scss)$/,
           use: [
@@ -117,7 +119,7 @@ module.exports = env => {
       ],
     },
     plugins: [
-      new CleanWebpackPlugin(),
+      // new CleanWebpackPlugin(),
       new MiniCssExtractPlugin({
         filename: chunkData => {
           const name = chunkData.chunk.name;
@@ -139,6 +141,19 @@ module.exports = env => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
+      },
+    },
+    optimization: {
+      splitChunks: {
+        chunks: "all",
+        minSize: 0,
+        cacheGroups: {
+          common: {
+            test: /\/src\/(utils|stores)/,
+            name: "common",
+            chunks: "all",
+          },
+        },
       },
     },
   };
