@@ -42,8 +42,11 @@ module.exports = env => {
     entry: {
       main: "./src/main.js",
       ...pageInputs,
-      stores: "./src/stores/store.js",
       "state-management": "./src/utils/state-management/index.js",
+      stores: {
+        import: "./src/stores/store.js",
+        dependOn: "state-management",
+      },
     },
     output: {
       path: path.resolve(__dirname, "dist"),
