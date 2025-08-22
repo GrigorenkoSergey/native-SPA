@@ -55,10 +55,10 @@ module.exports = env => {
         return name === "main" ? "[name].js" : `${pagesDirName}/${name}/index.js`;
       },
       publicPath: base,
-      // library: {
-      //   // работает только совместно со строкой experiments + scriptLoading
-      //   type: "module",
-      // },
+      library: {
+        // работает только совместно со строкой experiments + scriptLoading
+        type: "module",
+      },
     },
     externals: {
       // Для ES-модулей используем специальный синтаксис
