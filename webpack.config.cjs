@@ -73,6 +73,7 @@ module.exports = env => {
         directory: path.join(__dirname, "dist"),
       },
       hot: true,
+      port: 8080,
       historyApiFallback: {
         verbose: true,
         rewrites: [
