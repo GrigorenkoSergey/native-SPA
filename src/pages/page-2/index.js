@@ -1,7 +1,6 @@
 import { store } from "store";
 import "./style.css";
 
-window.store2 = store;
 console.log("page-2");
 
 const logic = () => {

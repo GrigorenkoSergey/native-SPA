@@ -1,10 +1,10 @@
 import { store } from "store";
+import { events } from "@/constants/events.js";
 import { derive } from "state-management";
 import "./style.css";
 
 console.log("page-1");
 
-window.store1 = store;
 const logic = () => {
   const input = document.querySelector("input");
   input.value = store.inputValue;
@@ -12,9 +12,11 @@ const logic = () => {
 
   let output = document.querySelector("output");
 
-  derive(() => {
+  const cleanup = derive(() => {
     output.textContent = store.inputValue;
   });
+
+  window.addEventListener(events.CHANGE_PAGE, () => cleanup());
 };
 
 if (window) window.logic = logic;
