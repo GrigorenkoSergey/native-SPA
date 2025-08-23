@@ -5,6 +5,12 @@ const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
 const base = document.querySelector("base").href;
 const pageLogics = {};
 
+const getPageScript = url => {
+  const { origin, pathname } = new URL(url);
+  const srcPattern = origin + pathname + "index.";
+  return [...document.scripts].find(script => script.src.includes(srcPattern));
+};
+
 /*
  При действительном изменении страницы в пределах проекта, добавим событие смены страницы для очистки памяти при
  переходах по различным страницам
@@ -31,24 +37,30 @@ export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
 
       document.documentElement.innerHTML = template;
 
-      const scriptSrc = url + "index.";
-      const pageScriptElement = [...document.scripts].find(script => script.src.includes(scriptSrc));
-      pageScriptElement.remove();
-
+      const pageScriptElement = getPageScript(url);
       const scriptKey = pageScriptElement.src;
+      pageScriptElement.remove();
 
       const newScript = document.createElement("script");
       newScript.src = scriptKey;
       newScript.type = "module";
       document.head.append(newScript);
 
-      // if (!(scriptKey in pageLogics)) pageLogics[scriptKey] = window.logic;
+      if (scriptKey in pageLogics) return pageLogics[scriptKey]?.();
 
-      // pageLogics[scriptKey]?.();
+      newScript.onload = () => {
+        pageLogics[scriptKey] = window.logic;
+      };
     } catch (error) {
       console.error(`Failed to load page ${url}`, error);
     }
   };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const pageScriptElement = getPageScript(window.location.href);
+    const scriptKey = pageScriptElement.src;
+    pageLogics[scriptKey] = window.logic;
+  });
 
   window.history.pushState = new Proxy(window.history.pushState, {
     async apply(...args) {
