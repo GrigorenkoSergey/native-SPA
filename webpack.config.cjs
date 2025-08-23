@@ -48,6 +48,15 @@ module.exports = env => {
         dependOn: "state-management",
       },
     },
+    externals: {
+      store: "module /native-SPA/pages/stores/index.js",
+      "state-management": "module /native-SPA/pages/state-management/index.js",
+    },
+    externalsType: "module",
+    experiments: {
+      // работает только совместно со строкой library + scriptLoading
+      outputModule: true,
+    },
     output: {
       path: path.resolve(__dirname, "dist"),
       filename: chunkData => {
@@ -62,12 +71,6 @@ module.exports = env => {
         type: "module",
       },
     },
-    externals: {
-      // Для ES-модулей используем специальный синтаксис
-      store: "module /native-SPA/pages/stores/index.js",
-      "state-management": "module /native-SPA/pages/state-management/index.js",
-    },
-    externalsType: "module", // Критически важно для ES-модулей
     devServer: {
       static: {
         directory: path.join(__dirname, "dist"),
@@ -85,10 +88,6 @@ module.exports = env => {
       },
       open: [`${base}pages/page-1/`],
     },
-    experiments: {
-      // работает только совместно со строкой library + scriptLoading
-      outputModule: true,
-    },
     module: {
       rules: [
         {
@@ -103,16 +102,16 @@ module.exports = env => {
             },
           },
         },
-        // {
-        //   test: /\.(js|jsx)$/,
-        //   exclude: /node_modules/,
-        //   use: {
-        //     loader: "babel-loader",
-        //     options: {
-        //       presets: [["@babel/preset-env"]],
-        //     },
-        //   },
-        // },
+        {
+          test: /\.(js|jsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: "babel-loader",
+            options: {
+              presets: [["@babel/preset-env"]],
+            },
+          },
+        },
         {
           test: /\.(css|scss)$/,
           use: [
@@ -144,7 +143,7 @@ module.exports = env => {
             // удалим все, что идет до src
             filename: fullPath.replace(/.+?src\/(.+)/, (m, p) => p.replace(".js", ".html")),
             template: fullPath.replace(".js", ".html"),
-            chunks: ["main", pageChunk, ...(pageChunk === 'page-1' ? ['stores', 'state-management'] : [])],
+            chunks: ["main", pageChunk, ...(pageChunk === "page-1" ? ["stores", "state-management"] : [])],
             // работает только совместно со строкой library + experiments
             scriptLoading: "module",
           }),
