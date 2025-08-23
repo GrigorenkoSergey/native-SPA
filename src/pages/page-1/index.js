@@ -17,6 +17,4 @@ const logic = () => {
   });
 };
 
-logic();
-
 if (window) window.logic = logic;

@@ -9,6 +9,4 @@ const logic = () => {
   span.textContent = store.inputValue;
 };
 
-logic();
-
 if (window) window.logic = logic;

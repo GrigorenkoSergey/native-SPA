@@ -50,6 +50,7 @@ export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
 
       newScript.onload = () => {
         pageLogics[scriptKey] = window.logic;
+        pageLogics[scriptKey]?.();
       };
     } catch (error) {
       console.error(`Failed to load page ${url}`, error);
@@ -59,7 +60,9 @@ export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
   document.addEventListener("DOMContentLoaded", () => {
     const pageScriptElement = getPageScript(window.location.href);
     const scriptKey = pageScriptElement.src;
+
     pageLogics[scriptKey] = window.logic;
+    pageLogics[scriptKey]?.();
   });
 
   window.history.pushState = new Proxy(window.history.pushState, {
