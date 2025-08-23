@@ -40,17 +40,17 @@ module.exports = env => {
     mode: env.mode || "development",
     devtool: env.mode === "production" ? false : "source-map",
     entry: {
-      main: "./src/main.js",
-      ...pageInputs,
+      main: "./src/main.js", // здесь подключим основные скрипты, роутинг, например
       "state-management": "./src/utils/state-management/index.js",
       stores: {
         import: "./src/stores/store.js",
         dependOn: "state-management",
       },
+      ...pageInputs,
     },
     externals: {
-      store: "module /native-SPA/pages/stores/index.js",
-      "state-management": "module /native-SPA/pages/state-management/index.js",
+      store: `module ${base}pages/stores/index.js`,
+      "state-management": `module ${base}pages/state-management/index.js`,
     },
     externalsType: "module",
     experiments: {
@@ -61,8 +61,8 @@ module.exports = env => {
       path: path.resolve(__dirname, "dist"),
       filename: chunkData => {
         const name = chunkData.chunk.name || "internal";
-        // return name === "main" ? "[name].[contenthash].js" : `${pagesDirName}/${name}/index.[contenthash].js`;
         if (name === "internal") return "[name].[contenthash].js";
+        // return name === "main" ? "[name].[contenthash].js" : `${pagesDirName}/${name}/index.[contenthash].js`;
         return name === "main" ? "[name].js" : `${pagesDirName}/${name}/index.js`;
       },
       publicPath: base,
@@ -79,12 +79,6 @@ module.exports = env => {
       port: 8080,
       historyApiFallback: {
         verbose: true,
-        rewrites: [
-          {
-            from: new RegExp(base + "(.+)"),
-            to: context => `${base}pages/${context.match[1].replace(/index\.html$/, "")}index.html`,
-          },
-        ],
       },
       open: [`${base}pages/page-1/`],
     },
@@ -143,7 +137,7 @@ module.exports = env => {
             // удалим все, что идет до src
             filename: fullPath.replace(/.+?src\/(.+)/, (m, p) => p.replace(".js", ".html")),
             template: fullPath.replace(".js", ".html"),
-            chunks: ["main", pageChunk, ...(pageChunk === "page-1" ? ["stores", "state-management"] : [])],
+            chunks: ["main", pageChunk],
             // работает только совместно со строкой library + experiments
             scriptLoading: "module",
           }),
@@ -153,12 +147,6 @@ module.exports = env => {
       alias: {
         "@": path.resolve(__dirname, "src"),
       },
-    },
-    optimization: {
-      minimize: false, // Отключаем минификацию
-      concatenateModules: false, // Отключаем объединение модулей
-      usedExports: false, // Отключаем tree shaking
-      splitChunks: false, // Полностью отключаем разделение чанков
     },
   };
 };

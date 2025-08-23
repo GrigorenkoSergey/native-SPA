@@ -47,7 +47,7 @@ test("Проверка перемещений по истории", async ({ pag
     await expect(page.getByText(inputText)).toBeVisible();
 
     await page.getByRole("link", { name: "Page-2" }).click();
-    await expect(page.getByRole("heading", { name: "Page-1" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Page-2" })).toBeVisible();
     await expect(page.getByText(inputText)).toBeVisible();
 
     await page.getByRole("link", { name: "Глубоко вложенная страница" }).click();
