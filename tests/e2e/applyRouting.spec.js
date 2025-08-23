@@ -36,3 +36,43 @@ test("Базовая логика переключений страниц", asyn
     await expect(page.getByText("12345abc")).toBeVisible();
   });
 });
+
+test("Проверка перемещений по истории", async ({ page }) => {
+  await page.goto("http://localhost:8080/native-SPA/pages/page-1/");
+
+  let inputText = "123";
+  await test.step("Обычные перемещения по ссылкам", async () => {
+    await expect(page.getByRole("heading", { name: "Page-1" })).toBeVisible();
+    await page.getByRole("textbox").fill(inputText);
+    await expect(page.getByText(inputText)).toBeVisible();
+
+    await page.getByRole("link", { name: "Page-2" }).click();
+    await expect(page.getByRole("heading", { name: "Page-1" })).toBeVisible();
+    await expect(page.getByText(inputText)).toBeVisible();
+
+    await page.getByRole("link", { name: "Глубоко вложенная страница" }).click();
+    await expect(page.getByRole("heading", { name: "Глубоко вложенная страница" })).toBeVisible();
+    await expect(page.getByTestId("created-span")).toBeVisible();
+  });
+
+  await test.step("Начнем возврат по истории", async () => {
+    await page.goBack();
+    await expect(page.getByRole("heading", { name: "Page-2" })).toBeVisible();
+    await expect(page.getByText(inputText)).toBeVisible();
+
+    await page.goBack();
+    await expect(page.getByRole("heading", { name: "Page-1" })).toBeVisible();
+    await expect(page.getByText(inputText)).toBeVisible();
+
+    inputText = "ABC";
+    await page.getByRole("textbox").fill(inputText);
+
+    await page.goForward();
+    await expect(page.getByRole("heading", { name: "Page-2" })).toBeVisible();
+    await expect(page.getByText(inputText)).toBeVisible();
+
+    await page.goForward();
+    await expect(page.getByRole("heading", { name: "Глубоко вложенная страница" })).toBeVisible();
+    await expect(page.getByTestId("created-span")).toBeVisible();
+  });
+});
