@@ -1,7 +1,11 @@
 import "./style.css";
 
 const logic = () => {
-  alert("Привет из глубоко вложенной страницы!");
+  const span = document.createElement("span");
+  span.dataset.testid = "created-span";
+  span.textContent = "Hello from script!";
+
+  document.body.append(span);
 };
 
 window.logic = logic;

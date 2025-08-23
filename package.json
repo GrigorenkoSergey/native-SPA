@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "webpack serve --mode development --env mode=development",
     "build": "webpack --mode production --env mode=production",
-    "test": "npx playwright test --project=chromium"
+    "test": "npx playwright test --project=chromium",
+    "test-ui": "IS_UI_MODE=true npx playwright test --ui"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.28.3",
