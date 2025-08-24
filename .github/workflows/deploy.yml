@@ -12,6 +12,9 @@ jobs:
       pages: write
       id-token: write
 
+    env:
+      BASE_URL: /native-SPA/
+
     steps:
       - uses: actions/checkout@v4
       - name: Install and build
