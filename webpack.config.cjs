@@ -79,8 +79,15 @@ module.exports = env => {
       path: path.resolve(__dirname, "dist"),
       filename: chunkData => {
         const name = chunkData.chunk.name || "internal";
+        const pageChunkNames = Object.keys(pageInputs);
+
         if (name === "internal") return "[name].[contenthash].js";
-        return name === "main" ? "[name].[contenthash].js" : `${pagesDirName}/${name}/index.[contenthash].js`;
+
+        if (pageChunkNames.includes(name)) {
+          return `${pagesDirName}/${name}/index.[contenthash].js`;
+        }
+
+        return `[name].[contenthash].js`;
       },
       publicPath: base,
       library: {
