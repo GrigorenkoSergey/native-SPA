@@ -1,5 +1,5 @@
 {
-  "main.js": "/native-SPA/main.65f6bcd5deaee365be30.js",
+  "main.js": "/native-SPA/main.3f3faf07e4a815f9c119.js",
   "state-management.js": "/native-SPA/pages/state-management/index.3458e2a02c4c45b3143a.js",
   "stores.js": "/native-SPA/pages/stores/index.c05abeb2fbd875d68064.js",
   "page-1.css": "/native-SPA/pages/page-1/index.d14233589d86978771a3.css",
@@ -12,5 +12,6 @@
   "pages/page-1/page-1-deeper-page/index.html": "/native-SPA/pages/page-1/page-1-deeper-page/index.html",
   "pages/page-2/index.html": "/native-SPA/pages/page-2/index.html",
   "pages/page-1/index.html": "/native-SPA/pages/page-1/index.html",
+  "index.html": "/native-SPA/index.html",
   "pages/page-404/index.html": "/native-SPA/pages/page-404/index.html"
 }
