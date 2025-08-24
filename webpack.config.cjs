@@ -60,11 +60,11 @@ module.exports = env => {
       ...pageInputs,
     },
     externals: {
-      "state-management": `module ${base}pages/state-management/index.js`,
+      "state-management": `module ${base}state-management.js`,
       ...Object.fromEntries(
         storeFiles.map(file => {
           const key = file.replace(".js", "");
-          return [key, `module ${base}pages/${key}/index.js`];
+          return [key, `module ${base}${file}`];
         }),
       ),
     },
@@ -77,8 +77,9 @@ module.exports = env => {
       path: path.resolve(__dirname, "dist"),
       filename: chunkData => {
         const name = chunkData.chunk.name || "internal";
-        if (name === "internal") return "[name].[contenthash].js";
-        return name === "main" ? "[name].js" : `${pagesDirName}/${name}/index.js`;
+        if (name in pageInputs) return `${pagesDirName}/${name}/index.js`;
+
+        return "[name].js";
       },
       publicPath: base,
       library: {
