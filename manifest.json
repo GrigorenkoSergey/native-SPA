@@ -1,0 +1,16 @@
+{
+  "main.js": "/native-SPA/main.65f6bcd5deaee365be30.js",
+  "state-management.js": "/native-SPA/pages/state-management/index.3458e2a02c4c45b3143a.js",
+  "stores.js": "/native-SPA/pages/stores/index.c05abeb2fbd875d68064.js",
+  "page-1.css": "/native-SPA/pages/page-1/index.d14233589d86978771a3.css",
+  "page-1.js": "/native-SPA/pages/page-1/index.cc47766983e2c049d0eb.js",
+  "page-1/page-1-deeper-page.css": "/native-SPA/pages/page-1/page-1-deeper-page/index.561ec0e0262181d0c2ab.css",
+  "page-1/page-1-deeper-page.js": "/native-SPA/pages/page-1/page-1-deeper-page/index.23d86530a174a09c82f9.js",
+  "page-2.css": "/native-SPA/pages/page-2/index.4ba6adefbf73e5da5939.css",
+  "page-2.js": "/native-SPA/pages/page-2/index.739d062560828adbabfc.js",
+  "page-404.js": "/native-SPA/pages/page-404/index.31d6cfe0d16ae931b73c.js",
+  "pages/page-1/page-1-deeper-page/index.html": "/native-SPA/pages/page-1/page-1-deeper-page/index.html",
+  "pages/page-2/index.html": "/native-SPA/pages/page-2/index.html",
+  "pages/page-1/index.html": "/native-SPA/pages/page-1/index.html",
+  "pages/page-404/index.html": "/native-SPA/pages/page-404/index.html"
+}
