@@ -41,14 +41,14 @@ module.exports = env => {
     entry: {
       main: "./src/main.js", // здесь подключим основные скрипты, роутинг, например
       "state-management": "./src/utils/state-management/index.js",
-      stores: {
+      store: {
         import: "./src/stores/store.js",
         dependOn: "state-management",
       },
       ...pageInputs,
     },
     externals: {
-      store: `module ${base}pages/stores/index.js`,
+      store: `module ${base}pages/store/index.js`,
       "state-management": `module ${base}pages/state-management/index.js`,
     },
     externalsType: "module",
@@ -93,16 +93,6 @@ module.exports = env => {
               return commonTemplate.replace(/\{\{(\w+)\}\}/g, (match, variable) => {
                 return params[variable] || match;
               });
-            },
-          },
-        },
-        {
-          test: /\.(js|jsx)$/,
-          exclude: /node_modules/,
-          use: {
-            loader: "babel-loader",
-            options: {
-              presets: [["@babel/preset-env"]],
             },
           },
         },
