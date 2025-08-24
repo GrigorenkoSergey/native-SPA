@@ -32,6 +32,21 @@ const getPageInputs = (dir, root) => {
 
 const pageInputs = getPageInputs(pathToPages, pathToPages);
 
+const storesDir = path.resolve(__dirname, "src/stores");
+const storeFiles = fs
+  .readdirSync(storesDir)
+  .filter(file => fs.statSync(path.join(storesDir, file)).isFile() && file.endsWith(".js"));
+
+const storeInputs = storeFiles.reduce((acc, file) => {
+  const key = file.replace(".js", "");
+  acc[key] = {
+    import: `${storesDir}/${file}`,
+    dependOn: "state-management",
+  };
+
+  return acc;
+}, {});
+
 module.exports = env => {
   const base = process.env.BASE_URL;
 
@@ -41,10 +56,7 @@ module.exports = env => {
     entry: {
       main: "./src/main.js", // здесь подключим основные скрипты, роутинг, например
       "state-management": "./src/utils/state-management/index.js",
-      store: {
-        import: "./src/stores/store.js",
-        dependOn: "state-management",
-      },
+      ...storeInputs,
       ...pageInputs,
     },
     externals: {
@@ -77,9 +89,6 @@ module.exports = env => {
       },
       hot: true,
       port: 8080,
-      historyApiFallback: {
-        verbose: true,
-      },
       open: [base],
     },
     module: {

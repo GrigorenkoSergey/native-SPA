@@ -1,5 +1,4 @@
 import { variables } from "./variables.js";
-// TODO как быть с асинхронщиной?
 
 export const derive = callback => {
   variables.isDerivingLogicAnalisis = true;
