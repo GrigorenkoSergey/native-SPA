@@ -1,5 +1,4 @@
 import { createStore } from "../utils/state-management/createStore.js";
-console.log("init common store");
 
 const store = createStore({
   inputValue: "",

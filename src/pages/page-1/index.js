@@ -1,4 +1,4 @@
-import { store } from "store";
+import store from "store";
 import { events } from "@/constants/events.js";
 import { derive } from "state-management";
 import "./style.css";

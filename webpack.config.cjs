@@ -60,8 +60,13 @@ module.exports = env => {
       ...pageInputs,
     },
     externals: {
-      store: `module ${base}pages/store/index.js`,
       "state-management": `module ${base}pages/state-management/index.js`,
+      ...Object.fromEntries(
+        storeFiles.map(file => {
+          const key = file.replace(".js", "");
+          return [key, `module ${base}pages/${key}/index.js`];
+        }),
+      ),
     },
     externalsType: "module",
     experiments: {
