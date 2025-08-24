@@ -1,4 +1,4 @@
-import { variables } from "./variables";
+import { variables } from "./variables.js";
 // TODO как быть с асинхронщиной?
 
 export const derive = callback => {

@@ -1,8 +1,11 @@
-import { store } from "../../stores/store";
+import { store } from "store";
+import "./style.css";
 
 console.log("page-2");
 
-export default () => {
+const logic = () => {
   const span = document.querySelector(".store-value");
   span.textContent = store.inputValue;
 };
+
+if (window) window.logic = logic;

@@ -1,55 +1,68 @@
-import { events } from "../constants/events";
+import { events } from "../constants/events.js";
 
 const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
-const PAGES_DIR = "pages/";
 
-const base = import.meta.env.VITE_BASE_URL || "/";
+const base = document.querySelector("base").href;
+const pageLogics = {};
+
+const getPageScript = url => {
+  const { origin, pathname } = new URL(url);
+  const srcPattern = origin + pathname + "index.";
+  return [...document.scripts].find(script => script.src.includes(srcPattern));
+};
 
 /*
  При действительном изменении страницы в пределах проекта, добавим событие смены страницы для очистки памяти при
  переходах по различным страницам
 */
-export const applyRouting = ({
-  getPageLogic,
-  pageContentContainer = "main",
-  defaultPage = "page-1",
-  page404 = "page-404",
-}) => {
+export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
+  if (!window) return;
+
   const buildPage = async (url, attempt = 0) => {
     if (attempt > MAX_ATTEMPTS_TO_LOAD_RESOURCE) return;
 
-    const { pathname, search, origin } = new URL(url);
+    const { pathname } = new URL(url);
 
     if (pathname === base) {
-      const defaultUrl = `${origin}${base}${defaultPage}`;
+      const defaultUrl = `${base}${defaultPage}`;
       window.history.replaceState(null, "", defaultUrl);
       return buildPage(defaultUrl, attempt + 1);
     }
 
-    const pathToPages = base + PAGES_DIR;
-    const pathToPageFromPagesDir = pathname.replace(base, "");
-    const pageUrl = pathToPages + pathToPageFromPagesDir + search;
+    const pageTemplateUrl = url + "index.html";
 
     try {
-      const response = await fetch(pageUrl + "/template.html", { cache: "force-cache" });
+      const response = await fetch(pageTemplateUrl);
       const template = await response.text();
 
-      const pageContainer = document.querySelector(pageContentContainer);
-      pageContainer.innerHTML = template;
+      document.documentElement.innerHTML = template;
 
-      const logic = await getPageLogic(pathToPageFromPagesDir);
-      logic?.();
-    } catch {
-      buildPage(window.location.origin + page404, attempt + 1);
+      const pageScriptElement = getPageScript(url);
+      const scriptKey = pageScriptElement.src;
+      pageScriptElement.remove();
+
+      const newScript = document.createElement("script");
+      newScript.src = scriptKey;
+      newScript.type = "module";
+      document.head.append(newScript);
+
+      if (scriptKey in pageLogics) return pageLogics[scriptKey]?.();
+
+      newScript.onload = () => {
+        pageLogics[scriptKey] = window.logic;
+        pageLogics[scriptKey]?.();
+      };
+    } catch (error) {
+      console.error(`Failed to load page ${url}`, error);
     }
   };
 
   document.addEventListener("DOMContentLoaded", () => {
-    const baseTag = document.createElement("base");
-    baseTag.href = base;
-    document.head.prepend(baseTag);
+    const pageScriptElement = getPageScript(window.location.href);
+    const scriptKey = pageScriptElement.src;
 
-    buildPage(window.location.href);
+    pageLogics[scriptKey] = window.logic;
+    pageLogics[scriptKey]?.();
   });
 
   window.history.pushState = new Proxy(window.history.pushState, {
@@ -68,32 +81,28 @@ export const applyRouting = ({
   });
 
   document.addEventListener("click", async event => {
-    const link = event.target.closest("a");
-    if (!link) return;
-
-    const linkUrl = new URL(link.href);
-    const isExternalLink = linkUrl.origin !== window.location.origin;
-    if (isExternalLink) return;
-
-    const isAnchor = link.getAttribute("href").startsWith("#");
-    if (isAnchor) return;
+    const isInnerLink = "innerLink" in event.target.dataset;
+    if (!isInnerLink) return;
 
     event.preventDefault();
 
+    const link = event.target;
     const currentHref = window.location.href;
-    const currentPathname = new URL(window.location.href);
+    const currentPathname = new URL(window.location.href).pathname;
 
-    const newUrl = new URL(link.href, window.location.href);
-    window.history.pushState(null, "", newUrl.href);
+    const newHref = new URL(link.href, window.location.href).href;
+    if (newHref === currentHref) return;
 
-    const newPathname = new URL(newUrl.href).pathname;
+    window.history.pushState(null, "", newHref);
+
+    const newPathname = new URL(newHref).pathname;
 
     if (currentPathname !== newPathname) {
       window.dispatchEvent(
         new CustomEvent(events.CHANGE_PAGE, {
           detail: {
             prev: currentHref,
-            next: newUrl.href,
+            next: newHref,
           },
         }),
       );

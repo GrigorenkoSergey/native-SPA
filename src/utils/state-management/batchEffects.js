@@ -1,4 +1,4 @@
-import { derive } from "./derive";
+import { derive } from "./derive.js";
 
 export const batchEffects = (cb, asyncFunc = setTimeout, clearup = clearTimeout) => {
   let timerId = -1;

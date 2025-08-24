@@ -1,3 +1,3 @@
-  body:has(.page-1) {
+  body {
     background-color: red;
   }

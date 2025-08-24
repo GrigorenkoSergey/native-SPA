@@ -1,4 +1,4 @@
-import { variables } from "./variables";
+import { variables } from "./variables.js";
 
 const createStore = obj => {
   const observableProps = {};

@@ -1,4 +1,4 @@
-import { applyRouting } from "../utils/applyRouting";
+import { applyRouting } from "../utils/applyRouting.js";
 
 const getPageLogic = async pathname => {
   switch (pathname) {
