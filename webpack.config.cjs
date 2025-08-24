@@ -101,7 +101,7 @@ module.exports = env => {
       historyApiFallback: {
         verbose: true,
       },
-      open: [`${base}pages/page-1/`],
+      open: [base],
     },
     module: {
       rules: [
@@ -154,6 +154,12 @@ module.exports = env => {
           const name = chunkData.chunk.name;
           return name === "main" ? "[name].[contenthash].css" : `${pagesDirName}/${name}/index.[contenthash].css`;
         },
+      }),
+      new HtmlWebpackPlugin({
+        filename: "index.html",
+        template: "./src/index.html",
+        chunks: ["main"],
+        scriptLoading: "module",
       }),
       ...Object.entries(pageInputs).map(
         ([pageChunk, fullPath]) =>

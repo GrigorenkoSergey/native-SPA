@@ -1,7 +1,5 @@
 import { events } from "../constants/events.js";
 
-const MAX_ATTEMPTS_TO_LOAD_RESOURCE = 10;
-
 const base = document.querySelector("base").href;
 const pageLogics = {};
 
@@ -15,20 +13,10 @@ const getPageScript = url => {
  При действительном изменении страницы в пределах проекта, добавим событие смены страницы для очистки памяти при
  переходах по различным страницам
 */
-export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
+export const applyRouting = ({ defaultPage = "pages/page-1/" }) => {
   if (!window) return;
 
-  const buildPage = async (url, attempt = 0) => {
-    if (attempt > MAX_ATTEMPTS_TO_LOAD_RESOURCE) return;
-
-    const { pathname } = new URL(url);
-
-    if (pathname === base) {
-      const defaultUrl = `${base}${defaultPage}`;
-      window.history.replaceState(null, "", defaultUrl);
-      return buildPage(defaultUrl, attempt + 1);
-    }
-
+  const buildPage = async url => {
     const pageTemplateUrl = url + "index.html";
 
     try {
@@ -58,6 +46,13 @@ export const applyRouting = ({ defaultPage = "pages/page-1" }) => {
   };
 
   document.addEventListener("DOMContentLoaded", () => {
+    const { pathname } = new URL(window.location.href);
+    const { pathname: basePathname } = new URL(base);
+
+    if (pathname === basePathname) {
+      const defaultUrl = `${base}${defaultPage}`;
+      return (window.location.href = defaultUrl);
+    }
     const pageScriptElement = getPageScript(window.location.href);
     const scriptKey = pageScriptElement.src;
 
