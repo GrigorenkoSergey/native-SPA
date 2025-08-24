@@ -5,7 +5,6 @@ const path = require("path");
 const fs = require("fs");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
 
 const pagesDirName = "pages";
 const pathToPages = path.resolve(__dirname, `src/${pagesDirName}/`);
@@ -35,14 +34,6 @@ const pageInputs = getPageInputs(pathToPages, pathToPages);
 
 module.exports = env => {
   const base = process.env.BASE_URL;
-  const manifestPath = path.resolve(__dirname, "dist/manifest.json");
-
-  let manifest = {};
-  try {
-    manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
-  } catch {
-    console.log("Can't find manifest file. It's ok for the first build.");
-  }
 
   return {
     mode: env.mode || "development",
@@ -56,19 +47,9 @@ module.exports = env => {
       },
       ...pageInputs,
     },
-    externals: ({ request }, callback) => {
-      if (Object.keys(manifest).length > 0) {
-        const stateManagementPath = manifest["state-management.js"];
-        const storePath = manifest["stores.js"];
-
-        if (request === "state-management" && stateManagementPath) {
-          return callback(null, `module ${stateManagementPath}`);
-        }
-        if (request === "store" && storePath) {
-          return callback(null, `module ${storePath}`);
-        }
-      }
-      callback();
+    externals: {
+      store: `module ${base}pages/stores/index.js`,
+      "state-management": `module ${base}pages/state-management/index.js`,
     },
     externalsType: "module",
     experiments: {
@@ -79,15 +60,8 @@ module.exports = env => {
       path: path.resolve(__dirname, "dist"),
       filename: chunkData => {
         const name = chunkData.chunk.name || "internal";
-        const pageChunkNames = Object.keys(pageInputs);
-
         if (name === "internal") return "[name].[contenthash].js";
-
-        if (pageChunkNames.includes(name)) {
-          return `${pagesDirName}/${name}/index.[contenthash].js`;
-        }
-
-        return `[name].[contenthash].js`;
+        return name === "main" ? "[name].js" : `${pagesDirName}/${name}/index.js`;
       },
       publicPath: base,
       library: {
@@ -150,10 +124,6 @@ module.exports = env => {
       ],
     },
     plugins: [
-      new WebpackManifestPlugin({
-        fileName: manifestPath,
-        publicPath: base,
-      }),
       new MiniCssExtractPlugin({
         filename: chunkData => {
           const name = chunkData.chunk.name;
@@ -181,8 +151,6 @@ module.exports = env => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
-        store: path.resolve(__dirname, "src/stores/store.js"),
-        "state-management": path.resolve(__dirname, "src/utils/state-management/index.js"),
       },
     },
   };
