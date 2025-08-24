@@ -58,7 +58,6 @@ module.exports = env => {
     },
     externals: ({ request }, callback) => {
       if (Object.keys(manifest).length > 0) {
-        // Only apply externals if manifest exists
         const stateManagementPath = manifest["state-management.js"];
         const storePath = manifest["stores.js"];
 
@@ -89,8 +88,8 @@ module.exports = env => {
         type: "module",
       },
       clean: {
-        keep: /manifest\.json$/, // Exclude manifest.json from being deleted
-      }, // Очистка будет здесь
+        keep: /manifest\.json$/,
+      },
     },
     devServer: {
       static: {
