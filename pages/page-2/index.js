@@ -1,0 +1,1 @@
+import{store as e}from"/native-SPA/pages/stores/index.js";console.log("page-2"),window&&(window.logic=function(){document.querySelector(".store-value").textContent=e.inputValue});

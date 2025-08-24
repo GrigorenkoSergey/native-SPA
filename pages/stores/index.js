@@ -1,0 +1,1 @@
+export const __webpack_esm_id__=221;export const __webpack_esm_ids__=[221];export const __webpack_esm_modules__={360:(e,o,s)=>{s.d(o,{M:()=>t});var _=s(991);console.log("init common store");var t=(0,_.y)({inputValue:""})}};import{__webpack_require__ as e}from"../state-management/index.js";import*as o from"./index.js";e.C(o);const s=e(e.s=360).M;export{s as store};
