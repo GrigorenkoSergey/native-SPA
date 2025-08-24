@@ -1,1 +1,1 @@
-window.logic=function(){var t=document.createElement("span");t.dataset.testid="created-span",t.textContent="Hello from script!",document.body.append(t)};
+window.logic=()=>{const t=document.createElement("span");t.dataset.testid="created-span",t.textContent="Hello from script!",document.body.append(t)};
