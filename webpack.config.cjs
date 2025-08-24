@@ -94,9 +94,7 @@ module.exports = env => {
         // работает только совместно со строкой experiments + scriptLoading
         type: "module",
       },
-      clean: {
-        keep: /manifest\.json$/,
-      },
+      clean: true,
     },
     devServer: {
       static: {
