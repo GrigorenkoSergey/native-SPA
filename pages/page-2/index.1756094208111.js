@@ -1,1 +1,0 @@
-import{default as e}from"/native-SPA/store.1756094208111.js";import{default as t}from"/native-SPA/store2.1756094208111.js";console.log("page-2"),window.store2=e,window&&(window.logic=()=>{document.querySelector(".store-value").textContent=e.inputValue;const o=document.querySelector("input");o.addEventListener("input",e=>t.inputValue=e.target.value),o.value=t.inputValue});
