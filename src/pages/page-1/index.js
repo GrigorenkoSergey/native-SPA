@@ -4,7 +4,6 @@ import { derive } from "state-management";
 import "./style.css";
 
 console.log("page-1");
-window.store1 = store;
 
 const logic = () => {
   const input = document.querySelector("input");

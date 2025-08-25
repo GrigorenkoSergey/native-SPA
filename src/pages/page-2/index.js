@@ -4,7 +4,6 @@ import store2 from "store2";
 import "./style.css";
 
 console.log("page-2");
-window.store2 = store;
 
 const logic = () => {
   const span = document.querySelector(".store-value");
