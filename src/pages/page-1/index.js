@@ -16,7 +16,7 @@ const logic = () => {
     output.textContent = store.inputValue;
   });
 
-  window.addEventListener(events.CHANGE_PAGE, () => cleanup());
+  if (window) window.addEventListener(events.CHANGE_PAGE, () => cleanup());
 };
 
 if (window) window.logic = logic;

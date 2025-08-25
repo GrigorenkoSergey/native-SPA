@@ -51,7 +51,8 @@ const logic = () => {
   ...
   const cleanup = derive(() => { ... });
 
-  window?.addEventListener(events.CHANGE_PAGE, () => cleanup());
+  // TODO можеть быть закинуть все в функцию в utils? Какую-нибудь onPageChange?
+  if (window) window.addEventListener(events.CHANGE_PAGE, () => cleanup());
 };
 
 if (window) window.logic = logic;
