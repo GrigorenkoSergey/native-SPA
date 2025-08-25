@@ -20,3 +20,4 @@ const logic = () => {
 };
 
 if (window) window.logic = logic;
+else logic();
