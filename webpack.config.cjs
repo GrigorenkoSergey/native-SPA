@@ -49,6 +49,7 @@ const storeInputs = storeFiles.reduce((acc, file) => {
 
 module.exports = env => {
   const base = process.env.BASE_URL;
+  const buildKey = Number(new Date());
 
   return {
     mode: env.mode || "development",
@@ -60,11 +61,11 @@ module.exports = env => {
       ...pageInputs,
     },
     externals: {
-      "state-management": `module ${base}state-management.js`,
+      "state-management": `module ${base}state-management.${buildKey}.js`,
       ...Object.fromEntries(
         storeFiles.map(file => {
           const key = file.replace(".js", "");
-          return [key, `module ${base}${file}`];
+          return [key, `module ${base}${key}.${buildKey}.js`];
         }),
       ),
     },
@@ -77,9 +78,9 @@ module.exports = env => {
       path: path.resolve(__dirname, "dist"),
       filename: chunkData => {
         const name = chunkData.chunk.name || "internal";
-        if (name in pageInputs) return `${pagesDirName}/${name}/index.js`;
+        if (name in pageInputs) return `${pagesDirName}/${name}/index.${buildKey}.js`;
 
-        return "[name].js";
+        return `${name}.${buildKey}.js`;
       },
       publicPath: base,
       library: {
