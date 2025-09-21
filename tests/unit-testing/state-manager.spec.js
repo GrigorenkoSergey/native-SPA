@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-import { createStore } from "../../src/utils/state-management/createStore.js";
-import { batchEffects } from "../../src/utils/state-management/batchEffects.js";
-import { derive } from "../../src/utils/state-management/derive.js";
+import { createStore } from "../../src/state-management/createStore.js";
+import { batchEffects } from "../../src/state-management/batchEffects.js";
+import { derive } from "../../src/state-management/derive.js";
 
 test.describe("Базовая логика", () => {
   test("Простейшая подписка", () => {
@@ -276,8 +276,10 @@ test.describe("Асинхронщина", () => {
     const storeA = createStore({ a: 1 });
     const storeB = createStore({ b: 1 });
 
+    const batch = cb => batchEffects(cb, setTimeout, clearTimeout);
+
     const callResults = [];
-    const cleanup = batchEffects(() => {
+    const cleanup = batch(() => {
       const storeValuesPair = [storeA.a, storeB.b];
       callResults.push(storeValuesPair);
     });

@@ -1,0 +1,120 @@
+<div class="wrapper">
+  <section>
+    <h3>Атрибуты</h3>
+    <ul class="attr-list">
+      <li><b>name</b> - имя. Необходимо, для передачи во внутренний input.
+        <b>Неотслеживаемое</b> (изменение не вызовет перерисовку элемента).
+      <li><b>prerendered</b> - флаг отключения считывания шаблона и посторения
+        html на его основе. Будет обрабатываться непосредственно переданная
+        разметка. <b>Неостлеживаемое.</b>
+      <li><b>open</b> - состояние открыт/закрыт</li>
+      <li><b>value</b> - выбранное значение в поле ввода</li>
+    </ul>
+  </section>
+  <section>
+    <h3 data-testid="basic-section-title">Базовый вариант</h3>
+
+    <p>Поддерживает фильтрацию, выделение с клавиатуры. Для добавления
+      первоначальных опций необходимо их добавить вручную:
+    <pre>const autocomplete = document.querySelector("custom-autocomplete");
+autocomplete.setOptions(["Опция-1", "Опция-2", "Опция-3", "Опция-4", "Опция-5"]);</pre>
+    </p>
+
+    <div class="component-wrapper-basic">
+      <custom-autocomplete class="basic" data-testid="basic"
+        name="basic"></custom-autocomplete>
+      <span>Кол-во рендеров: <span
+          data-testid="basic-renders-count">0</span></span>
+    </div>
+  </section>
+
+  <section>
+    <h3>Элемент с предварительно переданными опциями</h3>
+    <p>Можно передать разметку непосредственно в элемент. Тогда компоненту
+      необходимо добавить свойство <b>prerendered</b>. В переданной разметке
+      каждый элемент должен приблизительно соответствовать тому же, что и в
+      шаблоне. Т.е. в соответствующих элементах должны быть соответствующие
+      атрибуты. Например, <b>id</b> и <b>data-value</b> в элементах списка. Или
+      атрибуты поля ввода. Практическое применение - пререндеринг на сервере.
+    </p>
+    <custom-autocomplete data-testid="prerendered" name="prerendered"
+      prerendered>
+      <input type="text" name="" aria-autocomplete="list" role="textbox"
+        autocomplete="off" class="custom-autocomplete__input">
+
+      <ul role="listbox" class="custom-autocomplete__ul">
+        <li id='custom-autocomplete-option-1' data-value='value-1' role='option'
+          class="custom-autocomplete__li">
+          value-1
+        </li>
+        <li id='custom-autocomplete-option-2' data-value='value-2' role='option'
+          class="custom-autocomplete__li">
+          value-2
+        </li>
+        <li id='custom-autocomplete-option-3' data-value='value-3' role='option'
+          class="custom-autocomplete__li">
+          value-3
+        </li>
+      </ul>
+    </custom-autocomplete>
+  </section>
+
+  <section>
+    <h3>Кастомизированные опции</h3>
+    <p>По умолчанию компонент принимает простейшие опции
+      вида <b>string[]</b>.
+      Однако, список можно настроить дополнительно. Для этого нужно
+      переопределить метод <b>element.renderLi</b>.
+      Функция принимает элемент опции, и должна вернуть элемент списка LI в
+      виде
+      строки с нужными атрибутами <b>data-value</b>,
+      по которому будет осуществлена фильтрация и выбор.
+      Остальные атрибуты, которые указаны в шаблоне (напр. <b>id</b>), тоже
+      должны быть вычислены.
+      <br />
+      <br />
+      Пример:
+    </p>
+    <div class="example-customizing">
+      <pre>const withCustomizedLi = document.querySelector(".customized-li");
+
+withCustomizedLi.renderLi = li => `\
+&lt;li data-value=${li.value}>
+  ${li.value}
+  &lt;a href=${li.wiki} target="_blank" class="hero-wiki-link">
+    ?
+  &lt;/a>
+&lt;/li>
+`;
+
+withCustomizedLi.setOptions(
+  {
+    value: "Винни-Пух",
+    wiki: "https://en.wikipedia.org/wiki/Winnie-the-Pooh",
+  },
+  {
+    value: "Пятачок",
+    wiki: "https://en.wikipedia.org/wiki/Piglet_(Winnie-the-Pooh)",
+  },
+  {
+    value: "Иа",
+    wiki: "https://en.wikipedia.org/wiki/Eeyore",
+  },
+  {
+    value: "Сова",
+    wiki: "https://en.wikipedia.org/wiki/Owl_(Winnie-the-Pooh)",
+  },
+  {
+    value: "Кролик",
+    wiki: "https://en.wikipedia.org/wiki/Rabbit_(Winnie-the-Pooh)",
+  },
+);
+</pre>
+      </p>
+
+      <custom-autocomplete class="customized-li"
+        name="customized"></custom-autocomplete>
+    </div>
+  </section>
+
+</div>

@@ -1,4 +1,4 @@
-import { createStore } from "../utils/state-management/createStore.js";
+import { createStore } from "../state-management/createStore.js";
 
 const store = createStore({
   inputValue: "",

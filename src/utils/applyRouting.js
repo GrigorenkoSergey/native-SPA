@@ -1,51 +1,15 @@
-import { events } from "../constants/events.js";
-
 const base = document.querySelector("base").href;
 const pageLogics = {};
-
-const getPageScript = url => {
-  const { origin, pathname } = new URL(url);
-  const srcPattern = origin + pathname + "index.";
-  return [...document.scripts].find(script => script.src.includes(srcPattern));
-};
+let cleanup;
 
 /*
  При действительном изменении страницы в пределах проекта, добавим событие смены страницы для очистки памяти при
  переходах по различным страницам
 */
-export const applyRouting = ({ defaultPage = "pages/page-1/" }) => {
+export function applyRouting({ defaultPage = "pages/page-1/" }) {
   if (!window) return;
 
-  const buildPage = async url => {
-    const pageTemplateUrl = url + "index.html";
-
-    try {
-      const response = await fetch(pageTemplateUrl);
-      const template = await response.text();
-
-      document.documentElement.innerHTML = template;
-
-      const pageScriptElement = getPageScript(url);
-      const scriptKey = pageScriptElement.src;
-      pageScriptElement.remove();
-
-      const newScript = document.createElement("script");
-      newScript.src = scriptKey;
-      newScript.type = "module";
-      document.head.append(newScript);
-
-      if (scriptKey in pageLogics) return pageLogics[scriptKey]?.();
-
-      newScript.onload = () => {
-        pageLogics[scriptKey] = window.logic;
-        pageLogics[scriptKey]?.();
-      };
-    } catch (error) {
-      console.error(`Failed to load page ${url}`, error);
-    }
-  };
-
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     const { pathname } = new URL(window.location.href);
     const { pathname: basePathname } = new URL(base);
 
@@ -53,17 +17,16 @@ export const applyRouting = ({ defaultPage = "pages/page-1/" }) => {
       const defaultUrl = `${base}${defaultPage}`;
       return (window.location.href = defaultUrl);
     }
-    const pageScriptElement = getPageScript(window.location.href);
-    const scriptKey = pageScriptElement.src;
-
-    pageLogics[scriptKey] = window.logic;
-    pageLogics[scriptKey]?.();
+    applyPageLogic(window.location.href);
   });
 
   window.history.pushState = new Proxy(window.history.pushState, {
     async apply(...args) {
       const url = args[2][2];
-      if (url !== window.location.href) buildPage(url);
+
+      const newPathname = new URL(url).pathname;
+      const oldPathName = new URL(window.location.href).pathname;
+      if (newPathname !== oldPathName) buildPage(url);
 
       return Reflect.apply(...args);
     },
@@ -71,7 +34,6 @@ export const applyRouting = ({ defaultPage = "pages/page-1/" }) => {
 
   window.addEventListener("popstate", event => {
     const { href } = event.target.location;
-    if (href.includes("#")) return;
     buildPage(href);
   });
 
@@ -82,25 +44,69 @@ export const applyRouting = ({ defaultPage = "pages/page-1/" }) => {
     event.preventDefault();
 
     const link = event.target;
+
     const currentHref = window.location.href;
-    const currentPathname = new URL(window.location.href).pathname;
-
     const newHref = new URL(link.href, window.location.href).href;
-    if (newHref === currentHref) return;
 
-    window.history.pushState(null, "", newHref);
-
-    const newPathname = new URL(newHref).pathname;
-
-    if (currentPathname !== newPathname) {
-      window.dispatchEvent(
-        new CustomEvent(events.CHANGE_PAGE, {
-          detail: {
-            prev: currentHref,
-            next: newHref,
-          },
-        }),
-      );
+    if (newHref !== currentHref) {
+      window.history.pushState(null, "", newHref);
     }
   });
-};
+}
+
+async function buildPage(url) {
+  const pageTemplateUrl = url + "index.html";
+
+  const response = await fetch(pageTemplateUrl);
+  const template = await response.text();
+
+  const newDocument = new DOMParser().parseFromString(template, "text/html");
+
+  addHeadStylesheets(newDocument); // заметно только в production-mode
+  addHeadScripts(newDocument);
+  document.body.replaceWith(newDocument.body);
+
+  applyPageLogic(url);
+}
+
+function getPageScript(url) {
+  const { origin, pathname } = new URL(url);
+  const srcPattern = origin + pathname + "index.";
+  return [...document.scripts].find(script => script.src.includes(srcPattern));
+}
+
+function addHeadStylesheets(newDocument) {
+  return addNewRemoveStaleElements(newDocument, "link[rel=stylesheet]", "href");
+}
+
+function addHeadScripts(newDocument) {
+  return addNewRemoveStaleElements(newDocument, "script", "src");
+}
+
+function addNewRemoveStaleElements(newDocument, headSelector, attr) {
+  const newElements = [...newDocument.head.querySelectorAll(headSelector)];
+  const oldElements = [...document.head.querySelectorAll(headSelector)];
+  const allElements = [...oldElements, ...newElements];
+
+  for (const element of allElements) {
+    const isInNew = newElements.find(elements => elements[attr] === element[attr]);
+    const isInOld = oldElements.find(elements => elements[attr] === element[attr]);
+    const isCommon = isInNew && isInOld;
+    if (isCommon) continue;
+
+    if (isInOld) element.remove();
+    else document.head.append(element);
+  }
+}
+
+async function applyPageLogic(url) {
+  cleanup?.();
+
+  const pageScriptElement = getPageScript(url);
+  const scriptKey = pageScriptElement.src;
+  if (scriptKey in pageLogics) return pageLogics[scriptKey]?.();
+
+  const logic = (await import(/* webpackIgnore: true */ scriptKey)).default;
+  pageLogics[scriptKey] = logic;
+  cleanup = pageLogics[scriptKey]?.();
+}

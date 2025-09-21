@@ -1,23 +1,8 @@
-import store from "store";
-import { events } from "@/constants/events.js";
-import { derive } from "state-management";
+import "@/components/messages-section/index.js";
 import "./style.css";
 
 console.log("page-1");
 
-const logic = () => {
-  const input = document.querySelector("input");
-  input.value = store.inputValue;
-  input.addEventListener("input", event => (store.inputValue = event.target.value));
+const logic = () => {};
 
-  let output = document.querySelector("output");
-
-  const cleanup = derive(() => {
-    output.textContent = store.inputValue;
-  });
-
-  if (window) window.addEventListener(events.CHANGE_PAGE, () => cleanup());
-};
-
-if (window) window.logic = logic;
-else logic();
+export default logic;

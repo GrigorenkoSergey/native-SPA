@@ -1,17 +1,8 @@
-import store from "store";
-import store2 from "store2";
-
+import "@/components/messages-section/index.js";
 import "./style.css";
 
 console.log("page-2");
 
-const logic = () => {
-  const span = document.querySelector(".store-value");
-  span.textContent = store.inputValue;
+const logic = () => {};
 
-  const input = document.querySelector("input");
-  input.addEventListener("input", event => (store2.inputValue = event.target.value));
-  input.value = store2.inputValue;
-};
-
-if (window) window.logic = logic;
+export default logic;

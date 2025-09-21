@@ -12,17 +12,16 @@
   }
 }
 
-.storybook-layout__nav {
-  li:hover {
-    background-color: green;
-  }  
-}
-
 .storybook-layout__ul {
   list-style-type: none;
+}
 
-  li {
-    padding: 4px;
+.storybook-layout__a {
+  padding: 4px;
+  display: block;
+
+  &:hover {
+    background-color: green;
   }
 }
 

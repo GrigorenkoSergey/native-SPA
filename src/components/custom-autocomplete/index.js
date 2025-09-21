@@ -1,130 +1,273 @@
+import template from "./template.html";
 import "./style.css";
-import template from "./template.html?raw";
 
-import { listenClickOutsideOnce } from "../../utils/listenClickOutsideOnce.js";
+import { listenClickOutsideOnce } from "@/utils/listenClickOutsideOnce.js";
+import { generateIdInDocument } from "@/utils/generateIdInDocument.js";
+import {
+  syncAttrsPropsState,
+  initCustomElement,
+  applyGetSet,
+  syncPropsWithAttrs,
+} from "@/utils/customElementHelpers.js";
 
-// TODO дать возможность показывать элементы списков как есть, т.е. с непосредственно переданными li
+// TODO добавить рестик
+// TODO добавить видимость выбранного элемента в случае длинных списков (возможно, прокрутка к нему)
+/*
+  TODO посмотреть, как можно добавить настройку слотов. Через светлый DOM или через теневой. 
+  К примеру, через светлый DOM можно добавить свойство, которое ищет по id определенный шаблон, в котором
+  реализованы нужные элементы (например, стрелка или значок очистки). И при его наличии меняет стандартную реализацию... 
+  Если буду дальше использовать теневой DOM, то там уже есть слоты... 
 
-// TODO поэкспериментировать с видимостью методов элемента,
-// возможно вынести служеные функции наверх, или переопределить свойства элемента.
-
-// TODO добавить сверху описание поля (legend)
-// TODO добавить стрелочку и крестик
-
-const ulClasses = {
-  expanded: "expanded",
-};
+  В общем, подумать.
+*/
 
 const liClasses = {
   keyboardFocused: "keyboard-focused",
 };
 
+const events = {
+  change: "custom-autocomplete__change",
+};
+
 class CustomAutocomplete extends HTMLElement {
+  _isInnerAttrSet = false;
+  _isRendered = false;
+
   constructor() {
     super();
-    this.options = [];
-    this.isOpen = false;
-    this.value = "";
-    this.isEditing = false;
+
+    // properties that will be synchronized with attributes
+    this.open = this.hasAttribute("open");
+    this.value = this.getAttribute("value") || "";
+    applyGetSet(this, "open", "value");
+
+    this.events = events;
+    Object.defineProperty(this, "events", { writable: false });
+
+    this._state = {
+      open: this.open,
+      value: this.value,
+      options: [],
+      isEditing: false,
+    };
+
+    this._nodes = {
+      input: null,
+      ul: null,
+      selected: null,
+      activeDescendant: null,
+    };
+  }
+
+  static get observedAttributes() {
+    return ["value", "open"];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (!this._isRendered) return;
+    if (this._isInnerAttrSet) return;
+
+    syncPropsWithAttrs(this, name, newValue);
+
+    return this.render(name, newValue);
   }
 
   connectedCallback() {
-    this.innerHTML = template;
-    this.input = this.querySelector("input");
-    this.ul = this.querySelector("ul");
+    if (this.hasAttribute("prerendered")) {
+      const options = [...this.querySelectorAll("li")].map(item => item.getAttribute("data-value"));
+      this._state.options = options;
+    } else {
+      this.innerHTML = template;
+    }
 
-    // предпочтительно через свойство, чтобы не очищать лишний раз обработчики
-    this.onclick = event => this.handleClick(event);
-    this.input.oninput = event => this.handleInput(event);
-    this.onkeydown = event => this.handleKeydown(event);
+    this.setAttribute("role", "combobox");
+    this.setAttribute("aria-haspopup", "listbox");
 
-    this.init();
-  }
+    const input = this.querySelector("input");
 
-  renderLi(item) {
-    return `<li data-value='${item}'>${item}</li>`;
-  }
+    let name = this.getAttribute("name");
+    if (!name) throw new Error("Custom-autocomplete: attribute 'name' is required!");
+    input.setAttribute("name", name);
+    this._nodes.input = input;
 
-  init() {
-    this.input.value = "";
-    const lis = this.options.map(item => this.renderLi(item));
+    const ul = this.querySelector("ul");
+    this._nodes.ul = ul;
 
-    this.ul.replaceChildren([]);
-    this.ul.insertAdjacentHTML("afterbegin", lis.join(""));
+    const ulId = generateIdInDocument("custom-autocomplete");
+    ul.setAttribute("id", ulId);
+    this.setAttribute("aria-controls", ulId);
+
+    this._nodes.selected = this.value ? ul.querySelector(`[data-value='${this.value}']`) : undefined;
+
+    // preferably through a property, so as not to clear the handlers once again
+    this.onclick = event => this._onClick(event);
+    input.oninput = event => this._onInput(event);
+    input.addEventListener("click", this._onInputClick);
+    this.onkeydown = event => this._onKeydown(event);
+
+    this._init();
+    this._isRendered = true;
   }
 
   setOptions(options) {
-    this.options = options;
-    this.init();
+    this._state.options = options;
+    this._init();
   }
 
-  handleClick(event) {
-    this.isOpen = true;
+  renderLi(item, index) {
+    return (
+      `<li id='custom-autocomplete-option-${index}'` +
+      "class='custom-autocomplete__li' " +
+      `data-value='${item}' role='option'>` +
+      item +
+      "</li>"
+    );
+  }
 
-    listenClickOutsideOnce(this, () => {
-      this.isOpen = false;
-      this.isEditing = false;
-      if (this.input.value === "") this.value = "";
+  render(attrName) {
+    syncAttrsPropsState(this, attrName);
 
-      this.render();
-    });
+    const { _state, _nodes } = this;
+    const { value, open } = _state;
+    if (!_state.isEditing) _nodes.input.value = value;
+    this.ariaExpanded = String(open);
+
+    document.removeEventListener("focus", this._onOuterElementFocus, true);
+    if (!open) return;
+
+    document.addEventListener("focus", this._onOuterElementFocus, true);
+
+    const attr = "aria-activedescendant";
+    if (_nodes.activeDescendant) {
+      _nodes.input.setAttribute(attr, _nodes.activeDescendant.id);
+    } else {
+      _nodes.input.removeAttribute(attr);
+    }
+
+    const lis = _nodes.ul.querySelectorAll("li");
+    for (const li of lis) {
+      this._visualizeSelected(li, value);
+      this._visualizeKeyboardSelected(li);
+      this._filterOnInput(li);
+    }
+  }
+
+  _init() {
+    const { ul, input } = this._nodes;
+    const { options, value } = this._state;
+    input.value = value;
+
+    if (!this.hasAttribute("prerendered")) {
+      ul.replaceChildren([]); // there the list element is given as an example, so we delete it
+
+      const lis = options.map((item, index) => this.renderLi(item, index));
+      ul.insertAdjacentHTML("afterbegin", lis.join(""));
+    }
+
+    this.render();
+  }
+
+  _onClick(event) {
+    const { _state, _nodes } = this;
+
+    if (_state.open) {
+      listenClickOutsideOnce(this, () => {
+        if (!_state.open) return;
+
+        _state.open = false;
+        _state.isEditing = false;
+        if (_nodes.input.value === "") _state.value = "";
+        this.render();
+      });
+    }
 
     const { target } = event;
     if (target.tagName === "LI") {
-      this.value = target.dataset.value;
-      this.isOpen = false;
+      _state.value = target.getAttribute("data-value");
+      _nodes.selected = target;
+      _state.open = false;
+      this.render();
+    }
+  }
+
+  _onInputClick = () => {
+    const { _state } = this;
+    _state.open = !_state.open;
+    this.render();
+  };
+
+  _onInput = () => {
+    const { _state, _nodes } = this;
+    _state.isEditing = true;
+
+    if (!_nodes.input.value) {
+      _nodes.selected = null;
+      _state.value = "";
     }
 
     this.render();
-  }
+    _nodes.input.onblur = () => {
+      _state.isEditing = false;
+    };
+  };
 
-  handleInput() {
-    this.isEditing = true;
-    this.render();
-    this.input.onblur = () => (this.isEditing = false);
-  }
-
-  handleKeydown(event) {
-    this.isOpen = true;
-
+  _onKeydown(event) {
     const { key } = event;
     if (key === "ArrowDown" || key === "ArrowUp") {
-      return this.handleArrowKeydown(event);
+      return this._onArrowKeydown(event);
     }
 
+    const { _state } = this;
     if (key === "Enter") {
       const currentPointed = this._getCurrentPointedElement();
       if (!currentPointed) return;
 
-      this.value = currentPointed.dataset.value;
-      this.isOpen = false;
-      this.isEditing = false;
+      _state.value = currentPointed.dataset.value;
+      _state.selected = currentPointed;
+      _state.open = false;
+      _state.isEditing = false;
 
       return this.render();
     }
+
+    if (key === "Escape") {
+      const wasOpen = _state.open;
+      _state.open = false;
+      return wasOpen && this.render();
+    }
   }
 
-  handleArrowKeydown(event) {
+  _onArrowKeydown(event) {
     event.preventDefault(); // чтобы курсор не двигался
 
-    const { key } = event;
+    const { _nodes, _state } = this;
+    if (!_state.open) {
+      _state.open = true;
+      return this.render();
+    }
+
     const startPoint = this._getCurrentPointedElement();
-    const ul = this.ul;
+    const ul = _nodes.ul;
 
     let firstVisible = ul.firstElementChild;
-    while (firstVisible && firstVisible.clientHeight === 0) firstVisible = firstVisible.nextElementSibling;
+    while (firstVisible && firstVisible.hidden) {
+      firstVisible = firstVisible.nextElementSibling;
+    }
 
     let lastVisible = ul.lastElementChild;
-    while (lastVisible && lastVisible.clientHeight === 0) lastVisible = lastVisible.previousElementSibling;
+    while (lastVisible && lastVisible.hidden) {
+      lastVisible = lastVisible.previousElementSibling;
+    }
 
-    let elementToHighlight;
+    let elementToHighlight = startPoint;
 
+    const { key } = event;
     if (key === "ArrowDown") {
       if (!startPoint) elementToHighlight = firstVisible;
       else if (startPoint === lastVisible) elementToHighlight = lastVisible;
       else {
         let elem = startPoint.nextElementSibling;
-        while (elem && elem.clientHeight === 0) elem = elem.nextElementSibling;
+        while (elem && elem.hidden) elem = elem.nextElementSibling;
         elementToHighlight = elem;
       }
     }
@@ -134,68 +277,56 @@ class CustomAutocomplete extends HTMLElement {
       else if (startPoint === firstVisible) elementToHighlight = firstVisible;
       else {
         let elem = startPoint.previousElementSibling;
-        while (elem && elem.clientHeight === 0) elem = elem.previousElementSibling;
+        while (elem && elem.hidden) elem = elem.previousElementSibling;
         elementToHighlight = elem;
       }
     }
 
-    this.keyboardSelected = elementToHighlight;
+    _nodes.activeDescendant = elementToHighlight;
     this.render();
-    this.keyboardSelected = undefined;
 
-    this.addEventListener("pointermove", this.handlePointerMove.bind(this), { once: true });
+    this.addEventListener("pointermove", this._onPointerMove, { once: true });
   }
 
-  handlePointerMove() {
-    this.keyboardSelected = undefined;
+  _onPointerMove() {
+    this._nodes.activeDescendant = undefined;
     this.render();
   }
 
-  render() {
-    const { value } = this;
-    if (!this.isEditing) this.input.value = value;
-
-    if (this.isOpen) this.classList.add(ulClasses.expanded);
-    else this.classList.remove(ulClasses.expanded);
-
-    const lis = Array.from(this.ul.querySelectorAll("li") || []);
-
-    lis.forEach(li => {
-      this._visualizeSelected(li, value);
-      this._visualizeKeyboardSelected(li);
-      this._filterOnInput(li);
-    });
-  }
+  _onOuterElementFocus = event => {
+    if (!this.contains(event.target)) {
+      this._state.open = false;
+      this.render();
+    }
+  };
 
   _getCurrentPointedElement() {
-    const { ul } = this;
+    const { _nodes } = this;
+    const { activeDescendant, ul, selected } = _nodes;
 
-    return (
-      ul.querySelector("." + liClasses.keyboardFocused) ||
-      ul.querySelector("li:hover") ||
-      ul.querySelector(`[data-value='${this.input.value}']`)
-    );
+    return activeDescendant || ul.querySelector("li:hover") || selected;
   }
 
   _visualizeSelected(li, value) {
-    if (li.dataset.value === value) li.classList.add("selected");
-    else li.classList.remove("selected");
+    const attr = "aria-selected";
+    if (li.dataset.value === value) li.setAttribute(attr, "true");
+    else li.removeAttribute(attr);
   }
 
   _visualizeKeyboardSelected(li) {
-    if (this.keyboardSelected === li) li.classList.add(liClasses.keyboardFocused);
+    if (this._nodes.activeDescendant === li) li.classList.add(liClasses.keyboardFocused);
     else li.classList.remove(liClasses.keyboardFocused);
   }
 
   _filterOnInput(li) {
-    if (!this.isEditing) li.style.display = "";
+    if (!this._state.isEditing) li.hidden = false;
     else {
-      const inputValue = this.input.value.toLowerCase();
+      const inputValue = this._nodes.input.value.toLowerCase();
       const isMatch = li.textContent.toLowerCase().includes(inputValue);
-      if (isMatch) li.style.display = "";
-      else li.style.display = "none";
+      if (isMatch) li.hidden = false;
+      else li.hidden = true;
     }
   }
 }
 
-customElements.define("custom-autocomplete", CustomAutocomplete);
+initCustomElement("custom-autocomplete", CustomAutocomplete);

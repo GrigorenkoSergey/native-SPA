@@ -4,12 +4,12 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 const pagesDirName = "pages";
-const pathToPages = path.resolve(__dirname, `src/${pagesDirName}/`);
-const commonTemplate = fs.readFileSync(path.resolve(__dirname, "src/page-template.html"), "utf-8");
+const pathToPages = path.resolve(__dirname, `${pagesDirName}/`);
+const commonTemplate = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf-8");
 
 const getPageInputs = (dir, root) => {
   const entries = {};
@@ -33,23 +33,8 @@ const getPageInputs = (dir, root) => {
 
 const pageInputs = getPageInputs(pathToPages, pathToPages);
 
-const storesDir = path.resolve(__dirname, "src/stores");
-const storeFiles = fs
-  .readdirSync(storesDir)
-  .filter(file => fs.statSync(path.join(storesDir, file)).isFile() && file.endsWith(".js"));
-
-const storeInputs = storeFiles.reduce((acc, file) => {
-  const key = file.replace(".js", "");
-  acc[key] = {
-    import: `${storesDir}/${file}`,
-    dependOn: "state-management",
-  };
-
-  return acc;
-}, {});
-
 module.exports = env => {
-  const base = process.env.BASE_URL;
+  const base = "/";
   const isProd = env.mode === "production";
   const buildKey = isProd ? Number(new Date()) : 0;
 
@@ -57,32 +42,20 @@ module.exports = env => {
     mode: env.mode || "development",
     devtool: isProd ? false : "source-map",
     entry: {
-      main: "./src/main.js", // здесь подключим основные скрипты, роутинг, например
-      "state-management": "./src/state-management/index.js",
-      ...storeInputs,
+      main: path.resolve(__dirname, "./main.js"),
       ...pageInputs,
     },
-    externals: {
-      "state-management": `module ${base}state-management.${buildKey}.js`,
-      ...Object.fromEntries(
-        storeFiles.map(file => {
-          const key = file.replace(".js", "");
-          return [key, `module ${base}${key}.${buildKey}.js`];
-        }),
-      ),
-    },
-    externalsType: "module",
     experiments: {
       // работает только совместно со строкой library + scriptLoading
       outputModule: true,
     },
     output: {
-      path: path.resolve(__dirname, "dist"),
+      path: path.resolve(__dirname, "../../dist-storybook"),
       filename: chunkData => {
         const name = chunkData.chunk.name || "internal";
         if (name in pageInputs) return `${pagesDirName}/${name}/index.${buildKey}.js`;
 
-        return `${name}.${buildKey}.js`;
+        return `${name}.js`;
       },
       publicPath: base,
       library: {
@@ -92,14 +65,10 @@ module.exports = env => {
       clean: true,
     },
     devServer: {
-      static: {
-        directory: path.join(__dirname, "dist"),
-        publicPath: base,
-      },
       hot: true,
-      port: 8080,
+      port: 8082,
       open: {
-        target: [base],
+        target: `${base}pages/custom-autocomplete/`,
         // app: { name: "firefox" },
       },
       watchFiles: ["src/**/*.html"],
@@ -146,33 +115,25 @@ module.exports = env => {
       new MiniCssExtractPlugin({
         filename: chunkData => {
           const name = chunkData.chunk.name;
-          if (isProd) {
-            return name === "main" ? "[name].[contenthash].css" : `${pagesDirName}/${name}/index.[contenthash].css`;
-          }
           return name === "main" ? "[name].css" : `${pagesDirName}/${name}/index.css`;
         },
       }),
-      new HtmlWebpackPlugin({
-        filename: "index.html",
-        template: "./src/index.html",
-        chunks: ["main"],
-        scriptLoading: "module",
+      ...Object.entries(pageInputs).map(([pageChunk, fullPath]) => {
+        console.log("fullpath", fullPath);
+        return new HtmlWebpackPlugin({
+          // удалим все, что идет до storybook
+          filename: fullPath.replace(/.+?.storybook\/(.+)/, (m, p) => p.replace(".js", ".html")),
+          template: fullPath.replace(".js", ".html"),
+          chunks: ["main", pageChunk],
+          // работает только совместно со строкой library + experiments
+          scriptLoading: "module",
+        });
       }),
-      ...Object.entries(pageInputs).map(
-        ([pageChunk, fullPath]) =>
-          new HtmlWebpackPlugin({
-            // удалим все, что идет до src
-            filename: fullPath.replace(/.+?src\/(.+)/, (m, p) => p.replace(".js", ".html")),
-            template: fullPath.replace(".js", ".html"),
-            chunks: ["main", pageChunk],
-            // работает только совместно со строкой library + experiments
-            scriptLoading: "module",
-          }),
-      ),
     ],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "src"),
+        "@": path.resolve(__dirname, ".."),
+        components: path.resolve(__dirname, "../components"),
       },
     },
   };

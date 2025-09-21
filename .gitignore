@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-storybook
 dist-ssr
 *.local
 
@@ -28,3 +29,4 @@ dist-ssr
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/tests/e2e/__screenshots/

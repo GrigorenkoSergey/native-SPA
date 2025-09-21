@@ -1,52 +1,73 @@
 custom-autocomplete {
   display: block;
   position: relative;
+}
 
-  input {
+custom-autocomplete[hidden] {
+  display: none
+}
+
+custom-autocomplete[open] {
+  .custom-autocomplete__ul {
     display: block;
-    padding: 8px;
-    font-size: 16px;
-    width: 100%
   }
 
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    background: rgb(117, 177, 164);
-    position: absolute;
-    width: 100%;
-    display: none;
-    z-index: 100;
-  }
-
-  li {
-    display: flex;
-    align-items: center;
-
-    padding: 8px;
-    cursor: pointer;
-
-    &.selected {
-      background-color: orange;
-    }
-  }
-
-  /* hovering and selecting by keyboard */
-  ul:has(li.keyboard-focused) {
-    li:hover:not(.keyboard-focused) {
-      background-color: unset;
-    }
-  }
-
-  li:hover,
-  li.keyboard-focused {
-    background-color: red;
+  .custom-autocomplete__arrow {
+    rotate: 180deg;
   }
 }
 
-custom-autocomplete.expanded {
-  ul {
-    display: block;
+.custom-autocomplete__input-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.custom-autocomplete__input {
+  display: block;
+  padding: 8px;
+  font-size: 16px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.custom-autocomplete__ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: rgb(117, 177, 164);
+  position: absolute;
+  width: 100%;
+  display: none;
+  z-index: 100;
+}
+
+.custom-autocomplete__li {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+
+  &[aria-selected=true] {
+    background-color: orange;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+
+  &:hover,
+  &.keyboard-focused {
+    background-color: red;
+    outline: 1px solid;
+  }
+}
+
+.custom-autocomplete__arrow {
+  position: absolute;
+  right: 0.2rem;
+  pointer-events: none;
+
+  &::after {
+    content: "▼";
   }
 }

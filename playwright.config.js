@@ -34,6 +34,9 @@ export default defineConfig({
     // video: "on",
   },
 
+  // https://playwright.dev/docs/api/class-testproject#test-project-snapshot-path-template
+  snapshotPathTemplate: "tests/e2e/__screenshots/{projectName}/{testFilePath}/{arg}{ext}",
+
   /* Configure projects for major browsers */
   projects: [
     {

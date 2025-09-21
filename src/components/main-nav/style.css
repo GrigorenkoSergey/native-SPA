@@ -1,0 +1,36 @@
+.main-nav {
+  background-color: #f0f0f0;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.main-nav__ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  & > li {
+    flex-grow: 1;
+  }
+}
+
+.main-nav__a {
+  display: block;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  color: #333;
+  background-color: #fff;
+  transition: background-color 0.2s;
+}
+
+.main-nave__a--active {
+  background-color: #b1bfd3;
+}
+
+.main-nav__a:hover {
+  background-color: #e0e0e0;
+}

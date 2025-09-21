@@ -1,6 +1,6 @@
 import { derive } from "./derive.js";
 
-export const batchEffects = (cb, asyncFunc = setTimeout, clearup = clearTimeout) => {
+export const batchEffects = (cb, asyncFunc = requestAnimationFrame, clearup = cancelAnimationFrame) => {
   let timerId = -1;
   let isFirstCall = true;
 

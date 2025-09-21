@@ -1,3 +1,12 @@
+.wrapper {
+  display: grid;
+  gap: 1rem;
+}
+
+.attr-list {
+  margin-left: 1rem;
+}
+
 .hero-wiki-link {
   background-color: rgb(78, 110, 158);
   text-decoration: none;
@@ -13,9 +22,16 @@
 
 custom-autocomplete {
   max-width: 300px;
+
   a {
     color: white;
   }
+}
+
+.component-wrapper-basic {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .example-customizing {
