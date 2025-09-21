@@ -4,14 +4,17 @@ export const batchEffects = (cb, asyncFunc = requestAnimationFrame, clearup = ca
   let timerId = -1;
   let isFirstCall = true;
 
-  return derive(() => {
+  const deriveCleanup = derive(() => {
     clearup(timerId);
 
-    if (isFirstCall) {
-      cb();
-      isFirstCall = false;
-    }
+    if (isFirstCall) cb();
+    else timerId = asyncFunc(cb);
 
-    timerId = asyncFunc(cb);
+    isFirstCall = false;
   });
+
+  return () => {
+    deriveCleanup();
+    clearup(timerId);
+  };
 };

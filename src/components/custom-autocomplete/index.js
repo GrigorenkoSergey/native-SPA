@@ -65,6 +65,16 @@ class CustomAutocomplete extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (!this._isRendered) return;
+
+    if (name === "value" && oldValue !== newValue) {
+      this.dispatchEvent(
+        new CustomEvent(events.change, {
+          bubbles: true,
+          detail: { oldValue, newValue },
+        }),
+      );
+    }
+
     if (this._isInnerAttrSet) return;
 
     syncPropsWithAttrs(this, name, newValue);
