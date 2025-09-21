@@ -223,6 +223,23 @@ test("Навигация с клавиатуры", async () => {
   });
 });
 
+test("При нажатии на стрелки клавиатуры при отсутсвии элементов для выбора рендер не происиходит", async () => {
+  let expectedRenders = 0;
+  await elem.click();
+  expectedRenders += 1;
+
+  await input.fill("W");
+  expectedRenders += 1;
+  await checkExpectedRendersCount(expectedRenders);
+  await expect(elem.getByRole("option")).toHaveCount(0);
+
+  await page.keyboard.down("ArrowUp");
+  await page.keyboard.down("ArrowUp");
+  await page.keyboard.down("ArrowDown");
+  await page.keyboard.down("ArrowDown");
+  await checkExpectedRendersCount(expectedRenders);
+});
+
 test("Изменения атрибутов снаружи", async () => {
   let expectedRenders = 0;
 

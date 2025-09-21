@@ -249,16 +249,11 @@ class CustomAutocomplete extends HTMLElement {
     const startPoint = this._getCurrentPointedElement();
     const ul = _nodes.ul;
 
-    let firstVisible = ul.firstElementChild;
-    while (firstVisible && firstVisible.hidden) {
-      firstVisible = firstVisible.nextElementSibling;
-    }
+    const visibleLis = ul.querySelectorAll("li:not([hidden])");
+    if (visibleLis.length === 0) return;
 
-    let lastVisible = ul.lastElementChild;
-    while (lastVisible && lastVisible.hidden) {
-      lastVisible = lastVisible.previousElementSibling;
-    }
-
+    const firstVisible = visibleLis[0];
+    const lastVisible = visibleLis[visibleLis.length - 1];
     let elementToHighlight = startPoint;
 
     const { key } = event;
