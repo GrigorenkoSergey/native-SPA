@@ -97,15 +97,10 @@ class CustomAutocomplete extends HTMLElement {
     ul.setAttribute("id", ulId);
     this.setAttribute("aria-controls", ulId);
 
-    this._nodes.selected = this.value ? ul.querySelector(`[data-value='${this.value}']`) : undefined;
-
-    // preferably through a property, so as not to clear the handlers once again
-    this.onclick = event => this._onClick(event);
-    input.oninput = event => this._onInput(event);
-    input.addEventListener("click", this._onInputClick);
-    this.onkeydown = event => this._onKeydown(event);
+    this._nodes.selected = this.value ? ul.querySelector(`[data-value='${this.value}']`) : null;
 
     this._init();
+    this._attachHandlers();
     this._isRendered = true;
   }
 
@@ -133,6 +128,7 @@ class CustomAutocomplete extends HTMLElement {
     this.ariaExpanded = String(open);
 
     document.removeEventListener("focus", this._onOuterElementFocus, true);
+
     if (!open) return;
 
     document.addEventListener("focus", this._onOuterElementFocus, true);
@@ -167,6 +163,13 @@ class CustomAutocomplete extends HTMLElement {
     this.render();
   }
 
+  _attachHandlers() {
+    this.addEventListener("click", this._onInputClick);
+    this.addEventListener("click", this._onClick);
+    this.addEventListener("keydown", this._onKeydown);
+    this.addEventListener("input", this._onInput);
+  }
+
   _onClick(event) {
     const { _state, _nodes } = this;
 
@@ -190,13 +193,15 @@ class CustomAutocomplete extends HTMLElement {
     }
   }
 
-  _onInputClick = () => {
+  _onInputClick(event) {
+    if (event.target !== this._nodes.input) return;
+
     const { _state } = this;
     _state.open = !_state.open;
     this.render();
-  };
+  }
 
-  _onInput = () => {
+  _onInput() {
     const { _state, _nodes } = this;
     _state.isEditing = true;
 
@@ -209,7 +214,7 @@ class CustomAutocomplete extends HTMLElement {
     _nodes.input.onblur = () => {
       _state.isEditing = false;
     };
-  };
+  }
 
   _onKeydown(event) {
     const { key } = event;
@@ -238,7 +243,7 @@ class CustomAutocomplete extends HTMLElement {
   }
 
   _onArrowKeydown(event) {
-    event.preventDefault(); // чтобы курсор не двигался
+    event.preventDefault(); // so that the cursor does not move
 
     const { _nodes, _state } = this;
     if (!_state.open) {
