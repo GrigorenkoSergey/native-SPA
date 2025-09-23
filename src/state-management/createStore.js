@@ -1,5 +1,10 @@
 import { variables } from "./variables.js";
 
+/**
+ * @template {Object<string, any>} T
+ * @param {T} obj - простой объект, который нужно проксировать
+ * @returns {T} - прокси объекта
+ */
 const createStore = obj => {
   const observableProps = {};
 

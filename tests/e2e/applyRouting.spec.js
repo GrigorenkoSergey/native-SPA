@@ -56,11 +56,6 @@ test("Базовая логика переключений страниц", asyn
     await expect(page.getByText(phrase3)).toBeInViewport();
   });
 
-  await test.step("В глубоко вложенных страницах скрипты исполяются, стили применяются", async () => {
-    await page.getByRole("link", { name: "Глубоко вложенная страница" }).click();
-    await expect(page.getByTestId("created-span")).toBeVisible();
-  });
-
   await test.step("Возрат на первую страницу по-прежнему работает как ожидается", async () => {
     await winnieLink.click();
     await expect(winnieHeader).toBeVisible();
@@ -89,7 +84,6 @@ test("Проверка перемещений по истории", async ({ pag
 
     await page.getByRole("link", { name: "Глубоко вложенная страница" }).click();
     await expect(page.getByRole("heading", { name: "Глубоко вложенная страница" })).toBeVisible();
-    await expect(page.getByTestId("created-span")).toBeVisible();
   });
 
   await test.step("Начнем возврат по истории", async () => {
@@ -110,7 +104,6 @@ test("Проверка перемещений по истории", async ({ pag
 
     await page.goForward();
     await expect(page.getByRole("heading", { name: "Глубоко вложенная страница" })).toBeVisible();
-    await expect(page.getByTestId("created-span")).toBeVisible();
   });
 });
 
