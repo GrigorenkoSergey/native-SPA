@@ -1,4 +1,5 @@
-import "@/components/custom-autocomplete/index.js";
+import "@/components/custom-autocomplete";
+import { derive } from "@/state-management";
 import "./style.css";
 
 const getQuery = () => new URLSearchParams(window.location.search).get("hero");
@@ -9,6 +10,7 @@ const logic = () => {
     return originPushState.apply(this, args);
   };
 
+  derive(() => {});
   const autocomplete = document.querySelector("custom-autocomplete");
   autocomplete.setOptions(["Винни Пух", "Пятачок", "Иа", "Сова", "Кролик"]);
   autocomplete.value = decodeURI(getQuery() || "");

@@ -1,14 +1,9 @@
 import template from "./template.html";
 import "./style.css";
 
-import { listenClickOutsideOnce } from "@/utils/listenClickOutsideOnce.js";
-import { generateIdInDocument } from "@/utils/generateIdInDocument.js";
-import {
-  syncAttrsPropsState,
-  initCustomElement,
-  applyGetSet,
-  syncPropsWithAttrs,
-} from "@/utils/customElementHelpers.js";
+import { listenClickOutsideOnce } from "@/utils/listenClickOutsideOnce";
+import { generateIdInDocument } from "@/utils/generateIdInDocument";
+import { syncAttrsPropsState, initCustomElement, applyGetSet, syncPropsWithAttrs } from "@/utils/customElementHelpers";
 
 // TODO добавить рестик
 // TODO добавить видимость выбранного элемента в случае длинных списков (возможно, прокрутка к нему)

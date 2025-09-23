@@ -63,6 +63,7 @@ module.exports = env => {
       ...pageInputs,
     },
     externals: {
+      // в данных файлах обязательно указывать расширение
       "state-management": `module ${base}state-management.${buildKey}.js`,
       ...Object.fromEntries(
         storeFiles.map(file => {

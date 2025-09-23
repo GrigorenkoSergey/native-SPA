@@ -1,10 +1,10 @@
 import template from "./template.html";
 import "./style.css";
 
-import "@/components/chat-message/index.js";
-import { initCustomElement } from "@/utils/customElementHelpers.js";
-import { batchEffects } from "@/state-management/batchEffects.js";
-import messagesStore from "@/stores/messagesStore.js";
+import "@/components/chat-message/index";
+import { initCustomElement } from "@/utils/customElementHelpers";
+import { batchEffects } from "@/state-management/batchEffects";
+import messagesStore from "@/stores/messagesStore";
 
 class MessagesSection extends HTMLElement {
   constructor() {

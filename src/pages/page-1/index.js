@@ -1,4 +1,4 @@
-import "@/components/messages-section/index.js";
+import "@/components/messages-section/index";
 import "./style.css";
 
 console.log("page-1");

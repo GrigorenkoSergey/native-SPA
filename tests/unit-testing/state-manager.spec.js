@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-import { createStore } from "../../src/state-management/createStore.js";
-import { batchEffects } from "../../src/state-management/batchEffects.js";
-import { derive } from "../../src/state-management/derive.js";
+import { createStore } from "../../src/state-management/createStore";
+import { batchEffects } from "../../src/state-management/batchEffects";
+import { derive } from "../../src/state-management/derive";
 
 test.describe("Базовая логика", () => {
   test("Простейшая подписка", () => {

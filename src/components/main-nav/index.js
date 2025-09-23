@@ -1,7 +1,7 @@
 import template from "./template.html";
 import "./style.css";
 
-import { initCustomElement } from "@/utils/customElementHelpers.js";
+import { initCustomElement } from "@/utils/customElementHelpers";
 
 class MainNav extends HTMLElement {
   constructor() {
