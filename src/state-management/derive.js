@@ -1,5 +1,13 @@
 import { variables } from "./variables.js";
 
+/**
+ * Функция отслеживания изменений в переданных хранилищах. Значение в хранилище начинает отслеживаться если в callback обращаются к
+ * свойству хранилища. Может быть сколько угодно хранилищ для отслеживания.
+ * Срабатывает синхронно при изменениях любых значений в отслеживаемых хранилищах.
+ *
+ * @param {Function} callback - функция которая сработает СРАЗУ же и после изменения значения хранилища, к которому обращаются в callback.
+ * @returns {Function} cleanup - функция удаления callback
+ */
 export const derive = callback => {
   variables.isDerivingLogicAnalisis = true;
   variables.derivingCallback = callback;

@@ -1,3 +1,8 @@
+/**
+ * Исходная, наивная реализация хранилища
+ * @param {Object} obj
+ * @returns {Object}
+ */
 const createStore = obj => {
   let store = {
     ...obj,
