@@ -1,5 +1,5 @@
 import template from "./template.html";
-import { initCustomElement } from "@/utils/customElementHelpers.js";
+import { initCustomElement } from "@/utils/customElementHelpers";
 import "./style.css";
 
 class ChatMessage extends HTMLElement {

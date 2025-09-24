@@ -45,7 +45,7 @@ src/pages/
 
 ```js
 // src/pages/some-page-name/index.js
-import { events } from "@/constants/events.js";
+import { events } from "@/constants/events";
 
 const logic = () => {
   ...

@@ -11,6 +11,11 @@ const makeId = length => {
   return result;
 };
 
+/**
+ *
+ * @param {String} prefix
+ * @returns {String}
+ */
 export const generateIdInDocument = prefix => {
   const generate = () => (prefix ? `${prefix}-${makeId(4)}` : makeId(4));
 

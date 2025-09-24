@@ -56,11 +56,6 @@ test("Базовая логика переключений страниц", asyn
     await expect(page.getByText(phrase3)).toBeInViewport();
   });
 
-  await test.step("В глубоко вложенных страницах скрипты исполяются, стили применяются", async () => {
-    await page.getByRole("link", { name: "Глубоко вложенная страница" }).click();
-    await expect(page.getByTestId("created-span")).toBeVisible();
-  });
-
   await test.step("Возрат на первую страницу по-прежнему работает как ожидается", async () => {
     await winnieLink.click();
     await expect(winnieHeader).toBeVisible();
@@ -89,7 +84,6 @@ test("Проверка перемещений по истории", async ({ pag
 
     await page.getByRole("link", { name: "Глубоко вложенная страница" }).click();
     await expect(page.getByRole("heading", { name: "Глубоко вложенная страница" })).toBeVisible();
-    await expect(page.getByTestId("created-span")).toBeVisible();
   });
 
   await test.step("Начнем возврат по истории", async () => {
@@ -110,6 +104,56 @@ test("Проверка перемещений по истории", async ({ pag
 
     await page.goForward();
     await expect(page.getByRole("heading", { name: "Глубоко вложенная страница" })).toBeVisible();
-    await expect(page.getByTestId("created-span")).toBeVisible();
+  });
+});
+
+test("Проверка подхода синхронизации выпадашки с адресом в урле", async ({ page }) => {
+  const input = page.getByRole("textbox");
+  await test.step("Если урл пуст, в значении выпадашки так же пусто", async () => {
+    await page.goto("http://localhost:8080/native-SPA/pages/page-1/page-1-deeper-page/");
+    await expect(input).toHaveValue("");
+  });
+
+  const option1Text = "Иа";
+  const option2Text = "Винни Пух";
+  const option3Text = "Пятачок";
+
+  await test.step("Если в урле есть какой-либо запрос, оно отобразится в выпадашке", async () => {
+    await page.goto(`http://localhost:8080/native-SPA/pages/page-1/page-1-deeper-page/?hero=${option1Text}`);
+    await expect(input).toHaveValue(option1Text);
+  });
+
+  const checkQueryIsInUrl = async optionText => {
+    const heroQuery = await page.evaluate(() => decodeURI(new URLSearchParams(window.location.search).get("hero")));
+    await expect(() => expect(heroQuery).toEqual(optionText)).toPass();
+  };
+
+  await test.step("Изменения в выпадашке меняют урл", async () => {
+    await input.click();
+
+    await page.getByRole("option", { name: option2Text }).click();
+    await checkQueryIsInUrl(option2Text);
+
+    await input.click();
+    await page.getByRole("option", { name: option3Text }).click();
+    await checkQueryIsInUrl(option3Text);
+  });
+
+  await test.step("Переходы по истории меняют содержимое выпадашки", async () => {
+    await page.goBack();
+    await checkQueryIsInUrl(option2Text);
+    await expect(input).toHaveValue(option2Text);
+
+    await page.goBack();
+    await checkQueryIsInUrl(option1Text);
+    await expect(input).toHaveValue(option1Text);
+
+    await page.goForward();
+    await checkQueryIsInUrl(option2Text);
+    await expect(input).toHaveValue(option2Text);
+
+    await page.goForward();
+    await checkQueryIsInUrl(option3Text);
+    await expect(input).toHaveValue(option3Text);
   });
 });
