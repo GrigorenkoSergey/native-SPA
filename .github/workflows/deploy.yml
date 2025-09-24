@@ -22,9 +22,6 @@ jobs:
           npm install
           npm run build
 
-      - name: List build output
-        run: ls -R dist
-
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
