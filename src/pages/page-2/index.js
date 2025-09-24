@@ -1,5 +1,5 @@
-import "@/components/messages-section";
 import "./style.css";
+import "@/components/messages-section";
 
 console.log("page-2");
 

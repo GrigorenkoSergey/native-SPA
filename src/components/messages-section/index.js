@@ -25,14 +25,14 @@ class MessagesSection extends HTMLElement {
     });
 
     const button = this.querySelector(".messages-section__button");
-    button.addEventListener("click", event => this._handleMessageSend(event));
+    button.addEventListener("click", event => this._onMessageSend(event));
   }
 
   disconnectedCallback() {
     this.cleanups.forEach(func => func());
   }
 
-  _handleMessageSend() {
+  _onMessageSend() {
     const newMessage = this.input.value;
     if (!newMessage) return;
 
