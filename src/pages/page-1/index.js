@@ -6,6 +6,10 @@ console.log("Page-1. Должно быть выведено один раз пр
 const logic = () => {
   const h1 = document.querySelector("h1");
   h1.textContent = "Винни Пух";
+
+  return () => {
+    // ...some cleanup logic
+  };
 };
 
 export default logic;
