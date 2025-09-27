@@ -1,8 +1,11 @@
 import "@/components/messages-section/index";
 import "./style.css";
 
-console.log("page-1");
+console.log("Page-1. Должно быть выведено один раз при первом заходе на страницу.");
 
-const logic = () => {};
+const logic = () => {
+  const h1 = document.querySelector("h1");
+  h1.textContent = "Винни Пух";
+};
 
 export default logic;

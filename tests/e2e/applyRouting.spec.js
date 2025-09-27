@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date(2025, 8, 1, 12, 0, 0));
 });
 
-test("Базовая логика переключений страниц", async ({ page }) => {
+test("Базовая логика переключений страниц. Хедеры подставляются в JS.", async ({ page }) => {
   await page.goto("http://localhost:8080/native-SPA/pages/page-1/");
 
   const input = page.getByRole("textbox");

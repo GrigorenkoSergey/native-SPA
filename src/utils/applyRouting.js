@@ -67,7 +67,7 @@ async function buildPage(url) {
 
   const newDocument = new DOMParser().parseFromString(template, "text/html");
 
-  addHeadStylesheets(newDocument); // заметно только в production-mode
+  addHeadStylesheets(newDocument);
   addHeadScripts(newDocument);
   document.body.replaceWith(newDocument.body);
 
