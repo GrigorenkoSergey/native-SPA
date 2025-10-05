@@ -5,7 +5,7 @@ import { listenClickOutsideOnce } from "@/utils/listenClickOutsideOnce";
 import { generateIdInDocument } from "@/utils/generateIdInDocument";
 import { syncAttrsPropsState, initCustomElement, applyGetSet, syncPropsWithAttrs } from "@/utils/customElementHelpers";
 
-// TODO добавить рестик
+// TODO добавить крестик
 // TODO добавить видимость выбранного элемента в случае длинных списков (возможно, прокрутка к нему)
 /*
   TODO посмотреть, как можно добавить настройку слотов. Через светлый DOM или через теневой. 
@@ -114,9 +114,9 @@ class CustomAutocomplete extends HTMLElement {
     this._init();
   }
 
-  renderLi(item, index) {
+  renderLi(item) {
     return (
-      `<li id='custom-autocomplete-option-${index}'` +
+      `<li id='${generateIdInDocument("option")}'` +
       "class='custom-autocomplete__li' " +
       `data-value='${item}' role='option'>` +
       item +
