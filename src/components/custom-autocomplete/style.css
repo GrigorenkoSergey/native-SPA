@@ -55,7 +55,7 @@ custom-autocomplete[open] {
     display: none;
   }
 
-  &:hover,
+  ul:not(:has(.keyboard-focused)) &:hover,
   &.keyboard-focused {
     background-color: red;
     outline: 1px solid;
