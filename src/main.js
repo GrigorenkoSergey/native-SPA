@@ -5,4 +5,6 @@ import { applyRouting } from "@/utils/applyRouting";
 
 console.log("main");
 
-applyRouting({});
+const dynamicRoutes = [[/pages\/dynamic\/\w+/, "pages/dynamic-page/"]];
+
+applyRouting({ dynamicRoutes });

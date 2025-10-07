@@ -157,3 +157,29 @@ test("Проверка подхода синхронизации выпадаш�
     await expect(input).toHaveValue(option3Text);
   });
 });
+
+test("Проверка работоспособности динамических роутов", async ({ page }) => {
+  await test.step("Первоначальный заход", async () => {
+    await page.goto("http://localhost:8080/native-SPA/pages/dynamic/9999/");
+    await expect(page.getByRole("heading", { name: "Hello, dynamic page 9999!" })).toBeVisible();
+  });
+
+  await test.step("Переход по ссылкам", async () => {
+    const linkIds = [1, 2, 3];
+    for (const id of linkIds) {
+      await page.getByRole("link", { name: `Динамическая страница-${id}` }).click();
+      await expect(page.getByRole("heading", { name: `Hello, dynamic page ${id}!` })).toBeVisible();
+    }
+  });
+
+  await test.step("Возврат по истории", async () => {
+    await page.goBack();
+    await expect(page.getByRole("heading", { name: "Hello, dynamic page 2!" })).toBeVisible();
+
+    await page.goBack();
+    await expect(page.getByRole("heading", { name: "Hello, dynamic page 1!" })).toBeVisible();
+
+    await page.goForward();
+    await expect(page.getByRole("heading", { name: "Hello, dynamic page 2!" })).toBeVisible();
+  });
+});

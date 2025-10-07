@@ -2,7 +2,6 @@ const base = document.querySelector("base").href;
 const pageLogics = {};
 let cleanup;
 
-const dynamicRoutes = [[/pages\/dynamic\/\w+/, "pages/dynamic-page/"]];
 /**
  * Для определенных ссылок, помеченных атрибутов data-inner-link предотвращает действие по умолчанию.
  * Нажатие по данным ссылкам вызовет перестроение страницы без действительного перехода по ссылке.
@@ -10,23 +9,25 @@ const dynamicRoutes = [[/pages\/dynamic\/\w+/, "pages/dynamic-page/"]];
  * по умолчанию.
  * @param {Object} config
  * @property {String} config.defaultPage
+ * @property {Array} config.dynamicRoutes - список динамических роутов вида [regexp, string], где
+ *  regexp - регулярка с адресом страницы
+ *  string - адрес соответствующей страницы (без слеша спереди, как и в defaultPage)
+ *  пример - [ [/pages\/dynamic\/\w+/, "pages/dynamic-page/"], [...] ]
  * @returns {void}
  */
-export function applyRouting({ defaultPage = "pages/page-1/" }) {
+export function applyRouting({ defaultPage = "pages/page-1/", dynamicRoutes = [] }) {
   if (!window) return;
 
   document.addEventListener("DOMContentLoaded", async () => {
     const { pathname } = new URL(window.location.href);
     const { pathname: basePathname } = new URL(base);
 
-    const dynamicPage = dynamicRoutes.find(([pattern]) => pattern.test(pathname));
-    if (dynamicPage) return buildPage(base + dynamicPage[1]);
-
     if (pathname === basePathname) {
       const defaultUrl = `${base}${defaultPage}`;
       return (window.location.href = defaultUrl);
     }
-    applyPageLogic(window.location.href);
+
+    buildPage(window.location.href, dynamicRoutes);
   });
 
   window.history.pushState = new Proxy(window.history.pushState, {
@@ -35,7 +36,7 @@ export function applyRouting({ defaultPage = "pages/page-1/" }) {
 
       const newPathname = new URL(url).pathname;
       const oldPathName = new URL(window.location.href).pathname;
-      if (newPathname !== oldPathName) buildPage(url);
+      if (newPathname !== oldPathName) buildPage(url, dynamicRoutes);
 
       return Reflect.apply(...args);
     },
@@ -43,7 +44,7 @@ export function applyRouting({ defaultPage = "pages/page-1/" }) {
 
   window.addEventListener("popstate", event => {
     const { href } = event.target.location;
-    buildPage(href);
+    buildPage(href, dynamicRoutes);
   });
 
   document.addEventListener("click", async event => {
@@ -63,12 +64,15 @@ export function applyRouting({ defaultPage = "pages/page-1/" }) {
   });
 }
 
-async function buildPage(initialUrl) {
-  let url = initialUrl;
-
+function getDynamicUrl(url, dynamicRoutes) {
   const { pathname } = new URL(url);
   const dynamicPage = dynamicRoutes.find(([pattern]) => pattern.test(pathname));
-  if (dynamicPage) url = base + dynamicPage[1];
+
+  return dynamicPage ? base + dynamicPage[1] : undefined;
+}
+
+async function buildPage(initialUrl, dynamicRoutes) {
+  const url = getDynamicUrl(initialUrl, dynamicRoutes) || initialUrl;
 
   const pageTemplateUrl = url + "index.html";
 
