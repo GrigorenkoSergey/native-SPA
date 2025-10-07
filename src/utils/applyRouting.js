@@ -19,7 +19,8 @@ export function applyRouting({ defaultPage = "pages/page-1/", dynamicRoutes = []
   if (!window) return;
 
   document.addEventListener("DOMContentLoaded", async () => {
-    const { pathname } = new URL(window.location.href);
+    const windowHref = window.location.href;
+    const { pathname } = new URL(windowHref);
     const { pathname: basePathname } = new URL(base);
 
     if (pathname === basePathname) {
@@ -27,7 +28,11 @@ export function applyRouting({ defaultPage = "pages/page-1/", dynamicRoutes = []
       return (window.location.href = defaultUrl);
     }
 
-    buildPage(window.location.href, dynamicRoutes);
+    if (getDynamicUrl(windowHref, dynamicRoutes)) {
+      return buildPage(windowHref, dynamicRoutes);
+    }
+
+    applyPageLogic(windowHref);
   });
 
   window.history.pushState = new Proxy(window.history.pushState, {
