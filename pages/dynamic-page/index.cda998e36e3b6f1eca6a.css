@@ -1,0 +1,21 @@
+.dynamic-page__ul {
+  margin-left: 2rem;
+}
+
+.dynamic-page__li {
+  padding: 0.2rem;
+}
+
+.dynamic-page__li a {
+  &:visited {
+    color: blue;
+  }
+
+  &:hover {
+    color: green;
+  }
+
+  &:active {
+    color: yellow;
+  }
+}
