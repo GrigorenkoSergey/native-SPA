@@ -284,6 +284,7 @@ test("Изменения атрибутов снаружи", async () => {
   });
 });
 
+// TODO иногда падает в headless mode. Проверить.
 test("Изменения опций снаружи", async () => {
   let expectedRenders = 0;
 
