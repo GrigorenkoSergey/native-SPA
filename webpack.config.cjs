@@ -104,11 +104,12 @@ module.exports = env => {
         // app: { name: "firefox" },
       },
       watchFiles: ["src/**/*.html"],
+      historyApiFallback: { index: `${base}404.html` },
     },
     module: {
       rules: [
         {
-          test: /index\.html$/i,
+          test: /(index|404)\.html$/i,
           loader: "html-loader",
           options: {
             preprocessor: content => {
@@ -156,6 +157,14 @@ module.exports = env => {
       new HtmlWebpackPlugin({
         filename: "index.html",
         template: "./src/index.html",
+        chunks: ["main"],
+        scriptLoading: "module",
+      }),
+      new HtmlWebpackPlugin({
+        // сюда будем редиректить так же в случае динамических роутов, т.е.
+        // github использует адрес этой страницы для перенаправления по умолчанию
+        filename: "404.html",
+        template: "404.html",
         chunks: ["main"],
         scriptLoading: "module",
       }),

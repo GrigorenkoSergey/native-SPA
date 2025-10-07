@@ -2,6 +2,7 @@ const base = document.querySelector("base").href;
 const pageLogics = {};
 let cleanup;
 
+const dynamicRoutes = [[/pages\/dynamic\/\w+/, "pages/dynamic-page/"]];
 /**
  * Для определенных ссылок, помеченных атрибутов data-inner-link предотвращает действие по умолчанию.
  * Нажатие по данным ссылкам вызовет перестроение страницы без действительного перехода по ссылке.
@@ -17,6 +18,9 @@ export function applyRouting({ defaultPage = "pages/page-1/" }) {
   document.addEventListener("DOMContentLoaded", async () => {
     const { pathname } = new URL(window.location.href);
     const { pathname: basePathname } = new URL(base);
+
+    const dynamicPage = dynamicRoutes.find(([pattern]) => pattern.test(pathname));
+    if (dynamicPage) return buildPage(base + dynamicPage[1]);
 
     if (pathname === basePathname) {
       const defaultUrl = `${base}${defaultPage}`;
@@ -59,7 +63,13 @@ export function applyRouting({ defaultPage = "pages/page-1/" }) {
   });
 }
 
-async function buildPage(url) {
+async function buildPage(initialUrl) {
+  let url = initialUrl;
+
+  const { pathname } = new URL(url);
+  const dynamicPage = dynamicRoutes.find(([pattern]) => pattern.test(pathname));
+  if (dynamicPage) url = base + dynamicPage[1];
+
   const pageTemplateUrl = url + "index.html";
 
   const response = await fetch(pageTemplateUrl);
@@ -108,7 +118,9 @@ async function applyPageLogic(url) {
   cleanup?.();
 
   const pageScriptElement = getPageScript(url);
-  const scriptKey = pageScriptElement.src;
+  const scriptKey = pageScriptElement?.src;
+  if (!scriptKey) return;
+
   if (scriptKey in pageLogics) return pageLogics[scriptKey]?.();
 
   const logic = (await import(/* webpackIgnore: true */ scriptKey)).default;
