@@ -169,6 +169,7 @@ test("Проверка работоспособности динамически
     for (const id of linkIds) {
       await page.getByRole("link", { name: `Динамическая страница-${id}` }).click();
       await expect(page.getByRole("heading", { name: `Hello, dynamic page ${id}!` })).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`\\?some_query=${id}`));
     }
   });
 

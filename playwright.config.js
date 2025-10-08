@@ -35,7 +35,7 @@ export default defineConfig({
   },
 
   // https://playwright.dev/docs/api/class-testproject#test-project-snapshot-path-template
-  snapshotPathTemplate: "tests/e2e/__screenshots/{projectName}/{testFilePath}/{arg}{ext}",
+  snapshotPathTemplate: "tests/__screenshots/{projectName}/{testFilePath}/{arg}{ext}",
 
   /* Configure projects for major browsers */
   projects: [
