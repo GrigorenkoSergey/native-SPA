@@ -9,12 +9,12 @@ import { variables } from "./variables.js";
  * @returns {Function} cleanup - функция удаления callback
  */
 export const derive = callback => {
-  variables.isDerivingLogicAnalisis = true;
+  variables.isDerivingLogicAnalysis = true;
   variables.derivingCallback = callback;
 
   callback();
 
-  variables.isDerivingLogicAnalisis = false;
+  variables.isDerivingLogicAnalysis = false;
   variables.derivingCallback = null;
 
   const cleanup = () => {

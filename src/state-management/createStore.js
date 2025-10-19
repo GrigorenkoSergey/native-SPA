@@ -15,17 +15,20 @@ const createStore = obj => {
 
       const defaultReturn = Reflect.set(...args);
 
-      const { isDerivingLogicAnalisis, derivingCallback, issuers } = variables;
+      const { isDerivingLogicAnalysis, derivingCallback, issuers } = variables;
 
-      if (isDerivingLogicAnalisis) {
-        if (prop in observableProps) {
+      if (isDerivingLogicAnalysis) {
+        if (Object.hasOwn(observableProps, prop)) {
+          // Не стоит одновременно наблюдать за свойством и его устанавливать, т.к.
+          // это ведет к бесконечному циклу, поэтому удалим наблюдатель, если он был добавлен.
           observableProps[prop] = observableProps[prop].filter(cb => cb !== derivingCallback);
         }
 
         return defaultReturn;
       }
 
-      if (prop in observableProps) {
+      if (Object.hasOwn(observableProps, prop)) {
+        const isTrigger = issuers.size === 0;
         let propsInCurrentChain = issuers.get(target);
 
         if (!propsInCurrentChain) {
@@ -36,31 +39,38 @@ const createStore = obj => {
         if (propsInCurrentChain.has(prop)) return defaultReturn;
 
         propsInCurrentChain.add(prop);
+        const payload = { store: this, target, prop, value, oldValue };
 
-        if (propsInCurrentChain.size === 1) {
-          try {
-            observableProps[prop].forEach(cb => cb({ target, prop, value }));
-          } catch (error) {
-            target[prop] = oldValue;
-            observableProps[prop].forEach(cb => cb({ target, prop, value: oldValue }));
-            console.error(error);
-          }
-        } else {
-          observableProps[prop].forEach(cb => cb({ target, prop, value }));
+        if (!isTrigger) {
+          observableProps[prop].forEach(cb => cb(payload));
+
+          return defaultReturn;
         }
 
-        propsInCurrentChain.delete(prop);
+        try {
+          observableProps[prop].forEach(cb => cb(payload));
+        } catch (error) {
+          console.error(error);
+
+          issuers.clear();
+          issuers.set(target, propsInCurrentChain);
+
+          target[prop] = oldValue;
+          observableProps[prop].forEach(cb => cb({ ...payload, value: oldValue }));
+        }
+
+        issuers.clear();
       }
 
       return defaultReturn;
     },
 
     get(...args) {
-      const { isDerivingLogicAnalisis, derivingCallback } = variables;
+      const { isDerivingLogicAnalysis, derivingCallback } = variables;
 
-      if (isDerivingLogicAnalisis) {
+      if (isDerivingLogicAnalysis) {
         const prop = args[1];
-        if (!(prop in observableProps)) observableProps[prop] = [];
+        if (!Object.hasOwn(observableProps, prop)) observableProps[prop] = [];
 
         if (observableProps[prop].at(-1) !== derivingCallback) {
           observableProps[prop].push(derivingCallback);

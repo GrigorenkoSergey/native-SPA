@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 import { createStore } from "../../src/state-management/createStore";
 import { batchEffects } from "../../src/state-management/batchEffects";
 import { derive } from "../../src/state-management/derive";
+import { pause } from "@/utils/pause";
 
 test.describe("Базовая логика", () => {
   test("Простейшая подписка", () => {
@@ -24,6 +25,21 @@ test.describe("Базовая логика", () => {
     expect(a.value).toBe(2);
   });
 
+  test("Установка свойства одного и того же хранилища, зависящего от текущего значения этого же свойства", () => {
+    const a = createStore({ value: 0 });
+    const b = createStore({ value: 0 });
+
+    derive(() => {
+      a.value += b.value;
+    });
+
+    b.value = 1;
+    expect(a.value).toBe(1);
+
+    b.value = 2;
+    expect(a.value).toBe(3);
+  });
+
   test("Несколько обращений к свойству в одном сторе (обработчик добавляется только один раз)", () => {
     const store = createStore({ value: 0 });
     let a;
@@ -42,9 +58,25 @@ test.describe("Базовая логика", () => {
     expect(calls).toBe(2);
   });
 
+  test("Предотвращение вычислений (считывание payload)", () => {
+    const store = createStore({ value: 0 });
+
+    let a;
+    derive(payload => {
+      if (payload && payload.value === 1) return;
+      a = store.value;
+    });
+
+    expect(a).toBe(0);
+    store.value = 2;
+    expect(a).toBe(2);
+    store.value = 1;
+    expect(a).toBe(2);
+  });
+
   test("Циклическая зависимость", () => {
-    const a = createStore({ value: 0, store: "a" });
-    const b = createStore({ value: 0, store: "b" });
+    const a = createStore({ value: 0 });
+    const b = createStore({ value: 0 });
 
     derive(() => {
       a.value = -b.value;
@@ -60,7 +92,7 @@ test.describe("Базовая логика", () => {
     expect(b.value).toBe(-1);
   });
 
-  test("Зависимость свойства в одном сторе от другого", () => {
+  test("Зависимость одного свойства в сторе от другого", () => {
     const a = createStore({ prop: 1, derivedProp: 2 });
 
     derive(() => {
@@ -184,15 +216,14 @@ test.describe("Обработка ошибок", () => {
   test("Если произошла ошибка в одной из derive-функций, система откатывается к последнему стабильному состоянию", () => {
     const storeA = createStore({ value: 0 });
 
-    let b;
-    let c;
-
     const fn = value => {
       if (value % 2) throw new Error();
 
       return value;
     };
 
+    let b;
+    let c;
     derive(() => {
       b = fn(storeA.value) + 1;
       c = fn(storeA.value) + 2;
@@ -209,6 +240,41 @@ test.describe("Обработка ошибок", () => {
       expect(storeA.value).toBe(10);
       expect(b).toBe(11);
       expect(c).toBe(12);
+    });
+  });
+
+  test("Ошибка произошла в промежуточном колбеке при установке в другом сторе", () => {
+    const storeA = createStore({ v: 0, store: "a" });
+    const storeB = createStore({ v: 0, store: "b" });
+    const storeC = createStore({ v: 0, store: "c" });
+    const storeD = createStore({ v: 0, store: "d" });
+
+    derive(() => {
+      storeB.v = storeA.v + 1;
+    });
+
+    derive(() => {
+      storeC.v = storeB.v + 1;
+    });
+
+    derive(() => {
+      storeD.v = storeC.v + 1;
+      if (storeC.v === 4) throw new Error();
+    });
+
+    test.step("Удачная установка", () => {
+      storeA.v = 1;
+      expect(storeB.v).toBe(2);
+      expect(storeC.v).toBe(3);
+      expect(storeD.v).toBe(4);
+    });
+
+    test.step("Неудачная установка, откат к начальным значениям", () => {
+      storeA.v = 2;
+      expect(storeA.v).toBe(1);
+      expect(storeB.v).toBe(2);
+      expect(storeC.v).toBe(3);
+      expect(storeD.v).toBe(4);
     });
   });
 
@@ -235,6 +301,7 @@ test.describe("Обработка ошибок", () => {
     });
 
     storeA.a = 2;
+
     expect(b).toBe(3);
     expect(storeB.b).toBe(4);
     expect(c).toBe(5);
@@ -250,8 +317,6 @@ test.describe("Обработка ошибок", () => {
 });
 
 test.describe("Асинхронщина", () => {
-  const pause = ms => new Promise(res => setTimeout(res), ms);
-
   test("Запуск асинхронных функций возможен в принципе", async () => {
     const storeA = createStore({ a: 1 });
 
@@ -272,7 +337,7 @@ test.describe("Асинхронщина", () => {
     expect(() => expect(b).toBe(2)).toPass();
   });
 
-  test("Батчинг", async () => {
+  test("Батчинг, встроенные функции", async () => {
     const storeA = createStore({ a: 1 });
     const storeB = createStore({ b: 1 });
 
@@ -296,6 +361,7 @@ test.describe("Асинхронщина", () => {
     expect(callResults.length).toBe(1);
     await expect(() => {
       expect(callResults.length).toBe(2);
+
       const lastCallResult = callResults.at(-1);
       const [a, b] = lastCallResult;
 
@@ -313,5 +379,40 @@ test.describe("Асинхронщина", () => {
       expect(callResults.length).toBe(2);
       expect(a === 0 && b === 1).toBe(true);
     });
+  });
+
+  test("Батчинг с полностью кастомной функцией", async () => {
+    const storeA = createStore({ a: 1 });
+    const storeB = createStore({ b: 1 });
+
+    const batch = cb => batchEffects(cb, () => setTimeout(cb, 100), clearTimeout);
+    const callResults = [];
+
+    batch(() => {
+      const storeValuesPair = [storeA.a, storeB.b];
+      callResults.push(storeValuesPair);
+    });
+
+    storeA.a = 10;
+    storeB.b = 10;
+
+    await pause(20);
+    storeA.a = 20;
+    storeB.b = 20;
+
+    await pause(20);
+    storeA.a = 30;
+    storeB.b = 30;
+
+    expect(callResults.length).toBe(1);
+
+    await expect(() => {
+      expect(callResults.length).toBe(2);
+
+      const lastCallResult = callResults.at(-1);
+      const [a, b] = lastCallResult;
+      expect(a).toBe(30);
+      expect(b).toBe(30);
+    }).toPass({ timeout: 1000 });
   });
 });

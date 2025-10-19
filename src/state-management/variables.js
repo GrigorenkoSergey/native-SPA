@@ -1,5 +1,5 @@
 export const variables = {
-  isDerivingLogicAnalisis: false,
+  isDerivingLogicAnalysis: false,
   derivingCallback: null,
   issuers: new Map(),
   observables: new Map(),
