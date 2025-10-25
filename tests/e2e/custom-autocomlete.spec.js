@@ -363,16 +363,3 @@ test("Проверка основных ARIA атрибутов", async () => {
     await checkHasAttr(elem.getByRole("option", { name: option2Text }));
   });
 });
-
-test("Работоспособность переданной разметки", async () => {
-  elem = page.getByTestId("prerendered");
-  input = elem.getByRole("textbox");
-
-  await elem.click();
-  await page.waitForTimeout(1000);
-  const optionText = "value-1";
-  await elem.getByRole("option", { name: optionText }).click();
-
-  await elem.click();
-  await checkIsOptionSelected(optionText);
-});

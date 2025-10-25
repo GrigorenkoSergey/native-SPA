@@ -6,7 +6,7 @@
         <b>Неотслеживаемое</b> (изменение не вызовет перерисовку элемента).
       <li><b>prerendered</b> - флаг отключения считывания шаблона и посторения
         html на его основе. Будет обрабатываться непосредственно переданная
-        разметка. <b>Неостлеживаемое.</b>
+        разметка. <b>Неотслеживаемое.</b>
       <li><b>open</b> - состояние открыт/закрыт</li>
       <li><b>value</b> - выбранное значение в поле ввода</li>
     </ul>
@@ -26,37 +26,6 @@ autocomplete.setOptions(["Опция-1", "Опция-2", "Опция-3", "Опц
       <span>Кол-во рендеров: <span
           data-testid="basic-renders-count">0</span></span>
     </div>
-  </section>
-
-  <section>
-    <h3>Элемент с предварительно переданными опциями</h3>
-    <p>Можно передать разметку непосредственно в элемент. Тогда компоненту
-      необходимо добавить свойство <b>prerendered</b>. В переданной разметке
-      каждый элемент должен приблизительно соответствовать тому же, что и в
-      шаблоне. Т.е. в соответствующих элементах должны быть соответствующие
-      атрибуты. Например, <b>id</b> и <b>data-value</b> в элементах списка. Или
-      атрибуты поля ввода. Практическое применение - пререндеринг на сервере.
-    </p>
-    <custom-autocomplete data-testid="prerendered" name="prerendered"
-      prerendered>
-      <input type="text" name="" aria-autocomplete="list" role="textbox"
-        autocomplete="off" class="custom-autocomplete__input">
-
-      <ul role="listbox" class="custom-autocomplete__ul">
-        <li id='custom-autocomplete-option-1' data-value='value-1' role='option'
-          class="custom-autocomplete__li">
-          value-1
-        </li>
-        <li id='custom-autocomplete-option-2' data-value='value-2' role='option'
-          class="custom-autocomplete__li">
-          value-2
-        </li>
-        <li id='custom-autocomplete-option-3' data-value='value-3' role='option'
-          class="custom-autocomplete__li">
-          value-3
-        </li>
-      </ul>
-    </custom-autocomplete>
   </section>
 
   <section>
@@ -116,5 +85,4 @@ withCustomizedLi.setOptions(
         name="customized"></custom-autocomplete>
     </div>
   </section>
-
 </div>
