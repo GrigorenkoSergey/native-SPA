@@ -118,7 +118,7 @@ function setBooleanAttrIfNeeded(ctx, attrName, value) {
 export function attachStyles(ctx, initialStyles, customTemplate) {
   const resultStyles = [];
   const reset = document.getElementById("reset-css");
-  if (reset) resultStyles.push(reset.cloneNode());
+  if (reset) resultStyles.push(reset.cloneNode(true));
 
   const style = document.createElement("style");
   style.textContent = initialStyles;
@@ -127,7 +127,7 @@ export function attachStyles(ctx, initialStyles, customTemplate) {
   if (customTemplate) {
     const templateContent = customTemplate.content;
     const customStyles = templateContent.querySelector("style,link[rel=stylesheet]");
-    if (customStyles) resultStyles.push(customStyles);
+    if (customStyles) resultStyles.push(customStyles.cloneNode(true));
   }
 
   ctx.shadowRoot.prepend(...resultStyles);
