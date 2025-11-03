@@ -105,6 +105,8 @@ select {
 body {
   font-family: sans-serif;
   background-color: #f0f2f5;
+  max-width: 1920px;
+  margin: 0 auto;
 }
 
 main {

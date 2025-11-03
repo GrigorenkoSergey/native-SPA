@@ -79,6 +79,12 @@ module.exports = env => {
           test: /index\.html$/i,
           loader: "html-loader",
           options: {
+            sources: {
+              urlFilter: (attribute, value) => {
+                if (value === "./reset.css") return false;
+                return true;
+              },
+            },
             preprocessor: content => {
               const params = { base, content };
               return commonTemplate.replace(/\{\{(\w+)\}\}/g, (match, variable) => {
@@ -93,6 +99,12 @@ module.exports = env => {
         },
         {
           test: /\.(css|scss)$/,
+          resourceQuery: /raw/,
+          type: "asset/source",
+        },
+        {
+          test: /\.(css|scss)$/,
+          resourceQuery: { not: [/raw/] },
           use: [
             MiniCssExtractPlugin.loader,
             {
@@ -110,7 +122,10 @@ module.exports = env => {
     },
     plugins: [
       new CopyPlugin({
-        patterns: [{ from: "src/images", to: "images" }],
+        patterns: [
+          { from: "src/images", to: "images" },
+          { from: "src/reset.css", to: "reset.css" },
+        ],
       }),
       new MiniCssExtractPlugin({
         filename: chunkData => {
@@ -119,7 +134,6 @@ module.exports = env => {
         },
       }),
       ...Object.entries(pageInputs).map(([pageChunk, fullPath]) => {
-        console.log("fullpath", fullPath);
         return new HtmlWebpackPlugin({
           // удалим все, что идет до storybook
           filename: fullPath.replace(/.+?.storybook\/(.+)/, (m, p) => p.replace(".js", ".html")),

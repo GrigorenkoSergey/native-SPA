@@ -7,6 +7,20 @@
   margin-left: 1rem;
 }
 
+custom-autocomplete::part(link) {
+  margin-left: auto;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  text-decoration: none;
+  color: white;
+  background-color: rgb(78, 110, 158);
+}
+
 .hero-wiki-link {
   background-color: rgb(78, 110, 158);
   text-decoration: none;

@@ -1,6 +1,44 @@
 <h1>Глубоко вложенная страница</h1>
 
-<custom-autocomplete name="hero"></custom-autocomplete>
-
 <p>Пример синхронизации выпадашки с урлом. Перемещения по истории должны так же
   обновлять значение в выпадашке.</p>
+<custom-autocomplete name="hero"></custom-autocomplete>
+
+<template id="example">
+  <style>
+    li {
+      background-color: blueviolet
+    }
+
+    .arrow-custom {
+      --border: 2px solid black;
+      --width: 12px;
+      position: absolute;
+      right: 0.5rem;
+      content: "";
+      width: var(--width);
+      height: var(--width);
+      border-left: var(--border);
+      border-bottom: var(--border);
+      rotate: -45deg;
+      translate: 0 -33%;
+      pointer-events: none;
+    }
+
+    :host([open]) {
+      .arrow-custom {
+        rotate: 135deg;
+        translate: 0 33%;
+      }
+    }
+  </style>
+
+  <div id="arrow" class="arrow-custom"></div>
+</template>
+
+<p>
+  Пример настройки выпадашки. Поменяли значок стрелочки + поменяли стандартный
+  <code>background</code> для элементов списка.
+</p>
+<custom-autocomplete name="styles-example" template="example">
+</custom-autocomplete>

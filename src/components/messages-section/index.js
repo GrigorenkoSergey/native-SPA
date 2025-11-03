@@ -1,8 +1,8 @@
 import template from "./template.html";
-import "./style.css";
+import styles from "./style.css?raw";
 
 import "@/components/chat-message/index";
-import { initCustomElement } from "@/utils/customElementHelpers";
+import * as helpers from "@/utils/customElementHelpers";
 import { batchEffects } from "@/state-management/batchEffects";
 import messagesStore from "@/stores/messagesStore";
 
@@ -11,20 +11,22 @@ class MessagesSection extends HTMLElement {
     super();
     this.totalMessagesCount = 0;
     this.cleanups = [];
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
-    this.innerHTML = template;
+    this.shadowRoot.innerHTML = template;
+    helpers.attachStyles(this, styles);
 
     const cleanup = batchEffects(() => this._insertNewMessages());
     this.cleanups.push(cleanup);
 
-    this.input = this.querySelector(".messages-section__textarea");
+    this.input = this.shadowRoot.querySelector(".textarea");
     this.input.addEventListener("input", event => {
       event.target.style.height = event.target.scrollHeight + "px";
     });
 
-    const button = this.querySelector(".messages-section__button");
+    const button = this.shadowRoot.querySelector(".button");
     button.addEventListener("click", event => this._onMessageSend(event));
   }
 
@@ -57,7 +59,7 @@ class MessagesSection extends HTMLElement {
     this.totalMessagesCount = messages.length;
 
     const owner = this.getAttribute("owner");
-    const list = this.querySelector(".messages-section__list");
+    const list = this.shadowRoot.querySelector(".list");
 
     newMessages.forEach(item => {
       if (item.from !== owner) item.read = true;
@@ -83,4 +85,4 @@ class MessagesSection extends HTMLElement {
   }
 }
 
-initCustomElement("messages-section", MessagesSection);
+helpers.initCustomElement("messages-section", MessagesSection);

@@ -1,15 +1,14 @@
-chat-message {
-  --bg-parent: var(var(--bg-parent), white);
+:host {
   --img-width: 50px;
   display: flex;
   align-items: flex-end;
-
-  &[kind="out"] {
-    flex-flow: row-reverse;
-  }
 }
 
-.chat-message__img {
+:host([kind=out]) {
+  flex-flow: row-reverse;
+}
+
+.avatar {
   width: var(--img-width);
   aspect-ratio: 1;
   background-color: lightskyblue;
@@ -21,40 +20,40 @@ chat-message {
   }
 }
 
-.chat-message__bubble {
+.bubble {
   --bg-color: #e4e6eb;
   --border-radius: 1.25rem;
   margin-bottom: calc(var(--img-width) / 2);
   display: flex;
 
-  :where(chat-message[kind="out"]) & {
+  :host([kind="out"]) & {
     --bg-color: #0084ff;
     flex-flow: row-reverse;
   }
 }
 
-.chat-message__info-wrapper {
+.info-wrapper {
   padding: 0.8rem;
   background-color: var(--bg-color);
   border-radius: var(--border-radius);
   position: relative;
 }
 
-.chat-message__content {
+.content {
   position: relative;
   z-index: 1;
   background-color: var(--bg-color);
 
-  :where(chat-message[kind="in"]) & {
+  :host([kind="in"]) & {
     color: black;
   }
 
-  :where(chat-message[kind="out"]) & {
+  :host([kind="out"]) & {
     color: white;
   }
 }
 
-.chat-message__meta {
+.meta {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -62,17 +61,17 @@ chat-message {
   margin-right: 0.5rem;
 }
 
-.chat-message__date {
+.date {
   font-size: small;
   color: black;
 
-  :where(chat-message[kind="out"]) & {
+  :host([kind="out"]) & {
     color: white;
   }
 }
 
-.chat-message__read-state,
-.chat-message__read-state::after {
+.read-state,
+.read-state::after {
   --border-color: green;
   display: block;
   width: 5px;
@@ -83,16 +82,16 @@ chat-message {
   border-bottom: 1px solid var(--border-color);
 }
 
-:where(chat-message[read]) .chat-message__read-state::after {
+:host([read]) .read-state::after {
   content: "";
 }
 
-.chat-message__read-state::after {
+.read-state::after {
   rotate: none;
   translate: 3px -3px;
 }
 
-:where(chat-message[kind="out"]) .chat-message__read-state,
-:where(chat-message[kind="out"]) .chat-message__read-state::after {
+:host([kind="out"]) .read-state,
+:host([kind="out"]) .read-state::after {
   --border-color: ivory;
 }

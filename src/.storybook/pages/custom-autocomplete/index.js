@@ -41,9 +41,9 @@ export default () => {
   ];
 
   withCustomizedLi.renderLi = li => `\
-<li data-value=${li.value} class="custom-autocomplete__li">${li.value}<a href=${li.wiki} 
+<li part="li" data-value=${li.value}>${li.value} <a href=${li.wiki} 
     target="_blank"
-    class="hero-wiki-link">?</a>
+    part="link">?</a>
 </li>
 `;
 

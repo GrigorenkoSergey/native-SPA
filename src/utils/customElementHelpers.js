@@ -5,7 +5,7 @@ const attrToProp = attr => attr.replace(/_[A-Z]/g, m => `${m.toUpperCase()}`);
  * @param {String} name
  * @param {HTMLElement} constructor
  */
-function initCustomElement(name, constructor) {
+export function initCustomElement(name, constructor) {
   if (!customElements.get(name)) {
     customElements.define(name, constructor);
   }
@@ -17,7 +17,7 @@ function initCustomElement(name, constructor) {
  * @param {String} name - attribute name
  * @param {String} newValue - new attribute value
  */
-function syncPropsWithAttrs(ctx, name, newValue) {
+export function syncPropsWithAttrs(ctx, name, newValue) {
   ctx.constructor.observedAttributes.forEach(attr => {
     if (attr !== name) return;
 
@@ -34,11 +34,13 @@ function syncPropsWithAttrs(ctx, name, newValue) {
 }
 
 /**
- *
+ * Синхронизирует свойства, соответстующие наблюдаемым атрибутам и внутреннее состояние.
+ * Если аргументом передано имя атрибута - значит изменение пришло из attributeChangeCallback,
+ * то есть изменение вызвал какой-либо внейшний код (програмное изменение атрибута или свойства)
  * @param {HTMLElement} ctx
  * @param {String} attrName
  */
-function syncAttrsPropsState(ctx, attrName) {
+export function syncAttrPropsWithState(ctx, attrName) {
   const { _state } = ctx;
   if (!_state) throw new Error("_state property is required!");
 
@@ -60,7 +62,7 @@ function syncAttrsPropsState(ctx, attrName) {
  * @param {HTMLElement} ctx = this
  * @param  {String[]} props Element properties that must be synchronized with attributes
  */
-function applyGetSet(ctx, ...props) {
+export function applyGetSet(ctx, ...props) {
   props.forEach(prop => {
     const hiddenKey = `_${prop}`;
     ctx[hiddenKey] = ctx[prop];
@@ -106,4 +108,68 @@ function setBooleanAttrIfNeeded(ctx, attrName, value) {
   else ctx.removeAttribute(attrName);
 }
 
-export { initCustomElement, syncAttrsPropsState, syncPropsWithAttrs, applyGetSet };
+/**
+ * Вставка в компонент ссылки на общий сброс стилей + добавление тега style, в который будет добавлены
+ * стили, которые мы импортировали как строку. Компонент должен использовать shadow DOM.
+ * @param {HTMLElement} ctx
+ * @param {String} initialStyles - стили, которые импортируем как строку и которые будут вставлены после reset.css
+ * @param {HTMLElement} customTemplate -
+ */
+export function attachStyles(ctx, initialStyles, customTemplate) {
+  const resultStyles = [];
+  const reset = document.getElementById("reset-css");
+  if (reset) resultStyles.push(reset.cloneNode());
+
+  const style = document.createElement("style");
+  style.textContent = initialStyles;
+  resultStyles.push(style);
+
+  if (customTemplate) {
+    const templateContent = customTemplate.content;
+    const customStyles = templateContent.querySelector("style,link[rel=stylesheet]");
+    if (customStyles) resultStyles.push(customStyles);
+  }
+
+  ctx.shadowRoot.prepend(...resultStyles);
+}
+
+/**
+ * Ищет по ID с учетом возможного нахождения в shadow tree выше по дереву
+ * @param {String} id - ID по которому нужно найти элемент
+ * @param {HTMLElement} startElement - элемент, от которого начинаем поиск вверх по дереву (сначала ищем в нем)
+ * @returns {HTML}
+ */
+export function findById(id, startElement) {
+  let root = startElement;
+  let element = root.querySelector(`#${id}`);
+
+  while (!element) {
+    root = root.getRootNode();
+    if (root instanceof ShadowRoot) root = root.host;
+
+    element = root.querySelector(`#${id}`);
+    if (root === document) return element;
+  }
+
+  return element;
+}
+
+/**
+ * Ищет в шаблоне элементы с определенным ID и заменяет ими элементы с тем же ID в shadowDom
+ * @param {ShadowRoot} shadowRoot
+ * @param {HTMLTemplateElement} customTemplate
+ * @returns
+ */
+export function replaceToCustomIds(shadowRoot, customTemplate) {
+  if (!customTemplate) return;
+
+  const templateIds = Array.from(shadowRoot.querySelectorAll("[id]"), elem => elem.id);
+  if (templateIds.length === 0) return;
+
+  for (const id of templateIds) {
+    const elementToReplace = customTemplate.content.getElementById(id);
+    if (elementToReplace) {
+      shadowRoot.getElementById(id).replaceWith(elementToReplace);
+    }
+  }
+}

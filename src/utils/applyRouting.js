@@ -53,15 +53,14 @@ export function applyRouting({ defaultPage = "pages/page-1/", dynamicRoutes = []
   });
 
   document.addEventListener("click", async event => {
-    const isInnerLink = "innerLink" in event.target.dataset;
-    if (!isInnerLink) return;
+    const path = event.composedPath();
+    const innerLink = path.find(item => item instanceof Element && item.hasAttribute("data-inner-link"));
+    if (!innerLink) return;
 
     event.preventDefault();
 
-    const link = event.target;
-
     const currentHref = window.location.href;
-    const newHref = new URL(link.href, window.location.href).href;
+    const newHref = new URL(innerLink.href, window.location.href).href;
 
     if (newHref !== currentHref) {
       window.history.pushState(null, "", newHref);

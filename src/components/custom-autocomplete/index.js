@@ -1,21 +1,20 @@
 import template from "./template.html";
-import "./style.css";
+import styles from "./style.css?raw";
 
 import { listenClickOutsideOnce } from "@/utils/listenClickOutsideOnce";
 import { generateIdInDocument } from "@/utils/generateIdInDocument";
-import { syncAttrsPropsState, initCustomElement, applyGetSet, syncPropsWithAttrs } from "@/utils/customElementHelpers";
+import {
+  syncAttrPropsWithState,
+  initCustomElement,
+  applyGetSet,
+  syncPropsWithAttrs,
+  attachStyles,
+  findById,
+  replaceToCustomIds,
+} from "@/utils/customElementHelpers";
 
 // TODO добавить крестик
 // TODO добавить видимость выбранного элемента в случае длинных списков (возможно, прокрутка к нему)
-/*
-  TODO посмотреть, как можно добавить настройку слотов. Через светлый DOM или через теневой. 
-  К примеру, через светлый DOM можно добавить свойство, которое ищет по id определенный шаблон, в котором
-  реализованы нужные элементы (например, стрелка или значок очистки). И при его наличии меняет стандартную реализацию... 
-  Если буду дальше использовать теневой DOM, то там уже есть слоты... 
-
-  В общем, подумать.
-*/
-
 const liClasses = {
   keyboardFocused: "keyboard-focused",
 };
@@ -30,6 +29,8 @@ class CustomAutocomplete extends HTMLElement {
 
   constructor() {
     super();
+
+    this.attachShadow({ mode: "open" });
 
     // properties that will be synchronized with attributes
     this.open = this.hasAttribute("open");
@@ -61,11 +62,17 @@ class CustomAutocomplete extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (!this._isRendered) return;
 
-    if (name === "value" && oldValue !== newValue) {
+    if (oldValue !== newValue) {
       this.dispatchEvent(
         new CustomEvent(events.change, {
           bubbles: true,
-          detail: { oldValue, newValue },
+          composed: true,
+          detail: {
+            oldValue,
+            newValue,
+            attribute: name,
+            source: this._isInnerAttrSet ? "user" : "program",
+          },
         }),
       );
     }
@@ -73,29 +80,28 @@ class CustomAutocomplete extends HTMLElement {
     if (this._isInnerAttrSet) return;
 
     syncPropsWithAttrs(this, name, newValue);
-
-    return this.render(name, newValue);
+    this.render(name, newValue);
   }
 
   connectedCallback() {
-    if (this.hasAttribute("prerendered")) {
-      const options = [...this.querySelectorAll("li")].map(item => item.getAttribute("data-value"));
-      this._state.options = options;
-    } else {
-      this.innerHTML = template;
-    }
+    this.shadowRoot.innerHTML = template;
+
+    const templateAttr = this.getAttribute("template");
+    const customTemplate = templateAttr && findById(templateAttr, this);
+    attachStyles(this, styles, customTemplate);
+    replaceToCustomIds(this.shadowRoot, customTemplate);
 
     this.setAttribute("role", "combobox");
     this.setAttribute("aria-haspopup", "listbox");
 
-    const input = this.querySelector("input");
+    const input = this.shadowRoot.querySelector("input");
 
     let name = this.getAttribute("name");
     if (!name) throw new Error("Custom-autocomplete: attribute 'name' is required!");
     input.setAttribute("name", name);
     this._nodes.input = input;
 
-    const ul = this.querySelector("ul");
+    const ul = this.shadowRoot.querySelector("ul");
     this._nodes.ul = ul;
 
     const ulId = generateIdInDocument("custom-autocomplete");
@@ -114,18 +120,13 @@ class CustomAutocomplete extends HTMLElement {
     this._init();
   }
 
-  renderLi(item) {
-    return (
-      `<li id='${generateIdInDocument("option")}'` +
-      "class='custom-autocomplete__li' " +
-      `data-value='${item}' role='option'>` +
-      item +
-      "</li>"
-    );
+  renderLi(item, index) {
+    return `<li part="li" id='option-${index}' data-value='${item}' role='option'>${item}</li>`;
   }
 
+  // calling with the attribute name will mean that the render is initiated from attributeChangeCallback
   render(attrName) {
-    syncAttrsPropsState(this, attrName);
+    syncAttrPropsWithState(this, attrName);
 
     const { _state, _nodes } = this;
     const { value, open } = _state;
@@ -158,34 +159,34 @@ class CustomAutocomplete extends HTMLElement {
     const { options, value } = this._state;
     input.value = value;
 
-    if (!this.hasAttribute("prerendered")) {
-      ul.replaceChildren([]); // there the list element is given as an example, so we delete it
+    ul.replaceChildren([]); // there the list element is given as an example, so we delete it
 
-      const lis = options.map((item, index) => this.renderLi(item, index));
-      ul.insertAdjacentHTML("afterbegin", lis.join(""));
-    }
+    const lis = options.map((item, index) => this.renderLi(item, index));
+    ul.insertAdjacentHTML("afterbegin", lis.join(""));
 
     this.render();
   }
 
   _attachHandlers() {
-    this.addEventListener("click", this._onInputClick);
-    this.addEventListener("click", this._onClick);
-    this.addEventListener("keydown", this._onKeydown);
-    this.addEventListener("input", this._onInput);
+    // Note that here, since all clicks are on the shadow root, the order of processing is important. And does not depend on ascent
+    this.shadowRoot.addEventListener("click", this._onInputClick);
+    this.shadowRoot.addEventListener("click", this._onClick);
+    this.shadowRoot.addEventListener("keydown", this._onKeydown);
+    this.shadowRoot.addEventListener("input", this._onInput);
   }
 
   _onClick(event) {
-    const { _state, _nodes } = this;
+    const { host } = this.getRootNode();
+    const { _state, _nodes } = host;
 
     if (_state.open) {
-      listenClickOutsideOnce(this, () => {
+      listenClickOutsideOnce(host, () => {
         if (!_state.open) return;
 
         _state.open = false;
         _state.isEditing = false;
         if (_nodes.input.value === "") _state.value = "";
-        this.render();
+        host.render();
       });
     }
 
@@ -194,20 +195,22 @@ class CustomAutocomplete extends HTMLElement {
       _state.value = target.getAttribute("data-value");
       _nodes.selected = target;
       _state.open = false;
-      this.render();
+      host.render();
     }
   }
 
   _onInputClick(event) {
-    if (event.target !== this._nodes.input) return;
+    const { host } = this.getRootNode();
+    if (event.target !== host._nodes.input) return;
 
-    const { _state } = this;
+    const { _state } = host;
     _state.open = !_state.open;
-    this.render();
+    host.render();
   }
 
   _onInput() {
-    const { _state, _nodes } = this;
+    const { host } = this.getRootNode();
+    const { _state, _nodes } = host;
     _state.isEditing = true;
 
     if (!_nodes.input.value) {
@@ -215,21 +218,23 @@ class CustomAutocomplete extends HTMLElement {
       _state.value = "";
     }
 
-    this.render();
+    host.render();
     _nodes.input.onblur = () => {
       _state.isEditing = false;
     };
   }
 
   _onKeydown(event) {
+    const { host } = this.getRootNode();
+
     const { key } = event;
     if (key === "ArrowDown" || key === "ArrowUp") {
-      return this._onArrowKeydown(event);
+      return host._onArrowKeydown(event);
     }
 
-    const { _state } = this;
+    const { _state } = host;
     if (key === "Enter") {
-      const currentPointed = this._getCurrentPointedElement();
+      const currentPointed = host._getCurrentPointedElement();
       if (!currentPointed) return;
 
       _state.value = currentPointed.dataset.value;
@@ -237,13 +242,13 @@ class CustomAutocomplete extends HTMLElement {
       _state.open = false;
       _state.isEditing = false;
 
-      return this.render();
+      return host.render();
     }
 
     if (key === "Escape") {
       const wasOpen = _state.open;
       _state.open = false;
-      return wasOpen && this.render();
+      return wasOpen && host.render();
     }
   }
 

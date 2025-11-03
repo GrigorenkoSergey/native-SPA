@@ -112,6 +112,12 @@ module.exports = env => {
           test: /(index|404)\.html$/i,
           loader: "html-loader",
           options: {
+            sources: {
+              urlFilter: (attribute, value) => {
+                if (value === "./reset.css") return false;
+                return true;
+              },
+            },
             preprocessor: content => {
               const params = { base, content };
               return commonTemplate.replace(/\{\{(\w+)\}\}/g, (match, variable) => {
@@ -126,6 +132,12 @@ module.exports = env => {
         },
         {
           test: /\.(css|scss)$/,
+          resourceQuery: /raw/,
+          type: "asset/source",
+        },
+        {
+          test: /\.(css|scss)$/,
+          resourceQuery: { not: [/raw/] },
           use: [
             MiniCssExtractPlugin.loader,
             {
@@ -143,7 +155,10 @@ module.exports = env => {
     },
     plugins: [
       new CopyPlugin({
-        patterns: [{ from: "src/images", to: "images" }],
+        patterns: [
+          { from: "src/images", to: "images" },
+          { from: "src/reset.css", to: "reset.css" },
+        ],
       }),
       new MiniCssExtractPlugin({
         filename: chunkData => {

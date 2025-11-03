@@ -108,7 +108,7 @@ test("Проверка перемещений по истории", async ({ pag
 });
 
 test("Проверка подхода синхронизации выпадашки с адресом в урле", async ({ page }) => {
-  const input = page.getByRole("textbox");
+  const input = page.locator('input[name="hero"]');
   await test.step("Если урл пуст, в значении выпадашки так же пусто", async () => {
     await page.goto("http://localhost:8080/native-SPA/pages/page-1/page-1-deeper-page/");
     await expect(input).toHaveValue("");

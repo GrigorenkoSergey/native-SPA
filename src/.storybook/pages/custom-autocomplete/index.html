@@ -48,9 +48,9 @@ autocomplete.setOptions(["Опция-1", "Опция-2", "Опция-3", "Опц
       <pre>const withCustomizedLi = document.querySelector(".customized-li");
 
 withCustomizedLi.renderLi = li => `\
-&lt;li data-value=${li.value}>
+&lt;li part="li" data-value=${li.value}>
   ${li.value}
-  &lt;a href=${li.wiki} target="_blank" class="hero-wiki-link">
+  &lt;a part="link" href=${li.wiki} target="_blank" >
     ?
   &lt;/a>
 &lt;/li>
@@ -80,7 +80,6 @@ withCustomizedLi.setOptions(
 );
 </pre>
       </p>
-
       <custom-autocomplete class="customized-li"
         name="customized"></custom-autocomplete>
     </div>

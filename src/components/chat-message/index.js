@@ -1,24 +1,28 @@
 import template from "./template.html";
-import { initCustomElement } from "@/utils/customElementHelpers";
-import "./style.css";
+import styles from "./style.css?raw";
+
+import { initCustomElement, attachStyles } from "@/utils/customElementHelpers";
 
 class ChatMessage extends HTMLElement {
   constructor() {
     super();
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
     const initialContent = this.innerHTML;
-    this.innerHTML = template;
+    console.log(initialContent);
+    this.shadowRoot.innerHTML = template;
+    attachStyles(this, styles);
 
-    this.querySelector(".chat-message__content").innerHTML = initialContent;
+    this.shadowRoot.querySelector(".content").innerHTML = initialContent;
 
-    const timeContainer = this.querySelector(".chat-message__date");
+    const timeContainer = this.shadowRoot.querySelector(".date");
     const date = new Date(+this.getAttribute("timestamp"));
     timeContainer.textContent = date.toLocaleTimeString("ru");
 
     const owner = this.getAttribute("owner");
-    const img = this.querySelector(".chat-message__img");
+    const img = this.shadowRoot.querySelector(".avatar");
     img.src = `images/${owner}.png`;
   }
 }

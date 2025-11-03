@@ -1,28 +1,28 @@
-custom-autocomplete {
+:host {
   display: block;
   position: relative;
 }
 
-custom-autocomplete[hidden] {
+:host([hidden]) {
   display: none
 }
 
-custom-autocomplete[open] {
-  .custom-autocomplete__ul {
+:host([open]) {
+  ul {
     display: block;
   }
 
-  .custom-autocomplete__arrow {
+  .arrow {
     rotate: 180deg;
   }
 }
 
-.custom-autocomplete__input-wrapper {
+.input-wrapper {
   display: flex;
   align-items: center;
 }
 
-.custom-autocomplete__input {
+input {
   display: block;
   padding: 8px;
   font-size: 16px;
@@ -30,7 +30,7 @@ custom-autocomplete[open] {
   cursor: pointer;
 }
 
-.custom-autocomplete__ul {
+ul {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -41,7 +41,7 @@ custom-autocomplete[open] {
   z-index: 100;
 }
 
-.custom-autocomplete__li {
+li {
   display: flex;
   align-items: center;
   padding: 8px;
@@ -62,7 +62,7 @@ custom-autocomplete[open] {
   }
 }
 
-.custom-autocomplete__arrow {
+.arrow {
   position: absolute;
   right: 0.2rem;
   pointer-events: none;
