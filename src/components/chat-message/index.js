@@ -11,7 +11,6 @@ class ChatMessage extends HTMLElement {
 
   connectedCallback() {
     const initialContent = this.innerHTML;
-    console.log(initialContent);
     this.shadowRoot.innerHTML = template;
     attachStyles(this, styles);
 

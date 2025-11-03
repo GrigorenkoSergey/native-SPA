@@ -15,18 +15,19 @@ class MessagesSection extends HTMLElement {
   }
 
   connectedCallback() {
-    this.shadowRoot.innerHTML = template;
+    const { shadowRoot } = this;
+    shadowRoot.innerHTML = template;
     helpers.attachStyles(this, styles);
 
     const cleanup = batchEffects(() => this._insertNewMessages());
     this.cleanups.push(cleanup);
 
-    this.input = this.shadowRoot.querySelector(".textarea");
+    this.input = shadowRoot.querySelector(".textarea");
     this.input.addEventListener("input", event => {
       event.target.style.height = event.target.scrollHeight + "px";
     });
 
-    const button = this.shadowRoot.querySelector(".button");
+    const button = shadowRoot.querySelector(".button");
     button.addEventListener("click", event => this._onMessageSend(event));
   }
 
