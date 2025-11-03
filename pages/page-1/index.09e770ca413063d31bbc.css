@@ -1,0 +1,13 @@
+body {
+  display: flex;
+  flex-direction: column;
+  background-color: #f0f2f5;
+}
+
+main {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 1rem;
+}

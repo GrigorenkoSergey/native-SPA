@@ -105,71 +105,10 @@ select {
 body {
   font-family: sans-serif;
   background-color: #f0f2f5;
+  max-width: 1920px;
+  margin: 0 auto;
 }
 
 main {
   padding-inline: 1rem;
-}
-.flex {
-  display: flex;
-  gap: var(--gap, 1rem);
-}
-
-.grid {
-  display: grid;
-  gap: var(--gap, 1rem);
-}
-
-.flow > *:where(:not(:first-child)) {
-  margin-top: var(--flow-space, 1rem);
-}
-
-/* visibility-hidden pattern */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  /* added line */
-  border: 0;
-}
-.main-nav {
-  background-color: #f0f0f0;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.main-nav__ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-
-  & > li {
-    flex-grow: 1;
-  }
-}
-
-.main-nav__a {
-  display: block;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  text-decoration: none;
-  color: #333;
-  background-color: #fff;
-  transition: background-color 0.2s;
-}
-
-.main-nave__a--active {
-  background-color: #b1bfd3;
-}
-
-.main-nav__a:hover {
-  background-color: #e0e0e0;
 }
