@@ -1,1 +1,0 @@
-var e={d:(t,o)=>{for(var a in o)e.o(o,a)&&!e.o(t,a)&&Object.defineProperty(t,a,{enumerable:!0,get:o[a]})},o:(e,t)=>Object.prototype.hasOwnProperty.call(e,t)},t={};e.d(t,{A:()=>o});const o=()=>{const e=document.querySelector("h1"),t=window.location.href.match(/pages\/dynamic\/(\d+)/)[1];e.textContent=`Hello, dynamic page ${t}!`},a=t.A;export{a as default};
