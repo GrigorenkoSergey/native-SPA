@@ -20,7 +20,7 @@ test("Базовая логика переключений страниц. Хе�
   const pigletHeader = page.getByRole("heading", { name: "Пятачок" });
   const winnieHeader = page.getByRole("heading", { name: "Винни Пух" });
 
-  const checkSendingMessage = async message => {
+  const checkSendingMessage = async (message: string) => {
     await expect(page.getByText(message)).not.toBeInViewport();
     await input.fill(message);
     await submit.click();
@@ -123,8 +123,8 @@ test("Проверка подхода синхронизации выпадаш�
     await expect(input).toHaveValue(option1Text);
   });
 
-  const checkQueryIsInUrl = async optionText => {
-    const heroQuery = await page.evaluate(() => decodeURI(new URLSearchParams(window.location.search).get("hero")));
+  const checkQueryIsInUrl = async (optionText: string) => {
+    const heroQuery = await page.evaluate(() => decodeURI(new URLSearchParams(window.location.search).get("hero") || "") );
     await expect(() => expect(heroQuery).toEqual(optionText)).toPass();
   };
 

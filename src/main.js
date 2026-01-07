@@ -1,9 +1,0 @@
-import "./utilities.css";
-import "@/components/main-nav";
-import { applyRouting } from "@/utils/applyRouting";
-
-console.log("main");
-
-const dynamicRoutes = [[/pages\/dynamic\/\w+/, "pages/dynamic-page/"]];
-
-applyRouting({ dynamicRoutes });

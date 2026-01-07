@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "strict": true,
+    "noImplicitAny": true,
+    "module": "es2020",
+    "target": "es6",
+    "jsx": "react",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "sourceMap": true
+  },
+  "files": [
+    "src/declarations.d.ts"
+  ],
+  "include": [
+    "src/**/*",
+    "tests/**/*"
+  ]
+}

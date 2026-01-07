@@ -1,4 +1,5 @@
-import "@/components/custom-autocomplete";
+import { CustomAutocomplete, type CEvent } from "@/components/custom-autocomplete";
+
 import "./style.css";
 
 import { createStore, derive } from "@/state-management";
@@ -9,9 +10,13 @@ const logic = () => {
   const options = ["Винни Пух", "Пятачок", "Иа", "Сова", "Кролик"];
 
   const heroAutocomplete = document.querySelector("[name=hero]");
-  heroAutocomplete.setOptions(options);
-
   const styledAutocomplete = document.querySelector("[name='styles-example']");
+  if (
+    !(heroAutocomplete instanceof CustomAutocomplete) ||
+    !(styledAutocomplete instanceof CustomAutocomplete)
+  ) throw new Error();
+
+  heroAutocomplete.setOptions(options);
   styledAutocomplete.setOptions(options);
 
   const store = createStore({ hero: decodeURI(getQuery() || "") });
@@ -21,20 +26,21 @@ const logic = () => {
     heroAutocomplete.value = store.hero;
   });
 
-  const syncUrlWithValue = data => {
-    const { newValue, attribute, source } = data.detail;
+  const syncUrlWithValue = (event: CEvent) => {
+    const { newValue, attribute, source } = event.detail;
     if (attribute !== "value") return;
     if (source === "program") return;
 
-    store.hero = newValue;
+    store.hero = String(newValue);
 
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set("hero", store.hero);
-    window.history.pushState({}, null, newUrl.href);
+    window.history.pushState({}, "", newUrl.href);
   };
 
-  heroAutocomplete.addEventListener(heroAutocomplete.events.change, syncUrlWithValue);
-  styledAutocomplete.addEventListener(styledAutocomplete.events.change, syncUrlWithValue);
+  const changeEvent = heroAutocomplete.events.change;
+  heroAutocomplete.addEventListener(changeEvent, syncUrlWithValue as EventListener);
+  styledAutocomplete.addEventListener(changeEvent, syncUrlWithValue as EventListener);
 
   return () => cleanup();
 };

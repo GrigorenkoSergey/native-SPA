@@ -1,10 +1,10 @@
-import { createStore } from "../state-management/createStore.js";
+import { createStore } from "../state-management/createStore";
 console.log("init common store");
 
 let diff = 10000;
 const getExampleDate = () => {
   diff -= 1000;
-  return new Date() - diff;
+  return Number(new Date()) - diff;
 };
 
 const messagesStore = createStore({

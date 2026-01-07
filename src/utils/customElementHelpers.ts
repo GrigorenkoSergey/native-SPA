@@ -1,24 +1,42 @@
-const propToAttr = prop => prop.replace(/[A-Z]/g, m => `_${m.toLowerCase()}`);
-const attrToProp = attr => attr.replace(/_[A-Z]/g, m => `${m.toUpperCase()}`);
+const propToAttr = (prop: string) => prop.replace(/[A-Z]/g, m => `_${m.toLowerCase()}`);
+const attrToProp = (attr: string) => attr.replace(/_[A-Z]/g, m => `${m.toUpperCase()}`);
 
 /**
  * @param {String} name
  * @param {HTMLElement} constructor
  */
-export function initCustomElement(name, constructor) {
+export function initCustomElement(name: string, constructor: CustomElementConstructor) {
   if (!customElements.get(name)) {
     customElements.define(name, constructor);
   }
 }
 
+interface CustomElementConstructor {
+  new(): CustomElementInstance;
+  observedAttributes?: string[],
+}
+
+interface CustomElementInstance extends HTMLElement {
+  [p: string]: unknown;
+
+  constructor: CustomElementConstructor;
+  _state?: {
+    [stateProp: string]: unknown;
+  },
+}
+
 /**
  * When an attribute changes, synchronizes the properties of the element
- * @param {HTMLElement} ctx = this
- * @param {String} name - attribute name
- * @param {String} newValue - new attribute value
+ * @param ctx = this
+ * @param name - attribute name
+ * @param newValue - new attribute value
  */
-export function syncPropsWithAttrs(ctx, name, newValue) {
-  ctx.constructor.observedAttributes.forEach(attr => {
+export function syncPropsWithAttrs(
+  ctx: CustomElementInstance,
+  name: string,
+  newValue: unknown,
+) {
+  ctx.constructor.observedAttributes?.forEach(attr => {
     if (attr !== name) return;
 
     const propName = attrToProp(attr);
@@ -40,14 +58,14 @@ export function syncPropsWithAttrs(ctx, name, newValue) {
  * @param {HTMLElement} ctx
  * @param {String} attrName
  */
-export function syncAttrPropsWithState(ctx, attrName) {
+export function syncAttrPropsWithState(ctx: CustomElementInstance, attrName: string) {
   const { _state } = ctx;
   if (!_state) throw new Error("_state property is required!");
 
   ctx._isInnerAttrSet = !attrName;
   const shouldSetProp = ctx._isInnerAttrSet;
 
-  ctx.constructor.observedAttributes.forEach(attr => {
+  ctx.constructor.observedAttributes?.forEach(attr => {
     const propName = attrToProp(attr);
     if (shouldSetProp) ctx[propName] = _state[propName];
     else _state[propName] = ctx[propName];
@@ -59,10 +77,13 @@ export function syncAttrPropsWithState(ctx, attrName) {
 /**
  * For each property creates a protected and synchronizes attributes with it
  * To find a strategy (infer type), the property must be previously defined
- * @param {HTMLElement} ctx = this
- * @param  {String[]} props Element properties that must be synchronized with attributes
- */
-export function applyGetSet(ctx, ...props) {
+ **/
+export function applyGetSet(
+  /** this */
+  ctx: CustomElementInstance,
+  /** Element properties that must be synchronized with attributes */
+  ...props: string[]
+) {
   props.forEach(prop => {
     const hiddenKey = `_${prop}`;
     ctx[hiddenKey] = ctx[prop];
@@ -83,24 +104,20 @@ export function applyGetSet(ctx, ...props) {
   });
 }
 
-/**
- *
- * @param {HTMLElement} ctx
- * @param {String} attrName
- * @param {Boolean} value
- */
-function setNonBooleanAttrIfNeeded(ctx, attrName, value) {
+function setNonBooleanAttrIfNeeded(
+  ctx: CustomElementInstance,
+  attrName: string,
+  value: string,
+) {
   const attrValue = ctx.getAttribute(attrName);
   if (attrValue !== String(value)) ctx.setAttribute(attrName, value);
 }
 
-/**
- *
- * @param {HTMLElement} ctx
- * @param {String} attrName
- * @param {String|Number} value
- */
-function setBooleanAttrIfNeeded(ctx, attrName, value) {
+function setBooleanAttrIfNeeded(
+  ctx: CustomElementInstance,
+  attrName: string,
+  value: string | number | boolean
+) {
   const attrValue = ctx.hasAttribute(attrName);
   if (attrValue === value) return;
 
@@ -111,11 +128,13 @@ function setBooleanAttrIfNeeded(ctx, attrName, value) {
 /**
  * Вставка в компонент ссылки на общий сброс стилей + добавление тега style, в который будет добавлены
  * стили, которые мы импортировали как строку. Компонент должен использовать shadow DOM.
- * @param {HTMLElement} ctx
- * @param {String} initialStyles - стили, которые импортируем как строку и которые будут вставлены после reset.css
- * @param {HTMLElement} customTemplate -
- */
-export function attachStyles(ctx, initialStyles, customTemplate) {
+ **/
+export function attachStyles(
+  ctx: HTMLElement,
+  /** Стили, которые импортируем как строку и которые будут вставлены после reset.css */
+  initialStyles: string,
+  customTemplate?: HTMLTemplateElement | null,
+) {
   const resultStyles = [];
   const reset = document.getElementById("reset-css");
   if (reset) resultStyles.push(reset.cloneNode(true));
@@ -130,24 +149,26 @@ export function attachStyles(ctx, initialStyles, customTemplate) {
     if (customStyles) resultStyles.push(customStyles.cloneNode(true));
   }
 
-  ctx.shadowRoot.prepend(...resultStyles);
+  ctx.shadowRoot?.prepend(...resultStyles);
 }
 
 /**
  * Ищет по ID с учетом возможного нахождения в shadow tree выше по дереву
- * @param {String} id - ID по которому нужно найти элемент
- * @param {HTMLElement} startElement - элемент, от которого начинаем поиск вверх по дереву (сначала ищем в нем)
- * @returns {HTML}
  */
-export function findById(id, startElement) {
-  let root = startElement;
-  let element = root.querySelector(`#${id}`);
+export function findById(
+  id: string,
+  startElement: HTMLElement
+) {
+  let root: Node | Document | ShadowRoot = startElement;
+  let element = (root as HTMLElement).querySelector(`#${id}`);
 
   while (!element) {
     root = root.getRootNode();
     if (root instanceof ShadowRoot) root = root.host;
 
-    element = root.querySelector(`#${id}`);
+    if (root instanceof HTMLElement) {
+      element = root.querySelector(`#${id}`);
+    }
     if (root === document) return element;
   }
 
@@ -156,20 +177,18 @@ export function findById(id, startElement) {
 
 /**
  * Ищет в шаблоне элементы с определенным ID и заменяет ими элементы с тем же ID в shadowDom
- * @param {ShadowRoot} shadowRoot
- * @param {HTMLTemplateElement} customTemplate
- * @returns
  */
-export function replaceToCustomIds(shadowRoot, customTemplate) {
-  if (!customTemplate) return;
-
+export function replaceToCustomIds(
+  shadowRoot: ShadowRoot,
+  customTemplate: HTMLTemplateElement
+) {
   const templateIds = Array.from(shadowRoot.querySelectorAll("[id]"), elem => elem.id);
   if (templateIds.length === 0) return;
 
   for (const id of templateIds) {
     const elementToReplace = customTemplate.content.getElementById(id);
     if (elementToReplace) {
-      shadowRoot.getElementById(id).replaceWith(elementToReplace);
+      shadowRoot.getElementById(id)?.replaceWith(elementToReplace);
     }
   }
 }

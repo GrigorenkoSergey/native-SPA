@@ -5,7 +5,7 @@ console.log("Page-2. Должно быть выведено один раз пр
 
 const logic = () => {
   const h1 = document.querySelector("h1");
-  h1.textContent = "Пятачок";
+  if (h1) h1.textContent = "Пятачок";
 };
 
 export default logic;

@@ -1,4 +1,4 @@
-import { applyRouting } from "../utils/applyRouting.js";
+import { applyRouting } from "../utils/applyRouting";
 import "../utilities.css";
 import "./style.css";
 

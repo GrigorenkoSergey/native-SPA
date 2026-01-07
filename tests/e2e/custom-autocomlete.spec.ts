@@ -1,16 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
+import { assert } from "@/utils/assert";
 
-/**
-  @typedef {import('@playwright/test').Locator} Locator
-  @typedef {import('@playwright/test').Page} Page
- */
-
-/** @type {Locator} */
-let elem;
-/** @type {Locator} */
-let input;
-/** @type {Page} */
-let page;
+let elem: Locator;
+let input: Locator;
+let page: Page;
 
 const totalOptionsCount = 5;
 const option1Text = "Опция-1";
@@ -37,9 +30,9 @@ const checkIsClosed = async () => {
 };
 
 /**
- * @param {string} optionText - Текстовое значение опции, которая должна быть выбрана.
+ * @param optionText - Текстовое значение опции, которая должна быть выбрана.
  */
-const checkIsOptionSelected = async optionText => {
+const checkIsOptionSelected = async (optionText: string) => {
   await expect(input).toHaveValue(optionText);
   await expect(elem.getByRole("option").filter({ hasText: optionText })).toHaveAttribute("aria-selected", "true");
   await expect(elem.locator("[aria-selected='true']")).toHaveCount(1);
@@ -47,18 +40,18 @@ const checkIsOptionSelected = async optionText => {
 
 /**
  *
- * @param {Number} maxRenders - ожидаемое кол-во рендеров
+ * @param maxRenders - ожидаемое кол-во рендеров
  */
-const checkExpectedRendersCount = async maxRenders => {
+const checkExpectedRendersCount = async (maxRenders: number) => {
   const rendersCount = page.getByTestId("basic-renders-count");
   await expect(rendersCount).toHaveText(String(maxRenders));
 };
 
 /**
  *
- * @param {String} optionText - опция, которую нужно выбрать. После выбора элемент будет закрыт.
+ * @param optionText - опция, которую нужно выбрать. После выбора элемент будет закрыт.
  */
-const selectOption = async optionText => {
+const selectOption = async (optionText: string) => {
   const hasOpenAttr = (await elem.getAttribute("open")) !== null;
   if (!hasOpenAttr) await elem.click();
 
@@ -159,7 +152,7 @@ test("Фильтрация по вводу", async () => {
 });
 
 test("Очистка ввода", async () => {
-  const checkOptionIsNotSelected = async optionText => {
+  const checkOptionIsNotSelected = async (optionText: string) => {
     await expect(elem.getByRole("option").filter({ hasText: optionText })).not.toHaveAttribute("aria-selected", "true");
   };
 
@@ -246,7 +239,7 @@ test("Изменения атрибутов снаружи", async () => {
   await test.step("Смена value", async () => {
     await page.evaluate(option2Text => {
       const elem = document.querySelector("[data-testid=basic]");
-      elem.setAttribute("value", option2Text);
+      elem?.setAttribute("value", option2Text);
     }, option2Text);
     expectedRenders += 1;
 
@@ -263,7 +256,7 @@ test("Изменения атрибутов снаружи", async () => {
   await test.step("Смена open", async () => {
     await page.evaluate(() => {
       const elem = document.querySelector("[data-testid=basic]");
-      elem.setAttribute("open", "");
+      elem?.setAttribute("open", "");
     });
     expectedRenders += 1;
 
@@ -275,8 +268,8 @@ test("Изменения атрибутов снаружи", async () => {
   await test.step("Смена нескольких атрибутов синхронно", async () => {
     await page.evaluate(option1Text => {
       const elem = document.querySelector("[data-testid=basic]");
-      elem.setAttribute("value", option1Text);
-      elem.removeAttribute("open");
+      elem?.setAttribute("value", option1Text);
+      elem?.removeAttribute("open");
     }, option1Text);
 
     await expect(input).toHaveValue(option1Text);
@@ -290,7 +283,7 @@ test("Изменения опций снаружи", async () => {
   await test.step("Смена value", async () => {
     await page.evaluate(option2Text => {
       const elem = document.querySelector("[data-testid=basic]");
-      elem.value = option2Text;
+      if (elem && "value" in elem) elem.value = option2Text;
     }, option2Text);
     expectedRenders += 1;
 
@@ -307,7 +300,7 @@ test("Изменения опций снаружи", async () => {
   await test.step("Смена open", async () => {
     await page.evaluate(() => {
       const elem = document.querySelector("[data-testid=basic]");
-      elem.open = true;
+      if (elem && "open" in elem) elem.open = true;
     });
     expectedRenders += 1;
 
@@ -319,8 +312,10 @@ test("Изменения опций снаружи", async () => {
   await test.step("Смена нескольких атрибутов синхронно", async () => {
     await page.evaluate(option1Text => {
       const elem = document.querySelector("[data-testid=basic]");
-      elem.setAttribute("value", option1Text);
-      elem.removeAttribute("open");
+      if (elem) {
+        elem.setAttribute("value", option1Text);
+        elem.removeAttribute("open");
+      }
     }, option1Text);
 
     await expect(input).toHaveValue(option1Text);
@@ -347,8 +342,9 @@ test("Проверка основных ARIA атрибутов", async () => {
   });
 
   await test.step("При выборе с клавиатуры, верно устанавливается aria-activedescendant", async () => {
-    const checkHasAttr = async option => {
+    const checkHasAttr = async (option: Locator) => {
       const optionId = await option.getAttribute("id");
+      assert(optionId !== null);
       await expect(input).toHaveAttribute("aria-activedescendant", optionId);
     };
 

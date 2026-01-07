@@ -12,7 +12,8 @@
     "test-ui": "IS_UI_MODE=true npx playwright test --ui",
     "storybook": "npx webpack serve --config src/.storybook/webpack.config.cjs",
     "storybook-build": "npx webpack --mode production --env mode=production --config src/.storybook/webpack.config.cjs",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -28,6 +29,8 @@
     "mini-css-extract-plugin": "^2.9.4",
     "postcss-loader": "^8.1.1",
     "prettier": "^3.5.3",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
     "webpack": "^5.101.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"

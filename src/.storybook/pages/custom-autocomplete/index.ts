@@ -1,18 +1,21 @@
-import "components/custom-autocomplete/index.js";
-// TODO пока не ищет компонент в VS Code
+import { CustomAutocomplete } from "@/components/custom-autocomplete/index";
+import { assert } from "@/utils/assert";
 import "./style.css";
 
 export default () => {
   const basic = document.querySelector(".basic");
-  const originalRender = basic.render;
+  assert(basic instanceof CustomAutocomplete);
 
   const basicOptions = ["Опция-1", "Опция-2", "Опция-3", "Опция-4", "Опция-5"];
   basic.setOptions(basicOptions);
 
   const renderCount = document.querySelector("[data-testid='basic-renders-count']");
+  assert(renderCount);
+
+  const originalRender = basic.render;
   basic.render = function (...args) {
     const currentCount = +renderCount.textContent;
-    renderCount.textContent = currentCount + 1;
+    renderCount.textContent = String(currentCount + 1);
     return originalRender.call(basic, ...args);
   };
 
@@ -40,7 +43,8 @@ export default () => {
     },
   ];
 
-  withCustomizedLi.renderLi = li => `\
+  assert(withCustomizedLi instanceof CustomAutocomplete);
+  withCustomizedLi.renderLi = (li: typeof customizedOptions[number]) => `\
 <li part="li" data-value=${li.value}>${li.value} <a href=${li.wiki} 
     target="_blank"
     part="link">?</a>

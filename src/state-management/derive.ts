@@ -1,14 +1,15 @@
-import { variables } from "./variables.js";
+import { variables } from "./variables";
 
+type Cb = (obj?: Record<string, unknown>) => void
 /**
  * Функция отслеживания изменений в переданных хранилищах. Значение в хранилище начинает отслеживаться если в callback обращаются к
  * свойству хранилища. Может быть сколько угодно хранилищ для отслеживания.
  * Срабатывает синхронно при изменениях любых значений в отслеживаемых хранилищах.
- *
- * @param {Function} callback - функция которая сработает СРАЗУ же и после изменения значения хранилища, к которому обращаются в callback.
- * @returns {Function} cleanup - функция удаления callback
- */
-export const derive = callback => {
+ **/
+export const derive = (
+  /** функция которая сработает СРАЗУ же и после изменения значения хранилища, к которому обращаются в callback */
+  callback: Cb
+) => {
   variables.isDerivingLogicAnalysis = true;
   variables.derivingCallback = callback;
 
@@ -20,7 +21,7 @@ export const derive = callback => {
   const cleanup = () => {
     variables.observables.forEach(observableProps => {
       for (const prop in observableProps) {
-        observableProps[prop] = observableProps[prop].filter(cb => cb !== callback);
+        observableProps[prop] = observableProps[prop].filter((cb: Cb) => cb !== callback);
       }
     });
   };

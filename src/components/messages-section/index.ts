@@ -5,17 +5,24 @@ import "@/components/chat-message/index";
 import * as helpers from "@/utils/customElementHelpers";
 import { batchEffects } from "@/state-management/batchEffects";
 import messagesStore from "@/stores/messagesStore";
+import { assert } from "@/utils/assert";
 
 class MessagesSection extends HTMLElement {
+  totalMessagesCount = 0;
+  cleanups: (() => void)[] = [];
+  input = null as null | HTMLInputElement;
+
+  [key: string]: unknown;
+  ["constructor"]!: typeof MessagesSection;
   constructor() {
     super();
-    this.totalMessagesCount = 0;
-    this.cleanups = [];
     this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
     const { shadowRoot } = this;
+    assert(shadowRoot);
+
     shadowRoot.innerHTML = template;
     helpers.attachStyles(this, styles);
 
@@ -23,12 +30,15 @@ class MessagesSection extends HTMLElement {
     this.cleanups.push(cleanup);
 
     this.input = shadowRoot.querySelector(".textarea");
-    this.input.addEventListener("input", event => {
+    this.input?.addEventListener("input", event => {
+      assert(event.target instanceof HTMLElement);
       event.target.style.height = event.target.scrollHeight + "px";
     });
 
     const button = shadowRoot.querySelector(".button");
-    button.addEventListener("click", event => this._onMessageSend(event));
+    if (button) {
+      button.addEventListener("click", event => this._onMessageSend());
+    }
   }
 
   disconnectedCallback() {
@@ -36,15 +46,18 @@ class MessagesSection extends HTMLElement {
   }
 
   _onMessageSend() {
-    const newMessage = this.input.value;
+    const newMessage = this.input?.value;
     if (!newMessage) return;
 
     const owner = this.getAttribute("owner");
+    assert(this.input);
+    assert(owner);
 
     messagesStore.messages.push({
       from: owner,
       content: this.input.value,
       timestamp: +new Date(),
+      read: false,
     });
 
     const newMessages = messagesStore.messages;
@@ -54,6 +67,7 @@ class MessagesSection extends HTMLElement {
   }
 
   _insertNewMessages() {
+    assert(this.shadowRoot);
     const { messages } = messagesStore;
     const newMessages = messages.slice(this.totalMessagesCount);
 
@@ -71,17 +85,17 @@ class MessagesSection extends HTMLElement {
 
       elem.textContent = item.content;
       elem.setAttribute("kind", item.from === owner ? "out" : "in");
-      elem.setAttribute("timestamp", item.timestamp);
+      elem.setAttribute("timestamp", String(item.timestamp));
       elem.setAttribute("owner", item.from);
       if (item.read) elem.setAttribute("read", "");
 
       return elem;
     });
 
-    list.append(...nodes);
+    list?.append(...nodes);
 
     setTimeout(() => {
-      list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
+      list?.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
     }, 50);
   }
 }

@@ -19,7 +19,7 @@ const getPageInputs = (dir, root) => {
     const fullPath = path.join(dir, dirent.name);
 
     if (dirent.isDirectory()) {
-      const templatePath = path.join(fullPath, "index.js");
+      const templatePath = path.join(fullPath, "index.ts");
       if (fs.existsSync(templatePath)) {
         const relativePath = path.relative(root, fullPath);
         entries[relativePath] = templatePath;
@@ -57,8 +57,8 @@ module.exports = env => {
     mode: env.mode || "development",
     devtool: isProd ? false : "source-map",
     entry: {
-      main: "./src/main.js", // здесь подключим основные скрипты, роутинг, например
-      "state-management": "./src/state-management/index.js",
+      main: "./src/main.ts", // здесь подключим основные скрипты, роутинг, например
+      "state-management": "./src/state-management/index.ts",
       ...storeInputs,
       ...pageInputs,
     },
@@ -131,6 +131,11 @@ module.exports = env => {
           loader: "html-loader",
         },
         {
+          test: /\.ts$/,
+          use: "ts-loader",
+          exclude: /node_modules/,
+        },
+        {
           test: /\.(css|scss)$/,
           resourceQuery: /raw/,
           type: "asset/source",
@@ -187,8 +192,8 @@ module.exports = env => {
         ([pageChunk, fullPath]) =>
           new HtmlWebpackPlugin({
             // удалим все, что идет до src
-            filename: fullPath.replace(/.+?src\/(.+)/, (m, p) => p.replace(".js", ".html")),
-            template: fullPath.replace(".js", ".html"),
+            filename: fullPath.replace(/.+?src\/(.+)/, (m, p) => p.replace(/\.(js|ts)/, ".html")),
+            template: fullPath.replace(/\.(js|ts)/, ".html"),
             chunks: ["main", pageChunk],
             // работает только совместно со строкой library + experiments
             scriptLoading: "module",
@@ -196,6 +201,7 @@ module.exports = env => {
       ),
     ],
     resolve: {
+      extensions: [".ts", ".js"],
       alias: {
         "@": path.resolve(__dirname, "src"),
       },

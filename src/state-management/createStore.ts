@@ -1,12 +1,13 @@
-import { variables } from "./variables.js";
+import { variables } from "./variables";
 
-/**
- * @template {Object<string, any>} T
- * @param {T} obj - простой объект, который нужно проксировать
- * @returns {T} - прокси объекта
- */
-const createStore = obj => {
-  const observableProps = {};
+type Cb = (payload: unknown) => void;
+type StoreObject = Record<string | symbol, unknown>;
+
+const createStore = <T extends StoreObject>(
+  /** простой объект, который нужно проксировать */
+  obj: T
+): T => {
+  const observableProps = Object.create(null);
 
   const proxy = new Proxy(obj, {
     set(...args) {
@@ -18,16 +19,16 @@ const createStore = obj => {
       const { isDerivingLogicAnalysis, derivingCallback, issuers } = variables;
 
       if (isDerivingLogicAnalysis) {
-        if (Object.hasOwn(observableProps, prop)) {
+        if (prop in observableProps) {
           // Не стоит одновременно наблюдать за свойством и его устанавливать, т.к.
           // это ведет к бесконечному циклу, поэтому удалим наблюдатель, если он был добавлен.
-          observableProps[prop] = observableProps[prop].filter(cb => cb !== derivingCallback);
+          observableProps[prop] = observableProps[prop].filter((cb: Cb) => cb !== derivingCallback);
         }
 
         return defaultReturn;
       }
 
-      if (Object.hasOwn(observableProps, prop)) {
+      if (prop in observableProps) {
         const isTrigger = issuers.size === 0;
         let propsInCurrentChain = issuers.get(target);
 
@@ -42,21 +43,21 @@ const createStore = obj => {
         const payload = { store: this, target, prop, value, oldValue };
 
         if (!isTrigger) {
-          observableProps[prop].forEach(cb => cb(payload));
+          observableProps[prop].forEach((cb: Cb) => cb(payload));
 
           return defaultReturn;
         }
 
         try {
-          observableProps[prop].forEach(cb => cb(payload));
+          observableProps[prop].forEach((cb: Cb) => cb(payload));
         } catch (error) {
           console.error(error);
 
           issuers.clear();
           issuers.set(target, propsInCurrentChain);
 
-          target[prop] = oldValue;
-          observableProps[prop].forEach(cb => cb({ ...payload, value: oldValue }));
+          (target as StoreObject)[prop] = oldValue;
+          observableProps[prop].forEach((cb: Cb) => cb({ ...payload, value: oldValue }));
         }
 
         issuers.clear();
@@ -70,7 +71,7 @@ const createStore = obj => {
 
       if (isDerivingLogicAnalysis) {
         const prop = args[1];
-        if (!Object.hasOwn(observableProps, prop)) observableProps[prop] = [];
+        if (!(prop in observableProps)) observableProps[prop] = [];
 
         if (observableProps[prop].at(-1) !== derivingCallback) {
           observableProps[prop].push(derivingCallback);

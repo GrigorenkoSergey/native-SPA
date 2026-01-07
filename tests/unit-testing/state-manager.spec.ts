@@ -206,7 +206,7 @@ test.describe("Обработка ошибок", () => {
   const originalFunc = console.error;
 
   test.beforeAll(() => {
-    console.error = () => {};
+    console.error = () => { };
   });
 
   test.afterAll(() => {
@@ -216,14 +216,14 @@ test.describe("Обработка ошибок", () => {
   test("Если произошла ошибка в одной из derive-функций, система откатывается к последнему стабильному состоянию", () => {
     const storeA = createStore({ value: 0 });
 
-    const fn = value => {
+    const fn = (value: number) => {
       if (value % 2) throw new Error();
 
       return value;
     };
 
-    let b;
-    let c;
+    let b: ReturnType<typeof fn>;
+    let c: ReturnType<typeof fn>;
     derive(() => {
       b = fn(storeA.value) + 1;
       c = fn(storeA.value) + 2;
@@ -282,9 +282,9 @@ test.describe("Обработка ошибок", () => {
     const storeA = createStore({ a: 0 });
     const storeB = createStore({ b: 0 });
 
-    let b;
-    let c;
-    let d;
+    let b = -1;
+    let c = -1;
+    let d = -1;
 
     derive(() => {
       b = storeA.a + 1;
@@ -317,10 +317,12 @@ test.describe("Обработка ошибок", () => {
 });
 
 test.describe("Асинхронщина", () => {
+  type Cb = Parameters<typeof batchEffects>[0]
+
   test("Запуск асинхронных функций возможен в принципе", async () => {
     const storeA = createStore({ a: 1 });
 
-    let b;
+    let b = -1;
     derive(async () => {
       const origin = storeA.a;
 
@@ -341,11 +343,11 @@ test.describe("Асинхронщина", () => {
     const storeA = createStore({ a: 1 });
     const storeB = createStore({ b: 1 });
 
-    const batch = cb => batchEffects(cb, setTimeout, clearTimeout);
+    const batch = (cb: Cb) => batchEffects(cb, setTimeout, clearTimeout);
 
-    const callResults = [];
+    const callResults: [number, number][] = [];
     const cleanup = batch(() => {
-      const storeValuesPair = [storeA.a, storeB.b];
+      const storeValuesPair: typeof callResults[number] = [storeA.a, storeB.b];
       callResults.push(storeValuesPair);
     });
 
@@ -362,7 +364,7 @@ test.describe("Асинхронщина", () => {
     await expect(() => {
       expect(callResults.length).toBe(2);
 
-      const lastCallResult = callResults.at(-1);
+      const lastCallResult = callResults[callResults.length - 1];
       const [a, b] = lastCallResult;
 
       expect(a === 0 && b === 1).toBe(true);
@@ -373,7 +375,7 @@ test.describe("Асинхронщина", () => {
       storeA.a = 10;
 
       await pause(100);
-      const lastCallResult = callResults.at(-1);
+      const lastCallResult = callResults[callResults.length - 1];
       const [a, b] = lastCallResult;
 
       expect(callResults.length).toBe(2);
@@ -385,11 +387,11 @@ test.describe("Асинхронщина", () => {
     const storeA = createStore({ a: 1 });
     const storeB = createStore({ b: 1 });
 
-    const batch = cb => batchEffects(cb, () => setTimeout(cb, 100), clearTimeout);
-    const callResults = [];
+    const batch = (cb: Cb) => batchEffects(cb, () => Number(setTimeout(cb, 100)), clearTimeout);
+    const callResults: [number, number][] = [];
 
     batch(() => {
-      const storeValuesPair = [storeA.a, storeB.b];
+      const storeValuesPair: typeof callResults[number] = [storeA.a, storeB.b];
       callResults.push(storeValuesPair);
     });
 
@@ -409,7 +411,7 @@ test.describe("Асинхронщина", () => {
     await expect(() => {
       expect(callResults.length).toBe(2);
 
-      const lastCallResult = callResults.at(-1);
+      const lastCallResult = callResults[callResults.length - 1];
       const [a, b] = lastCallResult;
       expect(a).toBe(30);
       expect(b).toBe(30);

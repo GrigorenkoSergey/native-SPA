@@ -1,7 +1,7 @@
 const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 const charactersLength = characters.length;
 
-const makeId = length => {
+const makeId = (length: number) => {
   let result = "";
 
   for (let i = 0; i < length; i++) {
@@ -11,12 +11,7 @@ const makeId = length => {
   return result;
 };
 
-/**
- *
- * @param {String} prefix
- * @returns {String}
- */
-export const generateIdInDocument = prefix => {
+export const generateIdInDocument = (prefix: string) => {
   const generate = () => (prefix ? `${prefix}-${makeId(4)}` : makeId(4));
 
   let result = generate();
