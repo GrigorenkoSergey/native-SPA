@@ -166,7 +166,7 @@ export function findById(
     root = root.getRootNode();
     if (root instanceof ShadowRoot) root = root.host;
 
-    if (root instanceof HTMLElement) {
+    if (root instanceof HTMLElement || root instanceof Document) {
       element = root.querySelector(`#${id}`);
     }
     if (root === document) return element;
