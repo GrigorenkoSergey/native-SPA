@@ -20,7 +20,7 @@ class ChatMessage extends HTMLElement {
     this.shadowRoot.innerHTML = template;
     attachStyles(this, styles);
 
-    const contentSlot = this.shadowRoot.querySelector(".content")
+    const contentSlot = this.shadowRoot.querySelector(".content");
     assert(contentSlot);
     contentSlot.innerHTML = initialContent;
 

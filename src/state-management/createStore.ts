@@ -5,7 +5,7 @@ type StoreObject = Record<string | symbol, unknown>;
 
 const createStore = <T extends StoreObject>(
   /** простой объект, который нужно проксировать */
-  obj: T
+  obj: T,
 ): T => {
   const observableProps = Object.create(null);
 

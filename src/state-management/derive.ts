@@ -1,6 +1,6 @@
 import { variables } from "./variables";
 
-type Cb = (obj?: Record<string, unknown>) => void
+type Cb = (obj?: Record<string, unknown>) => void;
 /**
  * Функция отслеживания изменений в переданных хранилищах. Значение в хранилище начинает отслеживаться если в callback обращаются к
  * свойству хранилища. Может быть сколько угодно хранилищ для отслеживания.
@@ -8,7 +8,7 @@ type Cb = (obj?: Record<string, unknown>) => void
  **/
 export const derive = (
   /** функция которая сработает СРАЗУ же и после изменения значения хранилища, к которому обращаются в callback */
-  callback: Cb
+  callback: Cb,
 ) => {
   variables.isDerivingLogicAnalysis = true;
   variables.derivingCallback = callback;

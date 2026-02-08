@@ -2,7 +2,7 @@ const listeners = new WeakSet();
 
 const listenClickOutsideOnce = (
   element: HTMLElement,
-  cb: (el: HTMLElement) => void
+  cb: (el: HTMLElement) => void,
 ) => {
   if (listeners.has(element)) return;
 

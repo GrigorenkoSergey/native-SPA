@@ -83,7 +83,7 @@ export class CustomAutocomplete extends HTMLElement {
   attributeChangedCallback(
     name: string,
     oldValue: string | boolean,
-    newValue: string | boolean
+    newValue: string | boolean,
   ) {
     if (!this._isRendered) return;
 
@@ -126,7 +126,7 @@ export class CustomAutocomplete extends HTMLElement {
 
     const input = this.shadowRoot.querySelector("input");
 
-    let name = this.getAttribute("name");
+    const name = this.getAttribute("name");
     if (!name) throw new Error("Custom-autocomplete: attribute 'name' is required!");
     input?.setAttribute("name", name);
 
@@ -268,7 +268,7 @@ export class CustomAutocomplete extends HTMLElement {
 
 
   _onKeydown(event: KeyboardEvent) {
-    const { host } = this.getRootNode() as ShadowRoot
+    const { host } = this.getRootNode() as ShadowRoot;
     assert(host instanceof CustomAutocomplete);
 
     const { key } = event;

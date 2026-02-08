@@ -14,7 +14,7 @@ type Cb = () => void;
 export const batchEffects = (
   cb: Cb,
   asyncFunc: (callback: Cb) => number = requestAnimationFrame,
-  cleanup: (timerId: number) => void = cancelAnimationFrame
+  cleanup: (timerId: number) => void = cancelAnimationFrame,
 ) => {
   let timerId = -1;
   let isFirstCall = true;

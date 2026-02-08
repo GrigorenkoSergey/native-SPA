@@ -116,7 +116,7 @@ function setNonBooleanAttrIfNeeded(
 function setBooleanAttrIfNeeded(
   ctx: CustomElementInstance,
   attrName: string,
-  value: string | number | boolean
+  value: string | number | boolean,
 ) {
   const attrValue = ctx.hasAttribute(attrName);
   if (attrValue === value) return;
@@ -157,7 +157,7 @@ export function attachStyles(
  */
 export function findById(
   id: string,
-  startElement: HTMLElement
+  startElement: HTMLElement,
 ) {
   let root: Node | Document | ShadowRoot = startElement;
   let element = (root as HTMLElement).querySelector(`#${id}`);
@@ -180,7 +180,7 @@ export function findById(
  */
 export function replaceToCustomIds(
   shadowRoot: ShadowRoot,
-  customTemplate: HTMLTemplateElement
+  customTemplate: HTMLTemplateElement,
 ) {
   const templateIds = Array.from(shadowRoot.querySelectorAll("[id]"), elem => elem.id);
   if (templateIds.length === 0) return;

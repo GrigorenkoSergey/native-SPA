@@ -34,7 +34,7 @@ interface ApplyRoutingArgs {
  */
 export function applyRouting({
   defaultPage = "pages/page-1/",
-  dynamicRoutes = []
+  dynamicRoutes = [],
 }: ApplyRoutingArgs) {
   if (!window) return;
 

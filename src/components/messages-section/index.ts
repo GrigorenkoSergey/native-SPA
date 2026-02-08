@@ -37,7 +37,7 @@ class MessagesSection extends HTMLElement {
 
     const button = shadowRoot.querySelector(".button");
     if (button) {
-      button.addEventListener("click", event => this._onMessageSend());
+      button.addEventListener("click", () => this._onMessageSend());
     }
   }
 

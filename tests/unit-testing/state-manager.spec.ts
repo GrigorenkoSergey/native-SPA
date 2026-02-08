@@ -317,7 +317,7 @@ test.describe("Обработка ошибок", () => {
 });
 
 test.describe("Асинхронщина", () => {
-  type Cb = Parameters<typeof batchEffects>[0]
+  type Cb = Parameters<typeof batchEffects>[0];
 
   test("Запуск асинхронных функций возможен в принципе", async () => {
     const storeA = createStore({ a: 1 });
