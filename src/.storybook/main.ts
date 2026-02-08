@@ -3,5 +3,5 @@ import "../utilities.css";
 import "./style.css";
 
 applyRouting({
-  defaultPage: "/pages/custom-autocomplete/",
+         defaultPage: "/pages/custom-autocomplete/",
 });
