@@ -1,10 +1,11 @@
 :host {
   --img-width: 50px;
+
   display: flex;
   align-items: flex-end;
 }
 
-:host([kind=out]) {
+:host([kind="out"]) {
   flex-flow: row-reverse;
 }
 
@@ -23,11 +24,13 @@
 .bubble {
   --bg-color: #e4e6eb;
   --border-radius: 1.25rem;
+
   margin-bottom: calc(var(--img-width) / 2);
   display: flex;
 
   :host([kind="out"]) & {
     --bg-color: #0084ff;
+
     flex-flow: row-reverse;
   }
 }
@@ -73,6 +76,7 @@
 .read-state,
 .read-state::after {
   --border-color: green;
+
   display: block;
   width: 5px;
   height: 10px;
@@ -82,13 +86,13 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-:host([read]) .read-state::after {
-  content: "";
-}
-
 .read-state::after {
   rotate: none;
   translate: 3px -3px;
+}
+
+:host([read]) .read-state::after {
+  content: "";
 }
 
 :host([kind="out"]) .read-state,

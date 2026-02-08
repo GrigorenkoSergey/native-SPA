@@ -6,6 +6,7 @@
 
 .wrapper {
   --bg-parent: white;
+
   flex-grow: 1;
   margin: 0 auto;
   padding: 1rem;
@@ -37,6 +38,7 @@
 
 .input-area {
   --min-height: 2.5rem;
+
   display: grid;
   grid-template-rows: 1fr 2.5rem;
   gap: 1rem;

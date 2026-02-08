@@ -1,31 +1,29 @@
 <!doctype html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-    <base href="{{base}}" />
-    <link id="reset" rel="stylesheet" href="./reset.css">
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite App</title>
+  <base href="{{base}}" />
+  <link id="reset" rel="stylesheet" href="./reset.css">
+</head>
 
-  <body>
-    <div class="storybook-layout">
-      <nav class="storybook-layout__nav">
-        <h2>Components</h2>
+<body>
+  <div class="storybook-layout">
+    <nav class="storybook-layout__nav">
+      <h2>Components</h2>
 
-        <ul class="storybook-layout__ul">
-          <li><a href="./pages/custom-autocomplete/" data-inner-link
-              class="storybook-layout__a">custom-autocomplete</a>
-          <li><a href="./pages/chat-message/" data-inner-link
-              class="storybook-layout__a">chat-message</a>
-          </li>
-        </ul>
-      </nav>
+      <ul class="storybook-layout__ul">
+        <li><a href="./pages/custom-autocomplete/" data-inner-link class="storybook-layout__a">custom-autocomplete</a>
+        <li><a href="./pages/chat-message/" data-inner-link class="storybook-layout__a">chat-message</a>
+        </li>
+      </ul>
+    </nav>
 
-      <main>
-        {{content}}
-      </main>
-  </body>
+    <main>
+      {{content}}
+    </main>
+</body>
 
 </html>

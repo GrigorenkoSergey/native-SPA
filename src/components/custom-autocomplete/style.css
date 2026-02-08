@@ -34,7 +34,7 @@ ul {
   list-style: none;
   margin: 0;
   padding: 0;
-  background: rgb(117, 177, 164);
+  background: rgb(117 177 164);
   position: absolute;
   width: 100%;
   display: none;
@@ -47,7 +47,7 @@ li {
   padding: 8px;
   cursor: pointer;
 
-  &[aria-selected=true] {
+  &[aria-selected="true"] {
     background-color: orange;
   }
 
