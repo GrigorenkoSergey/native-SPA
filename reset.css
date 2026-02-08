@@ -12,8 +12,6 @@
 
 /* Prevent font size inflation */
 html {
-  -moz-text-size-adjust: none;
-  -webkit-text-size-adjust: none;
   text-size-adjust: none;
 }
 
@@ -41,6 +39,10 @@ ol[role="list"] {
 body {
   min-height: 100vh;
   line-height: 1.5;
+  font-family: sans-serif;
+  background-color: #f0f2f5;
+  max-width: 1920px;
+  margin: 0 auto;
 }
 
 /* Set shorter line heights on headings and interactive elements */
@@ -91,7 +93,6 @@ select {
 
 /* remove animations for people who've turned them off */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -100,13 +101,6 @@ select {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-body {
-  font-family: sans-serif;
-  background-color: #f0f2f5;
-  max-width: 1920px;
-  margin: 0 auto;
 }
 
 main {
