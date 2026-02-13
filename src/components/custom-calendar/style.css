@@ -1,0 +1,54 @@
+.header,
+.month-switchers {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.month-year {
+  font-size: 1rem;
+}
+
+.month-switchers {
+  button:active {
+    scale: 0.9;
+  }
+}
+
+svg {
+  display: block;
+}
+
+button {
+  border-radius: 50%;
+  border-width: 0;
+  cursor: pointer;
+  padding: 4px;
+
+  &:not(:hover) {
+    background-color: transparent;
+  }
+}
+
+.expand-arrow {
+  & svg {
+    width: 18px;
+    height: 16px;
+  }
+}
+
+.prev-month,
+.next-month {
+  & svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.prev-month {
+  rotate: 90deg;
+}
+
+.next-month {
+  rotate: -90deg;
+}

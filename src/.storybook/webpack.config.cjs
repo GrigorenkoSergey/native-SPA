@@ -68,8 +68,8 @@ module.exports = env => {
       hot: true,
       port: 8082,
       open: {
-        target: `${base}pages/custom-autocomplete/`,
-        // app: { name: "firefox" },
+        target: `${base}pages/custom-calendar/`,
+        app: { name: "firefox" },
       },
       watchFiles: ["src/**/*.html"],
     },
@@ -82,6 +82,7 @@ module.exports = env => {
             sources: {
               urlFilter: (attribute, value) => {
                 if (value === "./reset.css") return false;
+                if (value === "./shadow-reset.css") return false;
                 return true;
               },
             },
@@ -116,7 +117,6 @@ module.exports = env => {
               loader: "css-loader",
               options: { modules: { auto: true } },
             },
-            "postcss-loader",
           ],
         },
         {
@@ -130,6 +130,7 @@ module.exports = env => {
         patterns: [
           { from: "src/images", to: "images" },
           { from: "src/reset.css", to: "reset.css" },
+          { from: "src/shadow-reset.css", to: "shadow-reset.css" },
         ],
       }),
       new MiniCssExtractPlugin({

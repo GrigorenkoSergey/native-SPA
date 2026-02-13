@@ -131,12 +131,12 @@ function setBooleanAttrIfNeeded(
  **/
 export function attachStyles(
   ctx: HTMLElement,
-  /** Стили, которые импортируем как строку и которые будут вставлены после reset.css */
+  /** Стили, которые импортируем как строку и которые будут вставлены после shadow-reset.css */
   initialStyles: string,
   customTemplate?: HTMLTemplateElement | null,
 ) {
   const resultStyles = [];
-  const reset = document.getElementById("reset-css");
+  const reset = document.getElementById("shadow-reset");
   if (reset) resultStyles.push(reset.cloneNode(true));
 
   const style = document.createElement("style");
