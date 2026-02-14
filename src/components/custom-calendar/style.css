@@ -1,8 +1,72 @@
+.dialog {
+  --cell-width: 36px;
+  --cell-height: 36px;
+  --total-cell-width: calc(var(--cell-width) * 7);
+
+  --bg-button-hover: #d0d0d7;
+
+  width: 320px;
+}
+
+table {
+
+  width: 320px;
+  border-spacing: calc(calc(320px - var(--total-cell-width)) / 8);
+}
+
+button {
+  border-radius: 50%;
+  border-width: 0;
+  cursor: pointer;
+  padding: 4px;
+
+  &:hover {
+    background-color: var(--bg-button-hover);
+  }
+
+  &:not(:hover) {
+    background-color: transparent;
+  }
+}
+
+svg {
+  display: block;
+}
+
+td,
+th {
+  font-weight: 400;
+  vertical-align: middle;
+  text-align: center;
+  border-radius: 50%;
+  width: var(--cell-width);
+  height: var(--cell-height);
+}
+
+td {
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--bg-button-hover);
+  }
+}
+
 .header,
+.month-year-switcher {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
 .month-switchers {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.month-switchers {
+  margin-left: auto;
 }
 
 .month-year {
@@ -15,25 +79,10 @@
   }
 }
 
-svg {
-  display: block;
-}
-
-button {
-  border-radius: 50%;
-  border-width: 0;
-  cursor: pointer;
-  padding: 4px;
-
-  &:not(:hover) {
-    background-color: transparent;
-  }
-}
-
 .expand-arrow {
   & svg {
     width: 18px;
-    height: 16px;
+    height: 18px;
   }
 }
 
