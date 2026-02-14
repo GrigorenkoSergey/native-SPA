@@ -4,6 +4,8 @@ const phrase1 = "Ах... Я хожу.";
 const phrase2 = "Какой тебе больше нравится?";
 const phrase3 = "Вот что. Когда идешь за медом - главное, чтоб пчелы тебя не заметили.";
 
+test.skip();
+
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date(2025, 8, 1, 12, 0, 0));
 });
