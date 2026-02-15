@@ -124,7 +124,7 @@ export class CustomCalendar extends HTMLElement {
     assert(oldTbody);
     oldTbody.replaceWith(tbody);
 
-    const h2 = this.shadowRoot.querySelector(".month-year");
+    const h2 = this.shadowRoot.querySelector("#month-year");
     if (h2) h2.textContent = this.formatYearMonth(this.year, this.month);
   }
 
@@ -148,8 +148,8 @@ export class CustomCalendar extends HTMLElement {
     const {host} = this;
     assert(host instanceof CustomCalendar);
 
-    const isNextMonthBtn = target.closest(".next-month");
-    const isPrevMonthBtn = target.closest(".prev-month");
+    const isNextMonthBtn = target.closest("#next-month");
+    const isPrevMonthBtn = target.closest("#prev-month");
     if (!isNextMonthBtn && !isPrevMonthBtn) return;
 
 

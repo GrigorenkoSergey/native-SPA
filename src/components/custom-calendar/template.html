@@ -1,7 +1,7 @@
 <div class="dialog" role="dialog" aria-modal="true" aria-label="Выберите дату">
   <div class="header">
     <label class="month-year-switcher">
-      <h2 class="month-year" aria-live="polite">Февраль 2026</h2>
+      <h2 id="month-year" class="month-year" aria-live="polite">Февраль 2026</h2>
       <button class="expand-arrow">
         <svg id="expand-arrow" viewBox="0 0 18 16" xmlns="http://www.w3.org/2000/svg">
           <polygon points="2,4 16,4 9,14"></polygon>
@@ -10,7 +10,7 @@
     </label>
 
     <div class="month-switchers">
-      <button class="prev-month" aria-label="prev month">
+      <button id="prev-month" class="prev-month" aria-label="prev month">
         <svg id="arrow" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M5.70711 9.71069C5.31658 10.1012 5.31658 10.7344 5.70711 11.1249L10.5993 16.0123C11.3805 16.7927 12.6463 16.7924 13.4271 16.0117L18.3174 11.1213C18.708 10.7308 18.708 10.0976 18.3174 9.70708C17.9269 9.31655 17.2937 9.31655 16.9032 9.70708L12.7176 13.8927C12.3271 14.2833 11.6939 14.2832 11.3034 13.8927L7.12132 9.71069C6.7308 9.32016 6.09763 9.32016 5.70711 9.71069Z"
@@ -18,7 +18,7 @@
         </svg>
       </button>
 
-      <button class="next-month" aria-label="next month">
+      <button id="next-month" class="next-month" aria-label="next month">
         <svg>
           <use href="#arrow"></use>
         </svg>

@@ -6,7 +6,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto("http://localhost:8082/pages/custom-calendar/");
 });
 
-test.only("Отображение и переключение месяцев", async ({page}) => {
+test("Отображение и переключение месяцев", async ({page}) => {
   const calendar = page.getByTestId("basic");
   const firstTd = calendar.locator("td").first();
   const lastTd = calendar.locator("td").last();
@@ -26,5 +26,31 @@ test.only("Отображение и переключение месяцев", a
     await expect(page.getByRole("heading", { name: "февраль" })).toContainText("февраль 2026");
     await expect(firstTd).toContainText("26");
     await expect(lastTd).toContainText("1");
+  });
+});
+
+test.only("Выделение даты, даты предыдущего и следующего месяца нельзя выбрать", async ({page}) => {
+  const calendar = page.getByTestId("basic");
+  const selectedClassName = "selected";
+
+  await test.step("Даты предыдущего и следующего месяца нельзы выбрать в текущем календарике", async () => {
+    const firstTd = calendar.locator("td").first();
+    const lastTd = calendar.locator("td").last();
+
+    await firstTd.click();
+    await expect(firstTd).not.toHaveClass(selectedClassName);
+    await lastTd.click();
+    await expect(lastTd).not.toHaveClass(selectedClassName);
+  });
+
+  const date15thCell = page.getByRole("gridcell", { name: "15" });
+  await date15thCell.click();
+  await expect(date15thCell).toHaveClass(selectedClassName);
+
+  await test.step("При переходе на другой месяц и возврате, выбранная дата по-прежнему подсвечивается", async () => {
+    await page.getByRole("button", { name: "prev month" }).click();
+    await expect(date15thCell).not.toHaveClass(selectedClassName);
+    await page.getByRole("button", { name: "next month" }).click();
+    await expect(date15thCell).toHaveClass(selectedClassName);
   });
 });
