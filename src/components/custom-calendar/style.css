@@ -1,17 +1,26 @@
 .dialog {
   --cell-width: 36px;
   --cell-height: 36px;
-  --total-cell-width: calc(var(--cell-width) * 7);
 
-  --bg-button-hover: #d0d0d7;
+  --bg-button-hover: #e0e0e0;
+  --bg-selected: #007bff;
+  --color-selected: #ffffff;
+  --border-color: #e0e0e0;
+
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   width: 320px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--box-shadow);
 }
 
 table {
-
-  width: 320px;
-  border-spacing: calc(calc(320px - var(--total-cell-width)) / 8);
+  margin: 0 auto;
+  border-collapse: separate;
+  border-spacing: 4px;
 }
 
 button {
@@ -19,13 +28,11 @@ button {
   border-width: 0;
   cursor: pointer;
   padding: 4px;
+  background-color: transparent;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
 
   &:hover {
     background-color: var(--bg-button-hover);
-  }
-
-  &:not(:hover) {
-    background-color: transparent;
   }
 }
 
@@ -41,6 +48,12 @@ th {
   border-radius: 50%;
   width: var(--cell-width);
   height: var(--cell-height);
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+th {
+  color: #666;
+  font-size: 0.9rem;
 }
 
 td {
@@ -51,12 +64,24 @@ td {
   }
 }
 
+.selected {
+  background-color: var(--bg-selected);
+  color: var(--color-selected);
+  font-weight: 500;
+
+  &:hover {
+    background-color: var(--bg-selected);
+    opacity: 0.9;
+  }
+}
+
 .header,
 .month-year-switcher {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  padding: 0 4px 8px;
 }
 
 .month-switchers {
@@ -65,21 +90,20 @@ td {
   gap: 0.5rem;
 }
 
-.month-switchers {
-  margin-left: auto;
-}
-
 .month-year {
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .month-switchers {
   button:active {
-    scale: 0.9;
+    transform: scale(0.9);
   }
 }
 
 .expand-arrow {
+  transition: transform 0.2s ease-in-out;
+
   & svg {
     width: 18px;
     height: 18px;

@@ -110,6 +110,7 @@ export class CustomCalendar extends HTMLElement {
 
       tbody.append(tr);
     }
+
     const oldTbody = this.shadowRoot.querySelector("tbody");
     assert(oldTbody);
     oldTbody.replaceWith(tbody);
