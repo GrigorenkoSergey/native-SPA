@@ -11,9 +11,20 @@ test.only("Отображение и переключение месяцев", a
   const firstTd = calendar.locator("td").first();
   const lastTd = calendar.locator("td").last();
 
-  expect(page.getByRole("heading", { name: "Февраль" })).toContainText("Февраль 2026");
-  expect(firstTd).toContainText("26");
-  expect(lastTd).toContainText("1");
+  await expect(page.getByRole("heading", { name: "февраль" })).toContainText("февраль 2026");
+  await expect(firstTd).toContainText("26");
+  await expect(lastTd).toContainText("1");
 
-  await page.waitForTimeout(1000);
+  await test.step("Предыдущий месяц", async () => {
+    await page.getByRole("button", { name: "prev month" }).click();
+    await expect(page.getByRole("heading", { name: "январь" })).toContainText("январь 2026");
+    await expect(firstTd).toContainText("29");
+    await expect(lastTd).toContainText("1");
+  });
+  await test.step("Следующий месяц", async () => {
+    await page.getByRole("button", { name: "next month" }).click();
+    await expect(page.getByRole("heading", { name: "февраль" })).toContainText("февраль 2026");
+    await expect(firstTd).toContainText("26");
+    await expect(lastTd).toContainText("1");
+  });
 });

@@ -19,6 +19,8 @@ export default defineConfig([
       "@stylistic/semi": ["error", "always"],
       "@stylistic/quotes": ["error", "double"],
       "@stylistic/comma-dangle": ["error", "always-multiline"],
+      "@stylistic/no-extra-semi": "error",
+      "@stylistic/no-multi-spaces": "error",
     },
   },
 
