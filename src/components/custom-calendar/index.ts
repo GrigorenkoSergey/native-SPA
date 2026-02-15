@@ -60,8 +60,8 @@ export class CustomCalendar extends HTMLElement {
     oldValue: string | boolean,
     newValue: string | boolean,
   ) {
-    if (!this._isRendered) return;
-    if (this._isInnerAttrSet) return;
+    if (!this.isRendered) return;
+    if (this.isInnerAttrSet) return;
 
     this.render(name);
   }
@@ -69,6 +69,7 @@ export class CustomCalendar extends HTMLElement {
 
   attachHandlers() {
     this.shadowRoot.addEventListener("click", this.onNextMonthClick as EventListener);
+    this.shadowRoot.addEventListener("click", this.onDateClick as EventListener);
   }
 
   render(attrName: string = "") {
@@ -76,6 +77,8 @@ export class CustomCalendar extends HTMLElement {
     if (attrName === "month" || attrName === "year") {
       this.renderNewMonth();
     }
+
+    this.renderSelectedDate();
     this.isInnerAttrSet = false;
   }
 
@@ -85,6 +88,10 @@ export class CustomCalendar extends HTMLElement {
 
   get month() {
     return Number(this.getAttribute("month") ?? new Date().getMonth());
+  }
+
+  get date() {
+    return this.getAttribute("date");
   }
 
   renderNewMonth() {
@@ -103,6 +110,8 @@ export class CustomCalendar extends HTMLElement {
         const td = document.createElement("td");
         td.dataset.date = pointedDate.toDateString();
         td.textContent = String(pointedDate.getDate());
+        const cellMonth = pointedDate.getMonth();
+        if (cellMonth !== this.month) td.setAttribute("disabled", "");
 
         tr.append(td);
         ptr += 1;
@@ -119,23 +128,52 @@ export class CustomCalendar extends HTMLElement {
     if (h2) h2.textContent = this.formatYearMonth(this.year, this.month);
   }
 
-  onNextMonthClick(event: MouseEvent) {
+  renderSelectedDate() {
+    const {shadowRoot} = this;
+
+    const selected = shadowRoot.querySelector(".selected");
+    if (selected) selected.classList.remove("selected");
+
+    const selectedDate = this.date;
+    if (selectedDate) {
+      const cell = shadowRoot.querySelector(`[data-date="${selectedDate}"]`);
+      if (cell) cell.classList.add("selected");
+    }
+  }
+
+  onNextMonthClick(event: PointerEvent) {
     const { target } = event;
     if (!(target instanceof Element)) return;
+
+    const {host} = this;
+    assert(host instanceof CustomCalendar);
 
     const isNextMonthBtn = target.closest(".next-month");
     const isPrevMonthBtn = target.closest(".prev-month");
     if (!isNextMonthBtn && !isPrevMonthBtn) return;
 
-    const {host} = this;
-    assert(host instanceof CustomCalendar);
 
+    this.isInnerAttrSet = true;
     const next = isNextMonthBtn ? host.month + 1 : host.month - 1;
     if (next < 0) host.setAttribute("year", String(host.year - 1));
     else if (next > 11) host.setAttribute("year", String(host.year + 1));
     host.setAttribute("month", String((next + 12) % 12));
 
     host.render("month");
+  }
+
+  onDateClick(event: PointerEvent) {
+    const {target} = event;
+    if (!(target instanceof Element)) return;
+    if (target.tagName !== "TD") return;
+    if (target.hasAttribute("disabled")) return;
+
+    const {host} = this;
+    assert(host instanceof CustomCalendar);
+
+    this.isInnerAttrSet = true;
+    host.setAttribute("date", new Date(host.year, host.month, Number(target.textContent)).toDateString());
+    host.render("date");
   }
 
   formatYearMonth(year: number, month: number) {

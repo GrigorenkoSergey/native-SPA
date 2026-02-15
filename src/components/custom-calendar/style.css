@@ -6,6 +6,7 @@
   --bg-selected: #007bff;
   --color-selected: #ffffff;
   --border-color: #e0e0e0;
+  --color-disabled: #ccc;
 
   --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
@@ -61,6 +62,15 @@ td {
 
   &:hover {
     background-color: var(--bg-button-hover);
+  }
+
+  &[disabled] {
+    color: var(--color-disabled);
+    cursor: not-allowed;
+
+    &:hover {
+      background-color: transparent;
+    }
   }
 }
 
