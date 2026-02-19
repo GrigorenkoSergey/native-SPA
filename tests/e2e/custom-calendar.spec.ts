@@ -38,19 +38,19 @@ test.only("Выделение даты, даты предыдущего и сл�
     const lastTd = calendar.locator("td").last();
 
     await firstTd.click();
-    await expect(firstTd).not.toHaveClass(selectedClassName);
+    await expect(firstTd).not.toContainClass(selectedClassName);
     await lastTd.click();
-    await expect(lastTd).not.toHaveClass(selectedClassName);
+    await expect(lastTd).not.toContainClass(selectedClassName);
   });
 
   const date15thCell = page.getByRole("gridcell", { name: "15" });
   await date15thCell.click();
-  await expect(date15thCell).toHaveClass(selectedClassName);
+  await expect(date15thCell).toContainClass(selectedClassName);
 
   await test.step("При переходе на другой месяц и возврате, выбранная дата по-прежнему подсвечивается", async () => {
     await page.getByRole("button", { name: "prev month" }).click();
-    await expect(date15thCell).not.toHaveClass(selectedClassName);
+    await expect(date15thCell).not.toContainClass(selectedClassName);
     await page.getByRole("button", { name: "next month" }).click();
-    await expect(date15thCell).toHaveClass(selectedClassName);
+    await expect(date15thCell).toContainClass(selectedClassName);
   });
 });

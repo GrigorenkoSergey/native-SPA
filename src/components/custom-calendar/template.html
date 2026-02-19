@@ -2,7 +2,7 @@
   <div class="header">
     <label class="month-year-switcher">
       <h2 id="month-year" class="month-year" aria-live="polite">Февраль 2026</h2>
-      <button class="expand-arrow">
+      <button id="year-month-toggler" class="expand-arrow">
         <svg id="expand-arrow" viewBox="0 0 18 16" xmlns="http://www.w3.org/2000/svg">
           <polygon points="2,4 16,4 9,14"></polygon>
         </svg>
@@ -26,7 +26,7 @@
     </div>
   </div>
 
-  <table role="grid">
+  <table role="grid" id="dates">
     <thead>
       <tr>
         <th scope="col">Пн</th>
@@ -42,4 +42,17 @@
     </tbody>
   </table>
 
+  <table role="grid" id="years">
+    <tbody></tbody>
+  </table>
+
+  <table role="grid" id="months">
+    <tbody></tbody>
+  </table>
+
+  <div id="actions">
+    <button id="today">Сегодня</button>
+    <button id="cancel">Отмена</button>
+    <button id="ok">OK</button>
+  </div>
 </div>

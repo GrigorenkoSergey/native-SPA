@@ -1,3 +1,9 @@
+:host([view="years"]) {
+  #dates {
+    display: none;
+  }
+}
+
 .dialog {
   --cell-width: 36px;
   --cell-height: 36px;
@@ -11,6 +17,7 @@
   --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
   width: 320px;
+  height: var(--dialog-height, "auto");
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -41,35 +48,38 @@ svg {
   display: block;
 }
 
-td,
-th {
-  font-weight: 400;
-  vertical-align: middle;
-  text-align: center;
-  border-radius: 50%;
-  width: var(--cell-width);
-  height: var(--cell-height);
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-}
+:where(#dates) {
 
-th {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-td {
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--bg-button-hover);
+  td,
+  th {
+    font-weight: 400;
+    vertical-align: middle;
+    text-align: center;
+    border-radius: 50%;
+    width: var(--cell-width);
+    height: var(--cell-height);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
   }
 
-  &[disabled] {
-    color: var(--color-disabled);
-    cursor: not-allowed;
+  th {
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  td {
+    cursor: pointer;
 
     &:hover {
-      background-color: transparent;
+      background-color: var(--bg-button-hover);
+    }
+
+    &[disabled] {
+      color: var(--color-disabled);
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: transparent;
+      }
     }
   }
 }

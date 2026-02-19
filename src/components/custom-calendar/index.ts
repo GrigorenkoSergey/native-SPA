@@ -25,6 +25,13 @@ const monthDates = (d: string) => {
 
   return dates;
 };
+
+const getHost = (elem: Element) => {
+  const host = (elem.getRootNode() as ShadowRoot).host;
+  assert(host instanceof CustomCalendar);
+  return host;
+};
+
 // пока забить на создание дополнительных свойств и синхронизацию их с атрибутами
 // пусть будет все проще, чем в custom-autocomplete
 
@@ -34,8 +41,7 @@ export class CustomCalendar extends HTMLElement {
   ["constructor"]!: typeof CustomCalendar;
 
   shadowRoot!: ShadowRoot;
-  isInnerAttrSet = false;
-  isRendered = false;
+  skipCb = true;
 
   constructor() {
     super();
@@ -43,7 +49,7 @@ export class CustomCalendar extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["year", "month","date"];
+    return ["year", "month","date", "view"];
   }
 
   connectedCallback() {
@@ -51,8 +57,11 @@ export class CustomCalendar extends HTMLElement {
     attachStyles(this, styles);
 
     this.attachHandlers();
-    this.render("month");
-    this.isRendered = true;
+
+    if (!this.hasAttribute("view")) {
+      this.setAttribute("view", "dates");
+    }
+    this.render("view");
   }
 
   attributeChangedCallback(
@@ -60,26 +69,49 @@ export class CustomCalendar extends HTMLElement {
     oldValue: string | boolean,
     newValue: string | boolean,
   ) {
-    if (!this.isRendered) return;
-    if (this.isInnerAttrSet) return;
+    if (this.skipCb) return;
 
     this.render(name);
   }
 
 
   attachHandlers() {
-    this.shadowRoot.addEventListener("click", this.onNextMonthClick as EventListener);
+    const nextMonthButton = this.shadowRoot.querySelector("#next-month");
+    const prevMonthButton = this.shadowRoot.querySelector("#prev-month");
+    nextMonthButton?.addEventListener("click", this.onNextMonthClick as EventListener);
+    prevMonthButton?.addEventListener("click", this.onNextMonthClick as EventListener);
+
+    const yearMonthToggler = this.shadowRoot.querySelector("#year-month-toggler");
+    yearMonthToggler?.addEventListener("click", this.onYearSelectorClick as EventListener);
+
     this.shadowRoot.addEventListener("click", this.onDateClick as EventListener);
+    this.shadowRoot.addEventListener("click", this.onYearTdClick as EventListener);
   }
 
   render(attrName: string = "") {
-    this.isInnerAttrSet = true;
-    if (attrName === "month" || attrName === "year") {
-      this.renderNewMonth();
+    this.skipCb = true;
+    const view = this.getAttribute("view") || "dates";
+
+    if (view === "dates") {
+      if ((attrName === "month" || attrName === "year")) {
+        this.renderDates();
+      }
+      this.renderSelectedDate();
     }
 
-    this.renderSelectedDate();
-    this.isInnerAttrSet = false;
+    if (attrName === "view") {
+      const tbodies = [...this.shadowRoot.querySelectorAll("tbody")];
+      tbodies.forEach(tbody => tbody.innerHTML = "");
+
+      if (view === "years") this.renderYears();
+      else if (view === "months") this.renderMonths();
+      else if (view === "dates") {
+        this.renderDates();
+        this.renderSelectedDate();
+      }
+    }
+
+    this.skipCb = false;
   }
 
   get year() {
@@ -94,7 +126,7 @@ export class CustomCalendar extends HTMLElement {
     return this.getAttribute("date");
   }
 
-  renderNewMonth() {
+  renderDates() {
     const visibledDates = monthDates(new Date(this.year, this.month).toString());
     const weeksInMonth = visibledDates.length / 7;
 
@@ -108,6 +140,7 @@ export class CustomCalendar extends HTMLElement {
         const pointedDate = visibledDates[ptr];
 
         const td = document.createElement("td");
+        td.classList.add("date-cell");
         td.dataset.date = pointedDate.toDateString();
         td.textContent = String(pointedDate.getDate());
         const cellMonth = pointedDate.getMonth();
@@ -128,6 +161,46 @@ export class CustomCalendar extends HTMLElement {
     if (h2) h2.textContent = this.formatYearMonth(this.year, this.month);
   }
 
+  renderYears() {
+    const minYear = 1970; // TODO добавить минимальные года
+    const maxYear = 2050;
+    const yearsPerRow = 4;
+    const maxRows = Math.ceil((maxYear - minYear) / yearsPerRow);
+    const tbody = document.createElement("tbody");
+
+    for (let row = 0; row <= maxRows; row++) {
+      const tr = document.createElement("tr");
+      for (let col = 0; col <= 4; col++) {
+        const td = document.createElement("td");
+        td.classList.add("year-cell");
+        td.textContent = String(minYear + (row * yearsPerRow) + col);
+        tr.append(td);
+      }
+      tbody.append(tr);
+    }
+
+    this.shadowRoot.querySelector("#years tbody")?.replaceWith(tbody);
+  }
+
+  renderMonths() {
+    const tbody = document.createElement("tbody");
+
+    for (let row = 0; row <= 4; row++) {
+      const tr = document.createElement("tr");
+      for (let col = 0; col <= 3; col++) {
+        const td = document.createElement("td");
+        td.classList.add("month-cell");
+        td.textContent = new Date(
+          new Date().setMonth(row * 4 + col),
+        ).toLocaleDateString(undefined, {month: "short"});
+        tr.append(td);
+      }
+      tbody.append(tr);
+    }
+
+    this.shadowRoot.querySelector("#months tbody")?.replaceWith(tbody);
+  }
+
   renderSelectedDate() {
     const {shadowRoot} = this;
 
@@ -141,39 +214,55 @@ export class CustomCalendar extends HTMLElement {
     }
   }
 
-  onNextMonthClick(event: PointerEvent) {
-    const { target } = event;
-    if (!(target instanceof Element)) return;
+  onNextMonthClick() {
+    const host = getHost(this);
 
-    const {host} = this;
-    assert(host instanceof CustomCalendar);
-
-    const isNextMonthBtn = target.closest("#next-month");
-    const isPrevMonthBtn = target.closest("#prev-month");
-    if (!isNextMonthBtn && !isPrevMonthBtn) return;
-
-
-    this.isInnerAttrSet = true;
+    const isNextMonthBtn = this.id === "next-month";
     const next = isNextMonthBtn ? host.month + 1 : host.month - 1;
+
+    host.skipCb = true;
     if (next < 0) host.setAttribute("year", String(host.year - 1));
     else if (next > 11) host.setAttribute("year", String(host.year + 1));
-    host.setAttribute("month", String((next + 12) % 12));
 
+    host.setAttribute("month", String((next + 12) % 12));
     host.render("month");
   }
 
   onDateClick(event: PointerEvent) {
     const {target} = event;
     if (!(target instanceof Element)) return;
-    if (target.tagName !== "TD") return;
     if (target.hasAttribute("disabled")) return;
+    if (!target.classList.contains("date-cell")) return;
 
-    const {host} = this;
-    assert(host instanceof CustomCalendar);
+    const host = getHost(this);
+    host.setAttribute(
+      "date", 
+      new Date(host.year, host.month, Number(target.textContent)).toDateString(),
+    );
+  }
 
-    this.isInnerAttrSet = true;
-    host.setAttribute("date", new Date(host.year, host.month, Number(target.textContent)).toDateString());
-    host.render("date");
+  onYearSelectorClick() {
+    const host = getHost(this);
+
+    if (host.getAttribute("view") !== "dates") {
+      host.setAttribute("view", "dates");
+    } else {
+      host.setAttribute("view", "years");
+    }
+    // TODO добавить вычисление высоты через переменную
+  }
+
+  onYearTdClick(event: PointerEvent) {
+    const {target} = event;
+    if (!(target instanceof Element)) return;
+    if (!target.classList.contains("year-cell")) return;
+
+    const host = getHost(target);
+
+    host.skipCb = true;
+    host.setAttribute("year", target.textContent);
+    host.setAttribute("view", "dates");
+    host.render("view");
   }
 
   formatYearMonth(year: number, month: number) {
