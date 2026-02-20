@@ -52,6 +52,22 @@ export class CustomCalendar extends HTMLElement {
     return ["year", "month","date", "view"];
   }
 
+  get view() {
+    return this.getAttribute("view") || "dates";
+  }
+
+  get year() {
+    return Number(this.getAttribute("year") ?? new Date().getFullYear());
+  }
+
+  get month() {
+    return Number(this.getAttribute("month") ?? new Date().getMonth());
+  }
+
+  get date() {
+    return this.getAttribute("date");
+  }
+
   connectedCallback() {
     this.shadowRoot.innerHTML = template;
     attachStyles(this, styles);
@@ -90,7 +106,7 @@ export class CustomCalendar extends HTMLElement {
 
   render(attrName: string = "") {
     this.skipCb = true;
-    const view = this.getAttribute("view") || "dates";
+    const view = this.view;
 
     if (view === "dates") {
       if ((attrName === "month" || attrName === "year")) {
@@ -108,22 +124,11 @@ export class CustomCalendar extends HTMLElement {
       else if (view === "dates") {
         this.renderDates();
         this.renderSelectedDate();
+        this.restrictTableHeight(false);
       }
     }
 
     this.skipCb = false;
-  }
-
-  get year() {
-    return Number(this.getAttribute("year") ?? new Date().getFullYear());
-  }
-
-  get month() {
-    return Number(this.getAttribute("month") ?? new Date().getMonth());
-  }
-
-  get date() {
-    return this.getAttribute("date");
   }
 
   renderDates() {
@@ -243,8 +248,9 @@ export class CustomCalendar extends HTMLElement {
 
   onYearSelectorClick() {
     const host = getHost(this);
+    host.restrictTableHeight(true);
 
-    if (host.getAttribute("view") !== "dates") {
+    if (host.view !== "dates") {
       host.setAttribute("view", "dates");
     } else {
       host.setAttribute("view", "years");
@@ -270,6 +276,20 @@ export class CustomCalendar extends HTMLElement {
       month: "long",
       year: "numeric",
     });
+  }
+
+  restrictTableHeight(shouldBeRestricted: boolean) {
+    const tablesContainer = this.shadowRoot.querySelector(".tables-container");
+    assert(tablesContainer instanceof HTMLElement);
+
+    const varName = "--table-height";
+
+    if (shouldBeRestricted) {
+      const currentHeight = tablesContainer.getBoundingClientRect().height + "px";
+      tablesContainer.style.setProperty(varName, currentHeight);
+    } else {
+      tablesContainer.style.setProperty(varName, "");
+    }
   }
 }
 
