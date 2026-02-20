@@ -102,6 +102,7 @@ export class CustomCalendar extends HTMLElement {
 
     this.shadowRoot.addEventListener("click", this.onDateClick as EventListener);
     this.shadowRoot.addEventListener("click", this.onYearTdClick as EventListener);
+    this.shadowRoot.addEventListener("click", this.onMonthTdClick as EventListener);
   }
 
   render(attrName: string = "") {
@@ -173,14 +174,16 @@ export class CustomCalendar extends HTMLElement {
     const maxRows = Math.ceil((maxYear - minYear) / yearsPerRow);
     const tbody = document.createElement("tbody");
 
-    for (let row = 0; row <= maxRows; row++) {
+    for (let row = 0; row < maxRows; row++) {
       const tr = document.createElement("tr");
-      for (let col = 0; col <= 4; col++) {
+
+      for (let col = 0; col < yearsPerRow; col++) {
         const td = document.createElement("td");
         td.classList.add("year-cell");
         td.textContent = String(minYear + (row * yearsPerRow) + col);
         tr.append(td);
       }
+
       tbody.append(tr);
     }
 
@@ -189,15 +192,21 @@ export class CustomCalendar extends HTMLElement {
 
   renderMonths() {
     const tbody = document.createElement("tbody");
+    const rows = 4;
+    const cols = 3;
 
-    for (let row = 0; row <= 4; row++) {
+    for (let row = 0; row < rows; row++) {
       const tr = document.createElement("tr");
-      for (let col = 0; col <= 3; col++) {
+      for (let col = 0; col < cols; col++) {
         const td = document.createElement("td");
         td.classList.add("month-cell");
+
+        const index = row * cols + col;
+        td.dataset.index = String(index);
         td.textContent = new Date(
-          new Date().setMonth(row * 4 + col),
+          new Date().setMonth(index),
         ).toLocaleDateString(undefined, {month: "short"});
+
         tr.append(td);
       }
       tbody.append(tr);
@@ -260,13 +269,26 @@ export class CustomCalendar extends HTMLElement {
 
   onYearTdClick(event: PointerEvent) {
     const {target} = event;
-    if (!(target instanceof Element)) return;
+    if (!(target instanceof HTMLTableCellElement)) return;
     if (!target.classList.contains("year-cell")) return;
 
     const host = getHost(target);
 
     host.skipCb = true;
     host.setAttribute("year", target.textContent);
+    host.setAttribute("view", "months");
+    host.render("view");
+  }
+
+  onMonthTdClick(event: PointerEvent) {
+    const {target} = event;
+    if (!(target instanceof HTMLTableCellElement)) return;
+    if (!target.classList.contains("month-cell")) return;
+
+    const host = getHost(target);
+
+    host.skipCb = true;
+    host.setAttribute("month", String(target.dataset.index));
     host.setAttribute("view", "dates");
     host.render("view");
   }

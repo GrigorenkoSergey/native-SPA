@@ -1,4 +1,4 @@
-:host([view="years"]) {
+:host(:is([view="years"], [view="months"])) {
 
   #dates,
   .month-switchers {
@@ -35,7 +35,18 @@
 table {
   margin: 0 auto;
   border-collapse: separate;
+}
+
+#dates {
   border-spacing: 4px;
+}
+
+#years {
+  border-spacing: 4px 8px;
+}
+
+#months {
+  border-spacing: 16px 4px;
 }
 
 button {
@@ -55,40 +66,50 @@ svg {
   display: block;
 }
 
-:where(#dates) {
+td,
+th {
+  font-weight: 400;
+  vertical-align: middle;
+  text-align: center;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
 
-  td,
-  th {
-    font-weight: 400;
-    vertical-align: middle;
-    text-align: center;
-    border-radius: 50%;
-    width: var(--cell-width);
-    height: var(--cell-height);
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+th {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+td {
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--bg-button-hover);
   }
 
-  th {
-    color: #666;
-    font-size: 0.9rem;
-  }
-
-  td {
-    cursor: pointer;
+  &[disabled] {
+    color: var(--color-disabled);
+    cursor: not-allowed;
 
     &:hover {
-      background-color: var(--bg-button-hover);
-    }
-
-    &[disabled] {
-      color: var(--color-disabled);
-      cursor: not-allowed;
-
-      &:hover {
-        background-color: transparent;
-      }
+      background-color: transparent;
     }
   }
+}
+
+.date-cell {
+  border-radius: 50%;
+  width: var(--cell-width);
+  height: var(--cell-height);
+}
+
+.month-cell {
+  border-radius: 1000px;
+  padding: 8px 16px;
+}
+
+.year-cell {
+  border-radius: 1000px;
+  padding: 8px 12px;
 }
 
 .selected {
@@ -151,4 +172,47 @@ svg {
 
 .next-month {
   rotate: -90deg;
+}
+
+#actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  margin-top: 16px;
+}
+
+#actions button {
+  font-family: inherit;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-weight: 500;
+  transition: transform 0.1s ease, filter 0.1s ease, background-color 0.2s ease-in-out;
+}
+
+#ok {
+  background-color: var(--bg-selected);
+  color: var(--color-selected);
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    filter: brightness(0.9);
+  }
+}
+
+#cancel,
+#today {
+  &:hover {
+    background-color: var(--bg-button-hover);
+  }
+
+  &:active {
+    background-color: var(--bg-button-hover);
+    filter: brightness(0.9);
+  }
 }
