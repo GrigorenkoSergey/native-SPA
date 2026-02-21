@@ -32,8 +32,11 @@ const getHost = (elem: Element) => {
   return host;
 };
 
+type View = "dates" | "months" |"years";
+
 // пока забить на создание дополнительных свойств и синхронизацию их с атрибутами
 // пусть будет все проще, чем в custom-autocomplete
+
 
 // паттерн grid https://www.w3.org/WAI/ARIA/apg/patterns/grid/
 export class CustomCalendar extends HTMLElement {
@@ -52,20 +55,21 @@ export class CustomCalendar extends HTMLElement {
     return ["year", "month","date", "view"];
   }
 
-  get view() {
-    return this.getAttribute("view") || "dates";
+  get view(): View {
+    return this.getAttribute("view") as View || "dates";
   }
 
   get year() {
-    return Number(this.getAttribute("year") ?? new Date().getFullYear());
+    return Number(this.getAttribute("year") || new Date().getFullYear());
   }
 
   get month() {
-    return Number(this.getAttribute("month") ?? new Date().getMonth());
+    return Number(this.getAttribute("month") || new Date().getMonth());
   }
 
   get date() {
-    return this.getAttribute("date");
+    return this.getAttribute("date") 
+    || new Date(this.year, this.month, Number(new Date().getDate())).toDateString();
   }
 
   connectedCallback() {
@@ -74,9 +78,11 @@ export class CustomCalendar extends HTMLElement {
 
     this.attachHandlers();
 
-    if (!this.hasAttribute("view")) {
-      this.setAttribute("view", "dates");
-    }
+    if (!this.hasAttribute("view")) this.setAttribute("view", "dates");
+    if (!this.hasAttribute("date")) this.setAttribute("date", this.date);
+    if (!this.hasAttribute("month")) this.setAttribute("month", String(this.month));
+    if (!this.hasAttribute("year")) this.setAttribute("year", String(this.year));
+
     this.render("view");
   }
 
@@ -86,6 +92,7 @@ export class CustomCalendar extends HTMLElement {
     newValue: string | boolean,
   ) {
     if (this.skipCb) return;
+    if (oldValue === newValue) return;
 
     this.render(name);
   }
@@ -109,11 +116,8 @@ export class CustomCalendar extends HTMLElement {
     this.skipCb = true;
     const view = this.view;
 
-    if (view === "dates") {
-      if ((attrName === "month" || attrName === "year")) {
-        this.renderDates();
-      }
-      this.renderSelectedDate();
+    if ((attrName === "month" || attrName === "year") && view === "dates") {
+      this.renderDates();
     }
 
     if (attrName === "view") {
@@ -124,10 +128,11 @@ export class CustomCalendar extends HTMLElement {
       else if (view === "months") this.renderMonths();
       else if (view === "dates") {
         this.renderDates();
-        this.renderSelectedDate();
         this.restrictTableHeight(false);
       }
     }
+
+    this.highlightSelected(this.view);
 
     this.skipCb = false;
   }
@@ -149,6 +154,8 @@ export class CustomCalendar extends HTMLElement {
         td.classList.add("date-cell");
         td.dataset.date = pointedDate.toDateString();
         td.textContent = String(pointedDate.getDate());
+        td.tabIndex = -1;
+
         const cellMonth = pointedDate.getMonth();
         if (cellMonth !== this.month) td.setAttribute("disabled", "");
 
@@ -180,7 +187,12 @@ export class CustomCalendar extends HTMLElement {
       for (let col = 0; col < yearsPerRow; col++) {
         const td = document.createElement("td");
         td.classList.add("year-cell");
-        td.textContent = String(minYear + (row * yearsPerRow) + col);
+
+        const year = String(minYear + (row * yearsPerRow) + col);
+        td.dataset.year = year;
+        td.tabIndex = -1;
+        td.textContent = year;
+
         tr.append(td);
       }
 
@@ -202,7 +214,8 @@ export class CustomCalendar extends HTMLElement {
         td.classList.add("month-cell");
 
         const index = row * cols + col;
-        td.dataset.index = String(index);
+        td.dataset.month = String(index);
+        td.tabIndex = -1;
         td.textContent = new Date(
           new Date().setMonth(index),
         ).toLocaleDateString(undefined, {month: "short"});
@@ -215,16 +228,23 @@ export class CustomCalendar extends HTMLElement {
     this.shadowRoot.querySelector("#months tbody")?.replaceWith(tbody);
   }
 
-  renderSelectedDate() {
+  highlightSelected(view: View) {
     const {shadowRoot} = this;
 
     const selected = shadowRoot.querySelector(".selected");
-    if (selected) selected.classList.remove("selected");
+    if (selected instanceof HTMLElement) {
+      selected.classList.remove("selected");
+      selected.tabIndex = -1;
+    }
 
-    const selectedDate = this.date;
-    if (selectedDate) {
-      const cell = shadowRoot.querySelector(`[data-date="${selectedDate}"]`);
-      if (cell) cell.classList.add("selected");
+    const field = view.slice(0, -1); // dates -> date, months -> month...
+    const selectedValue = this[field];
+    const cell = shadowRoot.querySelector(`[data-${field}="${selectedValue}"]`);
+
+    if (cell instanceof HTMLElement) {
+      cell.classList.add("selected");
+      cell.tabIndex = 0;
+      cell.scrollIntoView();
     }
   }
 
@@ -259,12 +279,11 @@ export class CustomCalendar extends HTMLElement {
     const host = getHost(this);
     host.restrictTableHeight(true);
 
-    if (host.view !== "dates") {
-      host.setAttribute("view", "dates");
-    } else {
+    if (host.view === "dates") {
       host.setAttribute("view", "years");
+    } else {
+      host.setAttribute("view", "dates");
     }
-    // TODO добавить вычисление высоты через переменную
   }
 
   onYearTdClick(event: PointerEvent) {
@@ -288,7 +307,7 @@ export class CustomCalendar extends HTMLElement {
     const host = getHost(target);
 
     host.skipCb = true;
-    host.setAttribute("month", String(target.dataset.index));
+    host.setAttribute("month", String(target.dataset.month));
     host.setAttribute("view", "dates");
     host.render("view");
   }
