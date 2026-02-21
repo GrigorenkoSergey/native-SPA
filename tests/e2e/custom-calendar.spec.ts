@@ -89,5 +89,46 @@ test("Можно выбрать год и месяц", async ({page}) => {
 
     await expect(selected).toBeVisible();
   });
+});
 
+test("Табуляция", async ({page}) => {
+  await test.step("Сначала сфокусируемся на календарике", async () => {
+    await page.getByRole("heading", { name: "февраль 2026 г" }).click(); // открыли таблицу с годами
+    await page.getByRole("heading", { name: "февраль 2026 г" }).click(); // закрыли таблицу с годами
+  });
+
+  await test.step("Проверим порядок перебора", async () => {
+    const order = [
+      page.getByRole("button", { name: "prev month" }),
+      page.getByRole("button", { name: "next month" }),
+      page.getByRole("gridcell", { name: "14" }),
+      page.getByRole("button", { name: "Сегодня" }),
+      page.getByRole("button", { name: "Отмена" }),
+      page.getByRole("button", { name: "OK" }),
+    ];
+
+    for (const locator of order) {
+      await page.keyboard.press("Tab");
+      await expect(locator).toBeFocused();
+    }
+  });
+});
+
+test.only("Возможность выбирать даты с помощью клавиатуры", async ({page}) => {
+  const dateCellLocator = (date: number) => page.getByRole("gridcell", { 
+    name: String(date), exact: true, 
+  });
+
+  await page.getByRole("gridcell", { name: "14", exact: true }).focus();
+
+  await test.step("Простейшая навигация", async () => {
+    await page.keyboard.down("ArrowLeft");
+    await expect(dateCellLocator(13)).toBeFocused();
+    await page.keyboard.down("ArrowRight");
+    await expect(dateCellLocator(14)).toBeFocused();
+    await page.keyboard.down("ArrowUp");
+    await expect(dateCellLocator(7)).toBeFocused();
+    await page.keyboard.down("ArrowDown");
+    await expect(dateCellLocator(14)).toBeFocused();
+  });
 });

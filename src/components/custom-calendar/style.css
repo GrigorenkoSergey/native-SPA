@@ -86,6 +86,10 @@ td {
     background-color: var(--bg-button-hover);
   }
 
+  &:focus-visible {
+    background-color: red;
+  }
+
   &[disabled] {
     color: var(--color-disabled);
     cursor: not-allowed;

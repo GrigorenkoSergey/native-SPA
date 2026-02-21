@@ -110,6 +110,8 @@ export class CustomCalendar extends HTMLElement {
     this.shadowRoot.addEventListener("click", this.onDateClick as EventListener);
     this.shadowRoot.addEventListener("click", this.onYearTdClick as EventListener);
     this.shadowRoot.addEventListener("click", this.onMonthTdClick as EventListener);
+
+    this.shadowRoot.addEventListener("keydown", this.onKeyDown as EventListener);
   }
 
   render(attrName: string = "") {
@@ -310,6 +312,44 @@ export class CustomCalendar extends HTMLElement {
     host.setAttribute("month", String(target.dataset.month));
     host.setAttribute("view", "dates");
     host.render("view");
+  }
+  
+  onKeyDown(event: KeyboardEvent) {
+    console.log(event.code);
+    console.log(event.target);
+    const {target: td, code} = event;
+    if (!(td instanceof HTMLTableCellElement)) return;
+
+    const host = getHost(td);
+
+    switch(code) {
+      case("ArrowUp"): host.moveFocusFromTd(td, -1, 0); break;
+      case("ArrowDown"): host.moveFocusFromTd(td, 1, 0); break;
+      case("ArrowLeft"): host.moveFocusFromTd(td, 0, -1); break;
+      case("ArrowRight"): host.moveFocusFromTd(td, 0, 1); break;
+    }
+  }
+
+  moveFocusFromTd(td: HTMLTableCellElement, rowDir: number, colDir: number) {
+    const tr = td.closest("tr");
+    assert(tr instanceof HTMLTableRowElement);
+
+    const tbody = tr.closest("tbody");
+    assert(tbody instanceof HTMLTableSectionElement);
+
+    const {sectionRowIndex} = tr;
+    const {cellIndex} = td;
+    td.tabIndex = -1;
+
+    const nextRow = tbody.rows[
+      Math.min(Math.max(0, sectionRowIndex + rowDir), tbody.rows.length - 1)
+    ];
+    const nextCell = nextRow.cells[
+      Math.min(Math.max(0, cellIndex + colDir), nextRow.cells.length - 1)
+    ];
+
+    nextCell.tabIndex = 0;
+    nextCell.focus();
   }
 
   formatYearMonth(year: number, month: number) {
