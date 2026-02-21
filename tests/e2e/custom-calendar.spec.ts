@@ -114,7 +114,7 @@ test("Табуляция", async ({page}) => {
   });
 });
 
-test.only("Возможность выбирать даты с помощью клавиатуры", async ({page}) => {
+test("Возможность выбирать даты с помощью клавиатуры", async ({page}) => {
   const dateCellLocator = (date: number) => page.getByRole("gridcell", { 
     name: String(date), exact: true, 
   });
@@ -131,4 +131,13 @@ test.only("Возможность выбирать даты с помощью к
     await page.keyboard.down("ArrowDown");
     await expect(dateCellLocator(14)).toBeFocused();
   });
+
+  await test.step("При движении налево, при достижении первой ячейки \
+    перепрыгивает на последнюю ячейку предыдущей строки", async () => {
+    await page.getByRole("gridcell", { name: "9", exact: true }).click();
+    await page.keyboard.down("ArrowLeft");
+    await expect(page.getByRole("gridcell", { name: "8", exact: true })).toBeFocused();
+  });
+
+  // await test.step("При движении направо, ")
 });

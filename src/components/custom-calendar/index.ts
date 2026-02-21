@@ -33,6 +33,7 @@ const getHost = (elem: Element) => {
 };
 
 type View = "dates" | "months" |"years";
+type ArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowDown" | "ArrowUp";
 
 // пока забить на создание дополнительных свойств и синхронизацию их с атрибутами
 // пусть будет все проще, чем в custom-autocomplete
@@ -315,22 +316,35 @@ export class CustomCalendar extends HTMLElement {
   }
   
   onKeyDown(event: KeyboardEvent) {
-    console.log(event.code);
-    console.log(event.target);
     const {target: td, code} = event;
     if (!(td instanceof HTMLTableCellElement)) return;
 
     const host = getHost(td);
 
+    const tr = td.closest("tr");
+    assert(tr instanceof HTMLTableRowElement);
+
     switch(code) {
-      case("ArrowUp"): host.moveFocusFromTd(td, -1, 0); break;
-      case("ArrowDown"): host.moveFocusFromTd(td, 1, 0); break;
-      case("ArrowLeft"): host.moveFocusFromTd(td, 0, -1); break;
-      case("ArrowRight"): host.moveFocusFromTd(td, 0, 1); break;
+      case("ArrowLeft"): {
+        host.moveFocusFromTd(td, "ArrowLeft"); 
+        break;
+      }
+      case("ArrowRight"): {
+        host.moveFocusFromTd(td, "ArrowRight"); 
+        break;
+      }
+      case("ArrowUp"): {
+        host.moveFocusFromTd(td, "ArrowUp"); 
+        break;
+      }
+      case("ArrowDown"): {
+        host.moveFocusFromTd(td, "ArrowDown"); 
+        break;
+      }
     }
   }
 
-  moveFocusFromTd(td: HTMLTableCellElement, rowDir: number, colDir: number) {
+  moveFocusFromTd(td: HTMLTableCellElement, code: ArrowKey) {
     const tr = td.closest("tr");
     assert(tr instanceof HTMLTableRowElement);
 
@@ -339,17 +353,41 @@ export class CustomCalendar extends HTMLElement {
 
     const {sectionRowIndex} = tr;
     const {cellIndex} = td;
-    td.tabIndex = -1;
 
-    const nextRow = tbody.rows[
-      Math.min(Math.max(0, sectionRowIndex + rowDir), tbody.rows.length - 1)
-    ];
-    const nextCell = nextRow.cells[
-      Math.min(Math.max(0, cellIndex + colDir), nextRow.cells.length - 1)
-    ];
+    const maxRowIndex = tbody.rows.length - 1;
+    const maxColIndex = tr.cells.length - 1;
 
-    nextCell.tabIndex = 0;
-    nextCell.focus();
+    let nextCell: HTMLTableCellElement | undefined;
+
+    if (code === "ArrowDown" && sectionRowIndex < maxRowIndex) {
+      nextCell = tbody.rows[sectionRowIndex + 1].cells[cellIndex];
+    } 
+
+    if (code === "ArrowUp" && sectionRowIndex > 0) {
+      nextCell = tbody.rows[sectionRowIndex - 1].cells[cellIndex];
+    } 
+
+    if (code === "ArrowLeft") {
+      if (cellIndex > 0) {
+        nextCell = tbody.rows[sectionRowIndex].cells[cellIndex - 1];
+      } else if (sectionRowIndex > 0) {
+        nextCell = tbody.rows[sectionRowIndex - 1].cells[maxColIndex];
+      }
+    }
+
+    if (code === "ArrowRight") {
+      if (cellIndex < maxColIndex) {
+        nextCell = tbody.rows[sectionRowIndex].cells[cellIndex + 1];
+      } else if (sectionRowIndex < maxRowIndex) {
+        nextCell = tbody.rows[sectionRowIndex + 1].cells[0];
+      }
+    }
+
+    if (nextCell && !nextCell.hasAttribute("disabled")) {
+      td.tabIndex = -1;
+      nextCell.tabIndex = 0;
+      nextCell.focus();
+    }
   }
 
   formatYearMonth(year: number, month: number) {
