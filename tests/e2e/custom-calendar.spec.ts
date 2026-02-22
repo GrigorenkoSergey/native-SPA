@@ -169,5 +169,24 @@ test.only("Возможность выбирать даты с помощью к
     await expect(page.getByRole("heading", { name: "февраль 2026 г" })).toBeVisible();
   });
 
-  // await test.step("При движении направо, ")
+  await test.step("При движении наверх, при достижении границы \
+    следующего месяца календарик перестраивается", async () => {
+    await expect(page.getByRole("gridcell", { name: "1", exact: true }).first()).toBeFocused();
+    await page.keyboard.down("ArrowUp");
+    await expect(page.getByRole("gridcell", { name: "25" })).toBeFocused();
+    await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
+  });
+
+  await test.step("При движении наверх, год так же может поменяться", async () => {
+    await page.getByRole("gridcell", { name: "1", exact: true }).first().click();
+    await page.keyboard.down("ArrowUp");
+    await expect(page.getByRole("gridcell", { name: "25" })).toBeFocused();
+    await expect(page.getByRole("heading", { name: "декабрь 2025 г" })).toBeVisible();
+  });
+
+  await test.step("При движении вниз, год так же может поменяться", async () => {
+    await page.keyboard.down("ArrowDown");
+    await expect(page.getByRole("gridcell", { name: "1", exact: true }).first()).toBeFocused();
+    await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
+  });
 });

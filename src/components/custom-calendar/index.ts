@@ -327,59 +327,46 @@ export class CustomCalendar extends HTMLElement {
     switch(code) {
       case("ArrowLeft"): {
         const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
-        const isNextDateFromOtherMonth = nextDate.getMonth() !== host.month;
-        const isNextDateFromOtherYear = nextDate.getFullYear() !== host.year;
-
-
-        if (host.view === "dates" && isNextDateFromOtherMonth) {
-          host.skipCb = true;
-
-          if (isNextDateFromOtherYear) host.setAttribute("year", String(nextDate.getFullYear()));
-          if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
-          host.render("month");
-
-          const nextTd = host.shadowRoot.querySelector(`[data-date="${nextDate.toDateString()}"]`);
-          assert(nextTd instanceof HTMLTableCellElement);
-          nextTd.focus();
-        } else {
-          host.moveFocusFromTd(td, "ArrowLeft"); 
-        }
+        if (host.view === "dates") host.moveDateFocus(nextDate, host);
+        else host.moveFocusFromTd(td, "ArrowLeft"); 
         break;
       }
 
       case("ArrowRight"): {
         const nextDate = new Date(Number(new Date(String(td.dataset.date))) + msInDay);
-        const isNextDateFromOtherMonth = nextDate.getMonth() !== host.month;
-        const isNextDateFromOtherYear = nextDate.getFullYear() !== host.year;
-
-        if (host.view === "dates" && isNextDateFromOtherMonth) {
-          host.skipCb = true;
-
-          if (isNextDateFromOtherYear) host.setAttribute("year", String(nextDate.getFullYear()));
-          if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
-          host.render("month");
-
-          const nextTd = host.shadowRoot.querySelector(`[data-date="${nextDate.toDateString()}"]`);
-          assert(nextTd instanceof HTMLTableCellElement);
-          nextTd.focus();
-        } else {
-          host.moveFocusFromTd(td, "ArrowRight"); 
-        }
+        if (host.view === "dates") host.moveDateFocus(nextDate, host);
+        else host.moveFocusFromTd(td, "ArrowRight"); 
         break;
       }
 
       case("ArrowUp"): {
-        // const nextDate = new Date(Number(new Date(String(td.dataset.date))) + 7 * msInDay);
-
+        const nextDate = new Date(Number(new Date(String(td.dataset.date))) - 7 * msInDay);
+        if (host.view === "dates") host.moveDateFocus(nextDate, host);
         host.moveFocusFromTd(td, "ArrowUp"); 
         break;
       }
 
       case("ArrowDown"): {
+        const nextDate = new Date(Number(new Date(String(td.dataset.date))) + 7 * msInDay);
+        if (host.view === "dates") host.moveDateFocus(nextDate, host);
         host.moveFocusFromTd(td, "ArrowDown"); 
         break;
       }
     }
+  }
+
+  moveDateFocus(nextDate: Date, host: CustomCalendar) {
+    const isNextDateFromOtherMonth = nextDate.getMonth() !== host.month;
+    const isNextDateFromOtherYear = nextDate.getFullYear() !== host.year;
+
+    host.skipCb = true;
+    if (isNextDateFromOtherYear) host.setAttribute("year", String(nextDate.getFullYear()));
+    if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
+    host.render("month");
+
+    const nextTd = host.shadowRoot.querySelector(`[data-date="${nextDate.toDateString()}"]`);
+    assert(nextTd instanceof HTMLTableCellElement);
+    nextTd.focus();
   }
 
   moveFocusFromTd(td: HTMLTableCellElement, code: ArrowKey) {
