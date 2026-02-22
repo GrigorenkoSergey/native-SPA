@@ -326,23 +326,19 @@ export class CustomCalendar extends HTMLElement {
 
     switch(code) {
       case("ArrowLeft"): {
-        const prevDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
-        const isTdFirstDateOfMonth = 
-          (prevDate.getMonth() === 11 && host.month === 0) || prevDate.getMonth() < host.month;
+        const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
+        const isNextDateFromOtherMonth = nextDate.getMonth() !== host.month;
+        const isNextDateFromOtherYear = nextDate.getFullYear() !== host.year;
 
-        if (host.view === "dates" && isTdFirstDateOfMonth) {
+
+        if (host.view === "dates" && isNextDateFromOtherMonth) {
           host.skipCb = true;
 
-          if (host.month === 0) {
-            host.setAttribute("year", String(host.year - 1));
-            host.setAttribute("month", "11");
-          } else {
-            host.setAttribute("month", String(host.month - 1));
-          }
-
+          if (isNextDateFromOtherYear) host.setAttribute("year", String(nextDate.getFullYear()));
+          if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
           host.render("month");
 
-          const nextTd = host.shadowRoot.querySelector(`[data-date="${prevDate.toDateString()}"]`);
+          const nextTd = host.shadowRoot.querySelector(`[data-date="${nextDate.toDateString()}"]`);
           assert(nextTd instanceof HTMLTableCellElement);
           nextTd.focus();
         } else {
@@ -353,19 +349,16 @@ export class CustomCalendar extends HTMLElement {
 
       case("ArrowRight"): {
         const nextDate = new Date(Number(new Date(String(td.dataset.date))) + msInDay);
-        const isTdLastDateOfMonth = 
-          (nextDate.getMonth() > host.month) || (nextDate.getMonth() === 0 && host.month === 11);
+        const isNextDateFromOtherMonth = nextDate.getMonth() !== host.month;
+        const isNextDateFromOtherYear = nextDate.getFullYear() !== host.year;
 
-        if (host.view === "dates" && isTdLastDateOfMonth) {
+        if (host.view === "dates" && isNextDateFromOtherMonth) {
           host.skipCb = true;
-          if (host.month === 11) {
-            host.setAttribute("year", String(host.year + 1));
-            host.setAttribute("month", "0");
-          } else {
-            host.setAttribute("month", String(host.month + 1));
-          }
 
+          if (isNextDateFromOtherYear) host.setAttribute("year", String(nextDate.getFullYear()));
+          if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
           host.render("month");
+
           const nextTd = host.shadowRoot.querySelector(`[data-date="${nextDate.toDateString()}"]`);
           assert(nextTd instanceof HTMLTableCellElement);
           nextTd.focus();
@@ -376,6 +369,8 @@ export class CustomCalendar extends HTMLElement {
       }
 
       case("ArrowUp"): {
+        // const nextDate = new Date(Number(new Date(String(td.dataset.date))) + 7 * msInDay);
+
         host.moveFocusFromTd(td, "ArrowUp"); 
         break;
       }
