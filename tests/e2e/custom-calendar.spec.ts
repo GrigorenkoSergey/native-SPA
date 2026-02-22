@@ -114,7 +114,7 @@ test("Табуляция", async ({page}) => {
   });
 });
 
-test.only("Возможность выбирать даты с помощью клавиатуры", async ({page}) => {
+test("Возможность выбирать даты с помощью клавиатуры", async ({page}) => {
   const dateCellLocator = (date: number) => page.getByRole("gridcell", { 
     name: String(date), exact: true, 
   });
@@ -136,28 +136,28 @@ test.only("Возможность выбирать даты с помощью к
     перепрыгивает на последнюю ячейку предыдущей строки", async () => {
     await page.getByRole("gridcell", { name: "9", exact: true }).click();
     await page.keyboard.down("ArrowLeft");
-    await expect(page.getByRole("gridcell", { name: "8", exact: true })).toBeFocused();
+    await expect(dateCellLocator(8)).toBeFocused();
   });
 
   await test.step("При движении налево, при достижении границы \
     предыдущего месяца каленарик перестраивается", async () => {
     await page.getByRole("gridcell", { name: "1", exact: true }).first().click(); 
     await page.keyboard.down("ArrowLeft");
-    await expect(page.getByRole("gridcell", { name: "31" }).last()).toBeFocused();
+    await expect(dateCellLocator(31).last()).toBeFocused();
     await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
   });
 
   await test.step("При переходе с 1-го января на 31 декабря, год меняется", async () => {
-    await page.getByRole("gridcell", { name: "1", exact: true }).first().click(); 
+    await dateCellLocator(1).first().click(); 
     await page.keyboard.down("ArrowLeft");
-    await expect(page.getByRole("gridcell", { name: "31" }).last()).toBeFocused();
+    await expect(dateCellLocator(31).last()).toBeFocused();
     await expect(page.getByRole("heading", { name: "декабрь 2025 г" })).toBeVisible();
   });
 
   await test.step("При переходе с 31-го декабря на 1 января, год меняется", async () => {
     await page.getByRole("gridcell", { name: "31"}).last().click(); 
     await page.keyboard.down("ArrowRight");
-    await expect(page.getByRole("gridcell", { name: "1", exact: true }).first()).toBeFocused();
+    await expect(dateCellLocator(1).first()).toBeFocused();
     await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
   });
 
@@ -165,28 +165,47 @@ test.only("Возможность выбирать даты с помощью к
     следующего месяца каленарик перестраивается", async () => {
     await page.getByRole("gridcell", { name: "31" }).last().click(); 
     await page.keyboard.down("ArrowRight");
-    await expect(page.getByRole("gridcell", { name: "1", exact: true }).first()).toBeFocused();
+    await expect(dateCellLocator(1).first()).toBeFocused();
     await expect(page.getByRole("heading", { name: "февраль 2026 г" })).toBeVisible();
   });
 
   await test.step("При движении наверх, при достижении границы \
     следующего месяца календарик перестраивается", async () => {
-    await expect(page.getByRole("gridcell", { name: "1", exact: true }).first()).toBeFocused();
+    await expect(dateCellLocator(1).first()).toBeFocused();
     await page.keyboard.down("ArrowUp");
-    await expect(page.getByRole("gridcell", { name: "25" })).toBeFocused();
+    await expect(dateCellLocator(25)).toBeFocused();
     await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
   });
 
   await test.step("При движении наверх, год так же может поменяться", async () => {
-    await page.getByRole("gridcell", { name: "1", exact: true }).first().click();
+    await dateCellLocator(1).first().click();
     await page.keyboard.down("ArrowUp");
-    await expect(page.getByRole("gridcell", { name: "25" })).toBeFocused();
+    await expect(dateCellLocator(25)).toBeFocused();
     await expect(page.getByRole("heading", { name: "декабрь 2025 г" })).toBeVisible();
   });
 
   await test.step("При движении вниз, год так же может поменяться", async () => {
     await page.keyboard.down("ArrowDown");
-    await expect(page.getByRole("gridcell", { name: "1", exact: true }).first()).toBeFocused();
+    await expect(dateCellLocator(1).first()).toBeFocused();
     await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
+  });
+});
+
+test("Выбор ячеек с клавиатуры", async ({page}) => {
+  await page.getByRole("gridcell", { name: "14" }).click();
+
+  await test.step("Выбор ячейки дат по Enter и Space", async () => {
+    let leftCell = page.getByRole("gridcell", { name: "13" });
+    await page.keyboard.down("ArrowLeft");
+
+    await expect(leftCell).not.toContainClass("selected");
+    await page.keyboard.down("Enter");
+    await expect(leftCell).toContainClass("selected");
+
+    leftCell = page.getByRole("gridcell", { name: "12" });
+    await page.keyboard.down("ArrowLeft");
+    await expect(leftCell).not.toContainClass("selected");
+    await page.keyboard.down("Space");
+    await expect(leftCell).toContainClass("selected");
   });
 });

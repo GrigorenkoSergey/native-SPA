@@ -319,37 +319,51 @@ export class CustomCalendar extends HTMLElement {
     const {target: td, code} = event;
     if (!(td instanceof HTMLTableCellElement)) return;
 
-    const host = getHost(td);
-
     const tr = td.closest("tr");
     assert(tr instanceof HTMLTableRowElement);
 
+    const host = getHost(td);
+
     switch(code) {
       case("ArrowLeft"): {
-        const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
-        if (host.view === "dates") host.moveDateFocus(nextDate, host);
-        else host.moveFocusFromTd(td, "ArrowLeft"); 
+        if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowLeft"); 
+        else {
+          const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
+          host.moveDateFocus(nextDate, host);
+        } 
         break;
       }
 
       case("ArrowRight"): {
-        const nextDate = new Date(Number(new Date(String(td.dataset.date))) + msInDay);
-        if (host.view === "dates") host.moveDateFocus(nextDate, host);
-        else host.moveFocusFromTd(td, "ArrowRight"); 
+        if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowRight"); 
+        else {
+          const nextDate = new Date(Number(new Date(String(td.dataset.date))) + msInDay);
+          host.moveDateFocus(nextDate, host);
+        }
         break;
       }
 
       case("ArrowUp"): {
-        const nextDate = new Date(Number(new Date(String(td.dataset.date))) - 7 * msInDay);
-        if (host.view === "dates") host.moveDateFocus(nextDate, host);
-        host.moveFocusFromTd(td, "ArrowUp"); 
+        if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowUp"); 
+        else {
+          const nextDate = new Date(Number(new Date(String(td.dataset.date))) - 7 * msInDay);
+          host.moveDateFocus(nextDate, host);
+        }
         break;
       }
 
       case("ArrowDown"): {
-        const nextDate = new Date(Number(new Date(String(td.dataset.date))) + 7 * msInDay);
-        if (host.view === "dates") host.moveDateFocus(nextDate, host);
-        host.moveFocusFromTd(td, "ArrowDown"); 
+        if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowDown");
+        else {
+          const nextDate = new Date(Number(new Date(String(td.dataset.date))) + 7 * msInDay);
+          host.moveDateFocus(nextDate, host);
+        }
+        break;
+      }
+      
+      case("Enter"): 
+      case("Space"): {
+        td.dispatchEvent(new Event("click", {bubbles: true})); 
         break;
       }
     }
