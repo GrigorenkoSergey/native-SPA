@@ -248,6 +248,9 @@ export class CustomCalendar extends HTMLElement {
       cell.classList.add("selected");
       cell.tabIndex = 0;
       cell.scrollIntoView();
+    } else {
+      const firstTd = shadowRoot.querySelector("td:not([disabled])");
+      if (firstTd instanceof HTMLTableCellElement) firstTd.tabIndex = 0;
     }
   }
 

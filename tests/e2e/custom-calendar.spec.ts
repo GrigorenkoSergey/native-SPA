@@ -112,6 +112,12 @@ test("Табуляция", async ({page}) => {
       await expect(locator).toBeFocused();
     }
   });
+
+  await test.step("Фокусировка на датах возможна даже при отсутствии выделенной даты (будет выбрано 1-е число)", async () => {
+    await page.getByRole("button", { name: "next month" }).click();
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("gridcell", { name: "1", exact: true }).first()).toBeFocused();
+  });
 });
 
 test("Возможность выбирать даты с помощью клавиатуры", async ({page}) => {
