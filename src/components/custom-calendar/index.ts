@@ -203,6 +203,11 @@ export class CustomCalendar extends HTMLElement {
     }
 
     this.shadowRoot.querySelector("#years tbody")?.replaceWith(tbody);
+
+    const currentYearTd = tbody.querySelector(`[data-year="${this.year}"]`);
+    if (currentYearTd instanceof HTMLTableCellElement) {
+      currentYearTd.focus();
+    }
   }
 
   renderMonths() {
@@ -229,6 +234,11 @@ export class CustomCalendar extends HTMLElement {
     }
 
     this.shadowRoot.querySelector("#months tbody")?.replaceWith(tbody);
+
+    const currentMonthTd = tbody.querySelector(`[data-month="${this.month}"]`);
+    if (currentMonthTd instanceof HTMLTableCellElement) {
+      currentMonthTd.focus();
+    }
   }
 
   highlightSelected(view: View) {
@@ -316,6 +326,11 @@ export class CustomCalendar extends HTMLElement {
     host.setAttribute("month", String(target.dataset.month));
     host.setAttribute("view", "dates");
     host.render("view");
+
+    const yearToggler = host.shadowRoot.querySelector("#year-month-toggler");
+    if (yearToggler instanceof HTMLButtonElement) {
+      setTimeout(() => yearToggler.focus());
+    }
   }
   
   onKeyDown(event: KeyboardEvent) {

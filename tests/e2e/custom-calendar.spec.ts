@@ -215,3 +215,25 @@ test("Выбор ячеек с клавиатуры", async ({page}) => {
     await expect(leftCell).toContainClass("selected");
   });
 });
+
+test("Выбор года с помощью клавиатуры", async ({page}) => {
+  await page.getByRole("heading", { name: "февраль 2026 г" }).click();
+
+  await test.step("Выбираем год и месяц", async () => {
+    const currentYearCell = page.getByRole("gridcell", { name: "2026" });
+    await expect(currentYearCell).toContainClass("selected");
+    await expect(currentYearCell).toBeFocused();
+
+    await page.keyboard.down("Enter");
+    await expect(page.getByRole("gridcell", { name: "февр" })).toContainClass("selected");
+    await page.keyboard.down("ArrowLeft");
+    await page.keyboard.down("Space");
+
+    await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
+  });
+
+  await test.step("При нажатии \"Tab\" мы по-прежнему переходим к кнопке переключения месяца", async () => {
+    await page.keyboard.down("Tab");
+    await expect(page.getByRole("button", { name: "prev month" })).toBeFocused();
+  });
+});
