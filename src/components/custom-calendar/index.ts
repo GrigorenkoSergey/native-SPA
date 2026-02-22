@@ -326,7 +326,25 @@ export class CustomCalendar extends HTMLElement {
 
     switch(code) {
       case("ArrowLeft"): {
-        host.moveFocusFromTd(td, "ArrowLeft"); 
+        if (host.view === "dates" && td.textContent === "1") {
+          host.skipCb = true;
+
+          if (host.month === 0) {
+            host.setAttribute("year", String(host.year - 1));
+            host.setAttribute("month", "11");
+          } else {
+            host.setAttribute("month", String(host.month - 1));
+          }
+
+          host.render("month");
+
+          const prevDate = new Date(new Date(String(td.dataset.date)).setDate(0));
+          const nextTd = host.shadowRoot.querySelector(`[data-date="${prevDate.toDateString()}"]`);
+          assert(nextTd instanceof HTMLTableCellElement);
+          nextTd.focus();
+        } else {
+          host.moveFocusFromTd(td, "ArrowLeft"); 
+        }
         break;
       }
       case("ArrowRight"): {
