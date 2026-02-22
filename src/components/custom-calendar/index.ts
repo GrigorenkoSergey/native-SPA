@@ -326,7 +326,11 @@ export class CustomCalendar extends HTMLElement {
 
     switch(code) {
       case("ArrowLeft"): {
-        if (host.view === "dates" && td.textContent === "1") {
+        const prevDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
+        const isTdFirstDateOfMonth = 
+          (prevDate.getMonth() === 11 && host.month === 0) || prevDate.getMonth() < host.month;
+
+        if (host.view === "dates" && isTdFirstDateOfMonth) {
           host.skipCb = true;
 
           if (host.month === 0) {
@@ -338,7 +342,6 @@ export class CustomCalendar extends HTMLElement {
 
           host.render("month");
 
-          const prevDate = new Date(new Date(String(td.dataset.date)).setDate(0));
           const nextTd = host.shadowRoot.querySelector(`[data-date="${prevDate.toDateString()}"]`);
           assert(nextTd instanceof HTMLTableCellElement);
           nextTd.focus();
@@ -347,14 +350,36 @@ export class CustomCalendar extends HTMLElement {
         }
         break;
       }
+
       case("ArrowRight"): {
-        host.moveFocusFromTd(td, "ArrowRight"); 
+        const nextDate = new Date(Number(new Date(String(td.dataset.date))) + msInDay);
+        const isTdLastDateOfMonth = 
+          (nextDate.getMonth() > host.month) || (nextDate.getMonth() === 0 && host.month === 11);
+
+        if (host.view === "dates" && isTdLastDateOfMonth) {
+          host.skipCb = true;
+          if (host.month === 11) {
+            host.setAttribute("year", String(host.year + 1));
+            host.setAttribute("month", "0");
+          } else {
+            host.setAttribute("month", String(host.month + 1));
+          }
+
+          host.render("month");
+          const nextTd = host.shadowRoot.querySelector(`[data-date="${nextDate.toDateString()}"]`);
+          assert(nextTd instanceof HTMLTableCellElement);
+          nextTd.focus();
+        } else {
+          host.moveFocusFromTd(td, "ArrowRight"); 
+        }
         break;
       }
+
       case("ArrowUp"): {
         host.moveFocusFromTd(td, "ArrowUp"); 
         break;
       }
+
       case("ArrowDown"): {
         host.moveFocusFromTd(td, "ArrowDown"); 
         break;
