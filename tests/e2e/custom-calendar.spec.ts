@@ -270,3 +270,14 @@ test("Отбражение выделенного элемента в табли
     await expect(problemCell).not.toBeInViewport();
   });
 });
+
+test("Дополнительные кнопки клавиатуры для по датам", async ({page}) => {
+  await page.waitForTimeout(1000);
+  await page.getByRole("gridcell", { name: "14" }).focus();
+
+  await page.keyboard.down("Home");
+  await expect(page.getByRole("gridcell", { name: "9", exact: true })).toBeFocused();
+
+  await page.keyboard.down("End");
+  await expect(page.getByRole("gridcell", { name: "15" })).toBeFocused();
+});

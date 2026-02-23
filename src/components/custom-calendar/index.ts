@@ -124,7 +124,7 @@ export class CustomCalendar extends HTMLElement {
     this.shadowRoot.addEventListener("click", this.onYearTdClick as EventListener);
     this.shadowRoot.addEventListener("click", this.onMonthTdClick as EventListener);
 
-    this.shadowRoot.addEventListener("keydown", this.onKeyDown as EventListener);
+    this.shadowRoot.addEventListener("keydown", this.onTdKeyDown as EventListener);
   }
 
   render(attrName: string = "") {
@@ -346,7 +346,7 @@ export class CustomCalendar extends HTMLElement {
     }
   }
   
-  onKeyDown(event: KeyboardEvent) {
+  onTdKeyDown(event: KeyboardEvent) {
     const {target: td, code} = event;
     if (!(td instanceof HTMLTableCellElement)) return;
 
@@ -396,8 +396,15 @@ export class CustomCalendar extends HTMLElement {
       }
       
       case("Enter"): 
-      case("Space"): {
-        td.dispatchEvent(new Event("click", {bubbles: true})); 
+      case("Space"): td.click(); break;
+
+      case("Home"): {
+        if (host.view === "dates") tr.cells[0].focus();
+        break;
+      }
+
+      case("End"): {
+        if (host.view === "dates") tr.cells[tr.cells.length - 1].focus();
         break;
       }
     }
