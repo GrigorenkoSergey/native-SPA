@@ -45,6 +45,7 @@ export class CustomCalendar extends HTMLElement {
   ["constructor"]!: typeof CustomCalendar;
 
   shadowRoot!: ShadowRoot;
+  observer!: IntersectionObserver;
   skipCb = true;
 
   constructor() {
@@ -84,6 +85,18 @@ export class CustomCalendar extends HTMLElement {
     if (!this.hasAttribute("month")) this.setAttribute("month", String(this.month));
     if (!this.hasAttribute("year")) this.setAttribute("year", String(this.year));
 
+    const observerRoot = this.shadowRoot.querySelector(".tables-container");
+
+    this.observer = new IntersectionObserver((entries) => {
+      this.observer.disconnect();
+
+      const [entry] = entries;
+      if (!entry.isIntersecting) {
+        entry.target.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      }
+    }, 
+    { root: observerRoot, threshold: 1 }); 
+
     this.render("view");
   }
 
@@ -97,7 +110,6 @@ export class CustomCalendar extends HTMLElement {
 
     this.render(name);
   }
-
 
   attachHandlers() {
     const nextMonthButton = this.shadowRoot.querySelector("#next-month");
@@ -207,6 +219,8 @@ export class CustomCalendar extends HTMLElement {
     const currentYearTd = tbody.querySelector(`[data-year="${this.year}"]`);
     if (currentYearTd instanceof HTMLTableCellElement) {
       currentYearTd.focus();
+      this.observer.disconnect();
+      this.observer.observe(currentYearTd);
     }
   }
 
@@ -257,7 +271,6 @@ export class CustomCalendar extends HTMLElement {
     if (cell instanceof HTMLElement) {
       cell.classList.add("selected");
       cell.tabIndex = 0;
-      cell.scrollIntoView();
     } else {
       const firstTd = shadowRoot.querySelector("td:not([disabled])");
       if (firstTd instanceof HTMLTableCellElement) firstTd.tabIndex = 0;
@@ -341,6 +354,9 @@ export class CustomCalendar extends HTMLElement {
     assert(tr instanceof HTMLTableRowElement);
 
     const host = getHost(td);
+
+    const codesToHandle = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter", "Space"];
+    if (codesToHandle.includes(code)) event.preventDefault();
 
     switch(code) {
       case("ArrowLeft"): {
@@ -444,6 +460,8 @@ export class CustomCalendar extends HTMLElement {
       td.tabIndex = -1;
       nextCell.tabIndex = 0;
       nextCell.focus();
+      this.observer.disconnect();
+      this.observer.observe(nextCell);
     }
   }
 

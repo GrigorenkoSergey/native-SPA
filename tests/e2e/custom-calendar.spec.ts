@@ -237,3 +237,36 @@ test("Выбор года с помощью клавиатуры", async ({page}
     await expect(page.getByRole("button", { name: "prev month" })).toBeFocused();
   });
 });
+
+test("Отбражение выделенного элемента в таблице с годами", async ({page}) => {
+  await page.getByRole("heading", { name: "февраль 2026 г" }).click();
+
+  await test.step("Прокрутка плавно следует за фокусом (если элемент полностью не виден)", async () => {
+    for (let i = 0; i <= 20; i++) {
+      await page.keyboard.down("ArrowDown");
+      const focused = page.locator("td:focus");
+      await expect(focused).toBeInViewport({ratio: 1});
+    }
+
+    for (let i = 0; i <= 20; i++) {
+      await page.keyboard.down("ArrowUp");
+      const focused = page.locator("td:focus");
+      await expect(focused).toBeInViewport({ratio: 1});
+    }
+  });
+
+  await test.step("При открытии таблицы выбора года, год виден полностью (прокрутка к выделенному)", async () => {
+    const problemCell = page.getByRole("gridcell", { name: "1986" });
+    await problemCell.click();
+    await page.getByRole("gridcell", { name: "февр" }).click();
+    await page.keyboard.down("Enter");
+    await expect(problemCell).toBeInViewport({ratio: 1});
+  });
+
+  await test.step("При этом прокрутка мышью не зацикливается на этом элементе", async () => {
+    await page.mouse.wheel(0, 1000);
+    await page.waitForTimeout(500);
+    const problemCell = page.getByRole("gridcell", { name: "1986" });
+    await expect(problemCell).not.toBeInViewport();
+  });
+});
