@@ -38,7 +38,6 @@ type ArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowDown" | "ArrowUp";
 // пока забить на создание дополнительных свойств и синхронизацию их с атрибутами
 // пусть будет все проще, чем в custom-autocomplete
 
-
 // паттерн grid https://www.w3.org/WAI/ARIA/apg/patterns/grid/
 export class CustomCalendar extends HTMLElement {
   [key: string]: unknown;
@@ -217,11 +216,11 @@ export class CustomCalendar extends HTMLElement {
     this.shadowRoot.querySelector("#years tbody")?.replaceWith(tbody);
 
     const currentYearTd = tbody.querySelector(`[data-year="${this.year}"]`);
-    if (currentYearTd instanceof HTMLTableCellElement) {
-      currentYearTd.focus();
-      this.observer.disconnect();
-      this.observer.observe(currentYearTd);
-    }
+
+    assert (currentYearTd instanceof HTMLTableCellElement);
+    currentYearTd.focus();
+    this.observer.disconnect();
+    this.observer.observe(currentYearTd);
   }
 
   renderMonths() {
@@ -355,11 +354,9 @@ export class CustomCalendar extends HTMLElement {
 
     const host = getHost(td);
 
-    const codesToHandle = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter", "Space"];
-    if (codesToHandle.includes(code)) event.preventDefault();
-
     switch(code) {
       case("ArrowLeft"): {
+        event.preventDefault();
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowLeft"); 
         else {
           const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
@@ -369,6 +366,8 @@ export class CustomCalendar extends HTMLElement {
       }
 
       case("ArrowRight"): {
+        event.preventDefault();
+
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowRight"); 
         else {
           const nextDate = new Date(Number(new Date(String(td.dataset.date))) + msInDay);
@@ -378,6 +377,7 @@ export class CustomCalendar extends HTMLElement {
       }
 
       case("ArrowUp"): {
+        event.preventDefault();
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowUp"); 
         else {
           const nextDate = new Date(Number(new Date(String(td.dataset.date))) - 7 * msInDay);
@@ -387,6 +387,7 @@ export class CustomCalendar extends HTMLElement {
       }
 
       case("ArrowDown"): {
+        event.preventDefault();
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowDown");
         else {
           const nextDate = new Date(Number(new Date(String(td.dataset.date))) + 7 * msInDay);
@@ -407,6 +408,31 @@ export class CustomCalendar extends HTMLElement {
         if (host.view === "dates") tr.cells[tr.cells.length - 1].focus();
         break;
       }
+
+      case ("PageUp"): {
+        if (host.view === "dates") {
+          event.preventDefault();
+
+          // TODO предусмотреть, чтобы нельзя было перейти на год < 1970 (minYear)
+          const {date} = td.dataset;
+          assert(date);
+
+          const current = new Date(date);
+          const dateOfPrevMonth = new Date(current).setMonth(current.getMonth() - 1);
+          const prevMonthLastDate = new Date(current).setDate(0);
+          const dateToFocus = new Date(Math.min(+dateOfPrevMonth, +prevMonthLastDate));
+
+          host.skipCb = true;
+          host.setAttribute("year", String(dateToFocus.getFullYear()));
+          host.setAttribute("month", String(dateToFocus.getMonth()));
+          host.render("month");
+
+          const cellOfPrevMonth = host.getSelectedDateCell(dateToFocus);
+          assert (cellOfPrevMonth instanceof HTMLTableCellElement); 
+          cellOfPrevMonth.focus();
+        }
+        break;
+      }
     }
   }
 
@@ -419,7 +445,7 @@ export class CustomCalendar extends HTMLElement {
     if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
     host.render("month");
 
-    const nextTd = host.shadowRoot.querySelector(`[data-date="${nextDate.toDateString()}"]`);
+    const nextTd = host.getSelectedDateCell(nextDate);
     assert(nextTd instanceof HTMLTableCellElement);
     nextTd.focus();
   }
@@ -470,6 +496,10 @@ export class CustomCalendar extends HTMLElement {
       this.observer.disconnect();
       this.observer.observe(nextCell);
     }
+  }
+
+  getSelectedDateCell(date: Date) {
+    return this.shadowRoot.querySelector(`[data-date="${date.toDateString()}"]`);
   }
 
   formatYearMonth(year: number, month: number) {

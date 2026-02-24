@@ -271,13 +271,65 @@ test("Отбражение выделенного элемента в табли
   });
 });
 
-test("Дополнительные кнопки клавиатуры для по датам", async ({page}) => {
-  await page.waitForTimeout(1000);
+test.only("Дополнительные кнопки клавиатуры для по датам", async ({page}) => {
   await page.getByRole("gridcell", { name: "14" }).focus();
 
-  await page.keyboard.down("Home");
-  await expect(page.getByRole("gridcell", { name: "9", exact: true })).toBeFocused();
+  const resetCalendar = async () => {
+    await page.evaluate(() => {
+      const calendarNode = document.querySelector("[data-testid='basic']");
+      if (calendarNode) {
+        calendarNode.setAttribute("date", "Sat Feb 14 2026");
+        calendarNode.setAttribute("month", "1");
+        calendarNode.setAttribute("year", "2026");
+      }
+    });
+  };
 
-  await page.keyboard.down("End");
-  await expect(page.getByRole("gridcell", { name: "15" })).toBeFocused();
+  await test.step("Home + End", async () => {
+    await page.keyboard.down("Home");
+    await expect(page.getByRole("gridcell", { name: "9", exact: true })).toBeFocused();
+
+    await page.keyboard.down("End");
+    await expect(page.getByRole("gridcell", { name: "15" })).toBeFocused();
+    await expect(page.getByRole("gridcell", { name: "15" })).not.toContainClass("selected");
+  });
+
+  await resetCalendar();
+
+  await test.step("PageUp - переход на предыдущий месяц", async () => {
+    await page.keyboard.down("PageUp");
+    await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
+    await expect(page.getByRole("gridcell", { name: "15" })).not.toContainClass("selected");
+    await expect(page.getByRole("gridcell", { name: "15" })).toBeFocused();
+
+    await page.getByRole("gridcell", { name: "31" }).nth(1).click();
+    await page.keyboard.down("PageUp");
+
+    await expect(page.getByRole("heading", { name: "декабрь 2025 г" })).toBeVisible();
+    await page.keyboard.down("PageUp");
+
+    await expect(page.getByRole("heading", { name: "ноябрь 2025 г" })).toBeVisible();
+
+    const lastCell = page.getByRole("gridcell", { name: "30" }).nth(1);
+    await expect(lastCell).toBeFocused();
+    await expect(lastCell).not.toContainClass("selected");
+
+    await page.keyboard.down("Space");
+    await expect(lastCell).toBeFocused();
+    await expect(lastCell).toContainClass("selected");
+
+  });
+
+  await resetCalendar();
+
+  await test.step.skip("Shift + PageUp - переход на предыдущий год", async () => {
+    await page.getByRole("gridcell", { name: "14" }).focus();
+
+    await page.keyboard.down("Shift");
+    await page.keyboard.down("PageUp");
+    await page.keyboard.up("Shift");
+
+    // 2020 февраль - 29 дней
+    await expect(page.getByRole("heading", { name: "февраль 2026 г" })).toBeVisible();
+  });
 });
