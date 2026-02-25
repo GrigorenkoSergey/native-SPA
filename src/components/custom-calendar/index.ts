@@ -346,7 +346,7 @@ export class CustomCalendar extends HTMLElement {
   }
   
   onTdKeyDown(event: KeyboardEvent) {
-    const {target: td, code} = event;
+    const {target: td, code, shiftKey} = event;
     if (!(td instanceof HTMLTableCellElement)) return;
 
     const tr = td.closest("tr");
@@ -417,10 +417,13 @@ export class CustomCalendar extends HTMLElement {
           const {date} = td.dataset;
           assert(date);
 
-          const current = new Date(date);
-          const dateOfPrevMonth = new Date(current).setMonth(current.getMonth() - 1);
-          const prevMonthLastDate = new Date(current).setDate(0);
-          const dateToFocus = new Date(Math.min(+dateOfPrevMonth, +prevMonthLastDate));
+          const d = new Date(date);
+          const monthDiff = shiftKey ? 12 : 1;
+
+          const nextPeriodLastDate = new Date(d.getFullYear(), d.getMonth() - monthDiff + 1, 0);
+          const dateOfNextPeriod = new Date(d.getFullYear(), d.getMonth() - monthDiff, d.getDate());
+
+          const dateToFocus = new Date(Math.min(+dateOfNextPeriod, +nextPeriodLastDate));
 
           host.skipCb = true;
           host.setAttribute("year", String(dateToFocus.getFullYear()));
