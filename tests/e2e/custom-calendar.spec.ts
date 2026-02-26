@@ -271,7 +271,49 @@ test("Отбражение выделенного элемента в табли
   });
 });
 
-test.only("Дополнительные кнопки клавиатуры для по датам", async ({page}) => {
+test.only("Минимальные, максимальные года", async ({page}) => {
+  await page.evaluate(() => {
+    const calendarNode = document.querySelector("[data-testid='basic']");
+    if (calendarNode) {
+      calendarNode.setAttribute("min-year", "2010");
+      calendarNode.setAttribute("max-year", "2030");
+    }
+  });
+
+  await test.step("Приблизимся к нижней границе", async () => {
+    await page.getByRole("heading", { name: "февраль 2026 г" }).click();
+    await page.getByRole("gridcell", { name: "2010" }).click();
+    await page.getByRole("gridcell", { name: "янв" }).click();
+    await page.getByRole("gridcell", { name: "1", exact: true }).first().click();
+  });
+
+  await test.step("Нельзя выйти за нижний предел с помощью кнопок", async () => {
+    await expect(page.getByRole("heading", { name: "январь 2010 г" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "prev month" })).toBeDisabled();
+  });
+
+  await test.step("Нельзя выйти за нижний предел с помощью клавиатуры", async () => {
+    await page.keyboard.down("ArrowLeft");
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("heading", { name: "январь 2010 г" })).toBeVisible();
+
+    await page.keyboard.down("PageUp");
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("heading", { name: "январь 2010 г" })).toBeVisible();
+
+    await page.keyboard.down("Shift");
+    await page.keyboard.down("PageUp");
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("heading", { name: "январь 2010 г" })).toBeVisible();
+  });
+
+
+  await test.step("Приблизимся к верхней границе", async () => {
+
+  });
+});
+
+test("Дополнительные кнопки клавиатуры для по датам", async ({page}) => {
   const resetCalendar = async () => {
     await page.evaluate(() => {
       const calendarNode = document.querySelector("[data-testid='basic']");

@@ -35,6 +35,9 @@ const getHost = (elem: Element) => {
 type View = "dates" | "months" |"years";
 type ArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowDown" | "ArrowUp";
 
+const defaultMinYear = 1970;
+const defaultMaxYear = 2050;
+
 // пока забить на создание дополнительных свойств и синхронизацию их с атрибутами
 // пусть будет все проще, чем в custom-autocomplete
 
@@ -73,16 +76,28 @@ export class CustomCalendar extends HTMLElement {
     || new Date(this.year, this.month, Number(new Date().getDate())).toDateString();
   }
 
+  get minYear() {
+    if (!this.hasAttribute("min-year")) return defaultMinYear;
+
+    const dateYear = new Date(this.date).getFullYear();
+    const attrValue = Number(this.getAttribute("min-year"));
+    return attrValue > dateYear ? defaultMinYear : attrValue;
+  }
+
+  get maxYear() {
+    if (!this.hasAttribute("max-year")) return defaultMaxYear;
+
+    const dateYear = new Date(this.date).getFullYear();
+    const attrValue = Number(this.getAttribute("max-year"));
+    return attrValue < dateYear ? defaultMinYear : attrValue;
+  }
+
   connectedCallback() {
     this.shadowRoot.innerHTML = template;
     attachStyles(this, styles);
 
     this.attachHandlers();
-
-    if (!this.hasAttribute("view")) this.setAttribute("view", "dates");
-    if (!this.hasAttribute("date")) this.setAttribute("date", this.date);
-    if (!this.hasAttribute("month")) this.setAttribute("month", String(this.month));
-    if (!this.hasAttribute("year")) this.setAttribute("year", String(this.year));
+    this.setDefaultAttributes();
 
     const observerRoot = this.shadowRoot.querySelector(".tables-container");
 
@@ -126,6 +141,19 @@ export class CustomCalendar extends HTMLElement {
     this.shadowRoot.addEventListener("keydown", this.onTdKeyDown as EventListener);
   }
 
+  setDefaultAttributes() {
+    const ensureAttribute = (name: string, value: string) => {
+      if (!this.hasAttribute(name)) this.setAttribute(name, value);
+    };
+
+    ensureAttribute("view", "dates");
+    ensureAttribute("date", this.date);
+    ensureAttribute("month", String(this.month));
+    ensureAttribute("year", String(this.year));
+    ensureAttribute("min-year", String(this.minYear));
+    ensureAttribute("max-year", String(this.maxYear));
+  }
+
   render(attrName: string = "") {
     this.skipCb = true;
     const view = this.view;
@@ -147,6 +175,14 @@ export class CustomCalendar extends HTMLElement {
     }
 
     this.highlightSelected(this.view);
+
+
+    const prevMonthBtn = this.shadowRoot.getElementById("prev-month");
+    assert(prevMonthBtn instanceof HTMLButtonElement);
+    const prevMonthDate = new Date(this.year, this.month - 1);
+    prevMonthBtn.disabled = prevMonthDate < new Date(this.minYear, 0);
+
+    // const nextMonthBtn = this.shadowRoot.getElementById("next-month");
 
     this.skipCb = false;
   }
@@ -189,8 +225,8 @@ export class CustomCalendar extends HTMLElement {
   }
 
   renderYears() {
-    const minYear = 1970; // TODO добавить минимальные года
-    const maxYear = 2050;
+    const minYear = Number(this.getAttribute("min-year"));
+    const maxYear = Number(this.getAttribute("max-year"));
     const yearsPerRow = 4;
     const maxRows = Math.ceil((maxYear - minYear) / yearsPerRow);
     const tbody = document.createElement("tbody");
@@ -360,7 +396,7 @@ export class CustomCalendar extends HTMLElement {
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowLeft"); 
         else {
           const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
-          host.moveDateFocus(nextDate, host);
+          if (nextDate.getFullYear() >= this.minYear) host.moveDateFocus(nextDate, host);
         } 
         break;
       }
@@ -421,8 +457,9 @@ export class CustomCalendar extends HTMLElement {
           const monthDiff = shiftKey ? 12 : 1;
 
           const nextPeriodLastDate = new Date(d.getFullYear(), d.getMonth() - monthDiff + 1, 0);
-          const dateOfNextPeriod = new Date(d.getFullYear(), d.getMonth() - monthDiff, d.getDate());
+          if (nextPeriodLastDate.getFullYear() < host.minYear) return;
 
+          const dateOfNextPeriod = new Date(d.getFullYear(), d.getMonth() - monthDiff, d.getDate());
           const dateToFocus = new Date(Math.min(+dateOfNextPeriod, +nextPeriodLastDate));
 
           host.skipCb = true;
