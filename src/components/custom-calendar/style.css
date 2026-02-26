@@ -116,7 +116,7 @@ td {
   padding: 8px 12px;
 }
 
-.selected {
+[aria-selected="true"] {
   background-color: var(--bg-selected);
   color: var(--color-selected);
   font-weight: 500;

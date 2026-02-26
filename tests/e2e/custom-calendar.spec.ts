@@ -1,4 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Locator } from "@playwright/test";
+
+const expectSelected = async (locator: Locator, toBeSelected: boolean) => {
+  if (toBeSelected) await expect(locator).toHaveAttribute("aria-selected", "true");
+  else await expect(locator).not.toHaveAttribute("aria-selected");
+};
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date(2026, 1, 14));
@@ -31,10 +36,9 @@ test("Отображение и переключение месяцев", async 
 
 test("Выделение даты, даты предыдущего и следующего месяца нельзя выбрать", async ({page}) => {
   const calendar = page.getByTestId("basic");
-  const selectedClassName = "selected";
 
   await test.step("По умолчанию выбрана текущая дата (если нет соответствующего атрибута)", async () => {
-    const selected = calendar.locator(".selected");
+    const selected = calendar.locator("[aria-selected='true']");
     await expect(selected).toContainText("14");
   });
 
@@ -43,26 +47,27 @@ test("Выделение даты, даты предыдущего и следу
     const lastTd = calendar.locator("td").last();
 
     await firstTd.click();
-    await expect(firstTd).not.toContainClass(selectedClassName);
+    await expectSelected(firstTd, false);
     await lastTd.click();
-    await expect(lastTd).not.toContainClass(selectedClassName);
+    await expectSelected(lastTd, false);
   });
 
   const date15thCell = page.getByRole("gridcell", { name: "15" });
   await date15thCell.click();
-  await expect(date15thCell).toContainClass(selectedClassName);
+  await expectSelected(date15thCell, true);
 
   await test.step("При переходе на другой месяц и возврате, выбранная дата по-прежнему подсвечивается", async () => {
     await page.getByRole("button", { name: "prev month" }).click();
-    await expect(date15thCell).not.toContainClass(selectedClassName);
+
+    await expectSelected(date15thCell, false);
     await page.getByRole("button", { name: "next month" }).click();
-    await expect(date15thCell).toContainClass(selectedClassName);
+    await expectSelected(date15thCell, true);
   });
 });
 
 test("Можно выбрать год и месяц", async ({page}) => {
   const calendar = page.getByTestId("basic");
-  const selected = calendar.locator(".selected");
+  const selected = calendar.locator("[aria-selected='true']");
 
   await test.step("Текущий год и месяц должен быть выделен", async () => {
     await page.getByRole("heading", { name: "февраль 2026 г" }).click();
@@ -204,15 +209,15 @@ test("Выбор ячеек с клавиатуры", async ({page}) => {
     let leftCell = page.getByRole("gridcell", { name: "13" });
     await page.keyboard.down("ArrowLeft");
 
-    await expect(leftCell).not.toContainClass("selected");
+    await expectSelected(leftCell, false);
     await page.keyboard.down("Enter");
-    await expect(leftCell).toContainClass("selected");
+    await expectSelected(leftCell, true);
 
     leftCell = page.getByRole("gridcell", { name: "12" });
     await page.keyboard.down("ArrowLeft");
-    await expect(leftCell).not.toContainClass("selected");
+    await expectSelected(leftCell, false);
     await page.keyboard.down("Space");
-    await expect(leftCell).toContainClass("selected");
+    await expectSelected(leftCell, true);
   });
 });
 
@@ -221,11 +226,11 @@ test("Выбор года с помощью клавиатуры", async ({page}
 
   await test.step("Выбираем год и месяц", async () => {
     const currentYearCell = page.getByRole("gridcell", { name: "2026" });
-    await expect(currentYearCell).toContainClass("selected");
+    await expectSelected(currentYearCell, true);
     await expect(currentYearCell).toBeFocused();
 
     await page.keyboard.down("Enter");
-    await expect(page.getByRole("gridcell", { name: "февр" })).toContainClass("selected");
+    await expectSelected(page.getByRole("gridcell", { name: "февр" }), true);
     await page.keyboard.down("ArrowLeft");
     await page.keyboard.down("Space");
 
@@ -383,7 +388,7 @@ test("Дополнительные кнопки клавиатуры для по
 
     await page.keyboard.down("End");
     await expect(page.getByRole("gridcell", { name: "15" })).toBeFocused();
-    await expect(page.getByRole("gridcell", { name: "15" })).not.toContainClass("selected");
+    await expectSelected(page.getByRole("gridcell", { name: "15" }), false);
   });
 
   await resetCalendar();
@@ -394,7 +399,7 @@ test("Дополнительные кнопки клавиатуры для по
     await page.keyboard.down("PageUp");
 
     await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
-    await expect(page.getByRole("gridcell", { name: "14" })).not.toContainClass("selected");
+    await expectSelected(page.getByRole("gridcell", { name: "14" }), false);
     await expect(page.getByRole("gridcell", { name: "14" })).toBeFocused();
 
     await page.getByRole("gridcell", { name: "31" }).nth(1).click();
@@ -408,11 +413,11 @@ test("Дополнительные кнопки клавиатуры для по
 
     const lastCell = page.getByRole("gridcell", { name: "30" }).nth(1);
     await expect(lastCell).toBeFocused();
-    await expect(lastCell).not.toContainClass("selected");
+    await expectSelected(lastCell, false);
 
     await page.keyboard.down("Space");
     await expect(lastCell).toBeFocused();
-    await expect(lastCell).toContainClass("selected");
+    await expectSelected(lastCell, true);
   });
 
   await resetCalendar();
@@ -427,7 +432,7 @@ test("Дополнительные кнопки клавиатуры для по
     // 2020 февраль - 29 дней
     await expect(page.getByRole("heading", { name: "февраль 2025 г" })).toBeVisible();
     await expect(page.getByRole("gridcell", { name: "14" })).toBeFocused();
-    await expect(page.getByRole("gridcell", { name: "14" })).not.toContainClass("selected");
+    await expectSelected(page.getByRole("gridcell", { name: "14" }), false);
   });
 
   await resetCalendar();

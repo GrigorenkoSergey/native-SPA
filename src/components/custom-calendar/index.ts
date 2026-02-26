@@ -287,9 +287,9 @@ export class CustomCalendar extends HTMLElement {
   highlightSelected(view: View) {
     const {shadowRoot} = this;
 
-    const selected = shadowRoot.querySelector(".selected");
+    const selected = shadowRoot.querySelector("[aria-selected='true']");
     if (selected instanceof HTMLElement) {
-      selected.classList.remove("selected");
+      selected.ariaSelected = null;
       selected.tabIndex = -1;
     }
 
@@ -298,7 +298,7 @@ export class CustomCalendar extends HTMLElement {
     const cell = shadowRoot.querySelector(`[data-${field}="${selectedValue}"]`);
 
     if (cell instanceof HTMLElement) {
-      cell.classList.add("selected");
+      cell.ariaSelected = "true";
       cell.tabIndex = 0;
     } else {
       const firstTd = shadowRoot.querySelector("td:not([disabled])");
