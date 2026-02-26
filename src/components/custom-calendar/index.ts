@@ -175,14 +175,7 @@ export class CustomCalendar extends HTMLElement {
     }
 
     this.highlightSelected(this.view);
-
-
-    const prevMonthBtn = this.shadowRoot.getElementById("prev-month");
-    assert(prevMonthBtn instanceof HTMLButtonElement);
-    const prevMonthDate = new Date(this.year, this.month - 1);
-    prevMonthBtn.disabled = prevMonthDate < new Date(this.minYear, 0);
-
-    // const nextMonthBtn = this.shadowRoot.getElementById("next-month");
+    this.disableMonthArrowIfNeeded();
 
     this.skipCb = false;
   }
@@ -225,10 +218,9 @@ export class CustomCalendar extends HTMLElement {
   }
 
   renderYears() {
-    const minYear = Number(this.getAttribute("min-year"));
-    const maxYear = Number(this.getAttribute("max-year"));
+    const {minYear, maxYear} = this;
     const yearsPerRow = 4;
-    const maxRows = Math.ceil((maxYear - minYear) / yearsPerRow);
+    const maxRows = Math.ceil((maxYear + 1 - minYear) / yearsPerRow);
     const tbody = document.createElement("tbody");
 
     for (let row = 0; row < maxRows; row++) {
@@ -239,6 +231,8 @@ export class CustomCalendar extends HTMLElement {
         td.classList.add("year-cell");
 
         const year = String(minYear + (row * yearsPerRow) + col);
+        if (Number(year) > maxYear) break;
+
         td.dataset.year = year;
         td.tabIndex = -1;
         td.textContent = year;
@@ -396,7 +390,7 @@ export class CustomCalendar extends HTMLElement {
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowLeft"); 
         else {
           const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
-          if (nextDate.getFullYear() >= this.minYear) host.moveDateFocus(nextDate, host);
+          host.moveDateFocus(nextDate, host);
         } 
         break;
       }
@@ -449,7 +443,6 @@ export class CustomCalendar extends HTMLElement {
         if (host.view === "dates") {
           event.preventDefault();
 
-          // TODO предусмотреть, чтобы нельзя было перейти на год < 1970 (minYear)
           const {date} = td.dataset;
           assert(date);
 
@@ -477,6 +470,9 @@ export class CustomCalendar extends HTMLElement {
   }
 
   moveDateFocus(nextDate: Date, host: CustomCalendar) {
+    const nextDateYear = nextDate.getFullYear();
+    if (nextDateYear < host.minYear || nextDateYear > host.maxYear) return;
+
     const isNextDateFromOtherMonth = nextDate.getMonth() !== host.month;
     const isNextDateFromOtherYear = nextDate.getFullYear() !== host.year;
 
@@ -536,6 +532,20 @@ export class CustomCalendar extends HTMLElement {
       this.observer.disconnect();
       this.observer.observe(nextCell);
     }
+  }
+
+  disableMonthArrowIfNeeded() {
+    const {year, month, minYear, maxYear, shadowRoot} = this;
+
+    const prevMonthBtn = shadowRoot.getElementById("prev-month");
+    assert(prevMonthBtn instanceof HTMLButtonElement);
+    const prevMonthDate = new Date(year, month - 1);
+    prevMonthBtn.disabled = prevMonthDate.getFullYear() < minYear;
+
+    const nextMonthBtn = shadowRoot.getElementById("next-month");
+    assert(nextMonthBtn instanceof HTMLButtonElement);
+    const nextMonthDate = new Date(year, month + 1);
+    nextMonthBtn.disabled = nextMonthDate.getFullYear() > maxYear;
   }
 
   getSelectedDateCell(date: Date) {

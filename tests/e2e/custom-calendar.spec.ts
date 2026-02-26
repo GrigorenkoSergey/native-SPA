@@ -271,7 +271,7 @@ test("Отбражение выделенного элемента в табли
   });
 });
 
-test.only("Минимальные, максимальные года", async ({page}) => {
+test("Минимальные, максимальные года", async ({page}) => {
   await page.evaluate(() => {
     const calendarNode = document.querySelector("[data-testid='basic']");
     if (calendarNode) {
@@ -292,8 +292,21 @@ test.only("Минимальные, максимальные года", async ({p
     await expect(page.getByRole("button", { name: "prev month" })).toBeDisabled();
   });
 
+  await test.step("Блокировка и разблокировка стрелки на предыдущий месяц", async () => {
+    await page.getByRole("button", { name: "next month" }).click();
+    await expect(page.getByRole("heading", { name: "февраль 2010 г" })).toBeVisible();
+
+    await page.getByRole("button", { name: "prev month" }).click();
+    await expect(page.getByRole("heading", { name: "январь 2010 г" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "prev month" })).toBeDisabled();
+  });
+
   await test.step("Нельзя выйти за нижний предел с помощью клавиатуры", async () => {
     await page.keyboard.down("ArrowLeft");
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("heading", { name: "январь 2010 г" })).toBeVisible();
+
+    await page.keyboard.down("ArrowUp");
     await page.waitForTimeout(50);
     await expect(page.getByRole("heading", { name: "январь 2010 г" })).toBeVisible();
 
@@ -303,13 +316,50 @@ test.only("Минимальные, максимальные года", async ({p
 
     await page.keyboard.down("Shift");
     await page.keyboard.down("PageUp");
+    await page.keyboard.up("Shift");
     await page.waitForTimeout(50);
     await expect(page.getByRole("heading", { name: "январь 2010 г" })).toBeVisible();
   });
 
-
   await test.step("Приблизимся к верхней границе", async () => {
+    await page.getByRole("heading", { name: "январь 2010 г" }).click();
+    await page.getByRole("gridcell", { name: "2030" }).click();
+    await page.getByRole("gridcell", { name: "дек" }).click();
+    await page.getByRole("gridcell", { name: "31", exact: true }).last().click();
+  });
 
+  await test.step("Нельзя выйти за верхний предел с помощью кнопок", async () => {
+    await expect(page.getByRole("heading", { name: "декабрь 2030 г" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "next month" })).toBeDisabled();
+  });
+
+  await test.step("Блокировка и разблокировка стрелки на следующий месяц", async () => {
+    await page.getByRole("button", { name: "prev month" }).click();
+    await expect(page.getByRole("heading", { name: "ноябрь 2030 г" })).toBeVisible();
+
+    await page.getByRole("button", { name: "next month" }).click();
+    await expect(page.getByRole("heading", { name: "декабрь 2030 г" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "next month" })).toBeDisabled();
+  });
+
+  await test.step("Нельзя выйти за верхний предел с помощью клавиатуры", async () => {
+    await page.keyboard.down("ArrowRight");
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("heading", { name: "декабрь 2030 г." })).toBeVisible();
+
+    await page.keyboard.down("ArrowDown");
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("heading", { name: "декабрь 2030 г." })).toBeVisible();
+
+    await page.keyboard.down("PageDown");
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("heading", { name: "декабрь 2030 г." })).toBeVisible();
+
+    await page.keyboard.down("Shift");
+    await page.keyboard.down("PageDown");
+    await page.keyboard.up("Shift");
+    await page.waitForTimeout(50);
+    await expect(page.getByRole("heading", { name: "декабрь 2030 г." })).toBeVisible();
   });
 });
 
