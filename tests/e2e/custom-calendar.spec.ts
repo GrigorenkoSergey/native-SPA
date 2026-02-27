@@ -238,6 +238,7 @@ test("Выбор года с помощью клавиатуры", async ({page}
   });
 
   await test.step("При нажатии \"Tab\" мы по-прежнему переходим к кнопке переключения месяца", async () => {
+    await page.waitForTimeout(50);
     await page.keyboard.down("Tab");
     await expect(page.getByRole("button", { name: "prev month" })).toBeFocused();
   });
@@ -264,13 +265,17 @@ test("Отбражение выделенного элемента в табли
     const problemCell = page.getByRole("gridcell", { name: "1986" });
     await problemCell.click();
     await page.getByRole("gridcell", { name: "февр" }).click();
+
+    await page.waitForTimeout(50);
     await page.keyboard.down("Enter");
     await expect(problemCell).toBeInViewport({ratio: 1});
   });
 
   await test.step("При этом прокрутка мышью не зацикливается на этом элементе", async () => {
+    await page.waitForTimeout(50); // дадим прокрутить к ячейке
     await page.mouse.wheel(0, 1000);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(200); // убедимся, что браузер закончил прокрутку полностью
+
     const problemCell = page.getByRole("gridcell", { name: "1986" });
     await expect(problemCell).not.toBeInViewport();
   });
