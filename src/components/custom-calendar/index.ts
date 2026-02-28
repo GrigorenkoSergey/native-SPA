@@ -384,6 +384,7 @@ export class CustomCalendar extends HTMLElement {
 
     const host = getHost(td);
 
+    // TODO можно разбить навигацию в зависимости от вида без постоянных if.
     switch(code) {
       case("ArrowLeft"): {
         event.preventDefault();
@@ -439,7 +440,8 @@ export class CustomCalendar extends HTMLElement {
         break;
       }
 
-      case ("PageUp"): {
+      case ("PageUp"):
+      case ("PageDown"): {
         if (host.view === "dates") {
           event.preventDefault();
 
@@ -447,12 +449,16 @@ export class CustomCalendar extends HTMLElement {
           assert(date);
 
           const d = new Date(date);
-          const monthDiff = shiftKey ? 12 : 1;
+          const dir = code === "PageUp" ? -1 : 1;
+          const monthDiff = (shiftKey ? 12 : 1) * dir;
 
-          const nextPeriodLastDate = new Date(d.getFullYear(), d.getMonth() - monthDiff + 1, 0);
+          const nextPeriodLastDate = new Date(d.getFullYear(), d.getMonth() + monthDiff + 1, 0);
           if (nextPeriodLastDate.getFullYear() < host.minYear) return;
 
-          const dateOfNextPeriod = new Date(d.getFullYear(), d.getMonth() - monthDiff, d.getDate());
+          const nextPeriodFirstDate = new Date(d.getFullYear(), d.getMonth() + monthDiff );
+          if (nextPeriodFirstDate.getFullYear() > host.maxYear) return;
+
+          const dateOfNextPeriod = new Date(d.getFullYear(), d.getMonth() + monthDiff, d.getDate());
           const dateToFocus = new Date(Math.min(+dateOfNextPeriod, +nextPeriodLastDate));
 
           host.skipCb = true;
