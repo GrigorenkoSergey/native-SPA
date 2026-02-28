@@ -376,95 +376,97 @@ export class CustomCalendar extends HTMLElement {
   }
   
   onTdKeyDown(event: KeyboardEvent) {
-    const {target: td, code, shiftKey} = event;
+    const { target: td, code } = event;
     if (!(td instanceof HTMLTableCellElement)) return;
 
-    const tr = td.closest("tr");
-    assert(tr instanceof HTMLTableRowElement);
+    // Universal keys for all views
+    if (code === "Enter" || code === "Space") {
+      event.preventDefault(); // Prevent page scroll on space
+      td.click();
+      return;
+    }
 
     const host = getHost(td);
+    if (host.view === "dates") host.handleDatesKeyDown(event, td);
+    else host.handleGridViewKeyDown(event, td);
+  }
 
-    // TODO можно разбить навигацию в зависимости от вида без постоянных if.
+  handleDatesKeyDown(event: KeyboardEvent, td: HTMLTableCellElement) {
+    const { code, shiftKey } = event;
+    const tr = td.closest("tr");
+    assert(tr instanceof HTMLTableRowElement);
+    const host = getHost(td);
+
     switch (code) {
-      case ("ArrowLeft"): {
+      case "ArrowLeft": {
         event.preventDefault();
-        if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowLeft"); 
-        else {
-          const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
-          host.moveDateFocus(nextDate, host);
-        } 
+        const nextDate = new Date(Number(new Date(String(td.dataset.date))) - msInDay);
+        host.moveDateFocus(nextDate, host);
         break;
       }
-
-      case ("ArrowRight"): {
+      case "ArrowRight": {
         event.preventDefault();
-
-        if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowRight"); 
-        else {
-          const nextDate = new Date(Number(new Date(String(td.dataset.date))) + msInDay);
-          host.moveDateFocus(nextDate, host);
-        }
+        const nextDate = new Date(Number(new Date(String(td.dataset.date))) + msInDay);
+        host.moveDateFocus(nextDate, host);
         break;
       }
-
-      case ("ArrowUp"): {
+      case "ArrowUp": {
         event.preventDefault();
-        if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowUp"); 
-        else {
-          const nextDate = new Date(Number(new Date(String(td.dataset.date))) - 7 * msInDay);
-          host.moveDateFocus(nextDate, host);
-        }
+        const nextDate = new Date(Number(new Date(String(td.dataset.date))) - 7 * msInDay);
+        host.moveDateFocus(nextDate, host);
         break;
       }
-
-      case ("ArrowDown"): {
+      case "ArrowDown": {
         event.preventDefault();
-        if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowDown");
-        else {
-          const nextDate = new Date(Number(new Date(String(td.dataset.date))) + 7 * msInDay);
-          host.moveDateFocus(nextDate, host);
-        }
+        const nextDate = new Date(Number(new Date(String(td.dataset.date))) + 7 * msInDay);
+        host.moveDateFocus(nextDate, host);
         break;
       }
-      
-      case ("Enter"): 
-      case ("Space"): td.click(); break;
-
-      case ("Home"): {
-        if (host.view === "dates") tr.cells[0].focus();
+      case "Home": {
+        tr.cells[0].focus();
         break;
       }
-
-      case ("End") : {
-        if (host.view === "dates") tr.cells[tr.cells.length - 1].focus();
+      case "End": {
+        tr.cells[tr.cells.length - 1].focus();
         break;
       }
+      case "PageUp":
+      case "PageDown": {
+        event.preventDefault();
+        const { date } = td.dataset;
+        assert(date);
 
-      case ("PageUp"):
-      case ("PageDown"): {
-        if (host.view === "dates") {
-          event.preventDefault();
+        const dir = code === "PageUp" ? -1 : 1;
+        const monthDiff = (shiftKey ? 12 : 1) * dir;
 
-          const {date} = td.dataset;
-          assert(date);
+        const dateToFocus = host.addMonthSafely(new Date(date), monthDiff, host.minYear, host.maxYear);
+        if (!dateToFocus) return;
 
-          const dir = code === "PageUp" ? -1 : 1;
-          const monthDiff = (shiftKey ? 12 : 1) * dir;
+        host.skipCb = true;
+        host.setAttribute("year", String(dateToFocus.getFullYear()));
+        host.setAttribute("month", String(dateToFocus.getMonth()));
+        host.render("month");
 
-          const dateToFocus = host.addMonthSafely(new Date(date), monthDiff, host.minYear, host.maxYear);
-          if (!dateToFocus) return;
-
-          host.skipCb = true;
-          host.setAttribute("year", String(dateToFocus.getFullYear()));
-          host.setAttribute("month", String(dateToFocus.getMonth()));
-          host.render("month");
-
-          const cellToFocus = host.getDateCell(dateToFocus);
-          assert(cellToFocus instanceof HTMLTableCellElement); 
-          cellToFocus.focus();
-        }
+        const cellToFocus = host.getDateCell(dateToFocus);
+        assert(cellToFocus instanceof HTMLTableCellElement);
+        cellToFocus.focus();
         break;
       }
+    }
+  }
+
+  handleGridViewKeyDown(event: KeyboardEvent, td: HTMLTableCellElement) {
+    const { code } = event;
+    const host = getHost(td);
+
+    switch (code) {
+      case "ArrowLeft":
+      case "ArrowRight":
+      case "ArrowUp":
+      case "ArrowDown":
+        event.preventDefault();
+        host.moveFocusFromTd(td, code as ArrowKey);
+        break;
     }
   }
 
