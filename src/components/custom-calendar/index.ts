@@ -247,7 +247,7 @@ export class CustomCalendar extends HTMLElement {
 
     const currentYearTd = tbody.querySelector(`[data-year="${this.year}"]`);
 
-    assert (currentYearTd instanceof HTMLTableCellElement);
+    assert(currentYearTd instanceof HTMLTableCellElement);
     currentYearTd.focus();
     this.observer.disconnect();
     this.observer.observe(currentYearTd);
@@ -385,8 +385,8 @@ export class CustomCalendar extends HTMLElement {
     const host = getHost(td);
 
     // TODO можно разбить навигацию в зависимости от вида без постоянных if.
-    switch(code) {
-      case("ArrowLeft"): {
+    switch (code) {
+      case ("ArrowLeft"): {
         event.preventDefault();
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowLeft"); 
         else {
@@ -396,7 +396,7 @@ export class CustomCalendar extends HTMLElement {
         break;
       }
 
-      case("ArrowRight"): {
+      case ("ArrowRight"): {
         event.preventDefault();
 
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowRight"); 
@@ -407,7 +407,7 @@ export class CustomCalendar extends HTMLElement {
         break;
       }
 
-      case("ArrowUp"): {
+      case ("ArrowUp"): {
         event.preventDefault();
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowUp"); 
         else {
@@ -417,7 +417,7 @@ export class CustomCalendar extends HTMLElement {
         break;
       }
 
-      case("ArrowDown"): {
+      case ("ArrowDown"): {
         event.preventDefault();
         if (host.view !== "dates") host.moveFocusFromTd(td, "ArrowDown");
         else {
@@ -427,15 +427,15 @@ export class CustomCalendar extends HTMLElement {
         break;
       }
       
-      case("Enter"): 
-      case("Space"): td.click(); break;
+      case ("Enter"): 
+      case ("Space"): td.click(); break;
 
-      case("Home"): {
+      case ("Home"): {
         if (host.view === "dates") tr.cells[0].focus();
         break;
       }
 
-      case("End"): {
+      case ("End") : {
         if (host.view === "dates") tr.cells[tr.cells.length - 1].focus();
         break;
       }
@@ -460,7 +460,7 @@ export class CustomCalendar extends HTMLElement {
           host.render("month");
 
           const cellToFocus = host.getDateCell(dateToFocus);
-          assert (cellToFocus instanceof HTMLTableCellElement); 
+          assert(cellToFocus instanceof HTMLTableCellElement); 
           cellToFocus.focus();
         }
         break;

@@ -21,6 +21,9 @@ export default defineConfig([
       "@stylistic/comma-dangle": ["error", "always-multiline"],
       "@stylistic/no-extra-semi": "error",
       "@stylistic/no-multi-spaces": "error",
+      "@stylistic/keyword-spacing": ["error", { "before": true, "after": true }],
+      "@stylistic/function-call-spacing": ["error", "never"],
+      "@stylistic/space-before-blocks": "error",
     },
   },
 
