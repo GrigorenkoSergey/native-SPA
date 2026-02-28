@@ -448,31 +448,35 @@ export class CustomCalendar extends HTMLElement {
           const {date} = td.dataset;
           assert(date);
 
-          const d = new Date(date);
           const dir = code === "PageUp" ? -1 : 1;
           const monthDiff = (shiftKey ? 12 : 1) * dir;
 
-          const nextPeriodLastDate = new Date(d.getFullYear(), d.getMonth() + monthDiff + 1, 0);
-          if (nextPeriodLastDate.getFullYear() < host.minYear) return;
-
-          const nextPeriodFirstDate = new Date(d.getFullYear(), d.getMonth() + monthDiff );
-          if (nextPeriodFirstDate.getFullYear() > host.maxYear) return;
-
-          const dateOfNextPeriod = new Date(d.getFullYear(), d.getMonth() + monthDiff, d.getDate());
-          const dateToFocus = new Date(Math.min(+dateOfNextPeriod, +nextPeriodLastDate));
+          const dateToFocus = host.addMonthSafely(new Date(date), monthDiff, host.minYear, host.maxYear);
+          if (!dateToFocus) return;
 
           host.skipCb = true;
           host.setAttribute("year", String(dateToFocus.getFullYear()));
           host.setAttribute("month", String(dateToFocus.getMonth()));
           host.render("month");
 
-          const cellOfPrevMonth = host.getSelectedDateCell(dateToFocus);
+          const cellOfPrevMonth = host.getDateCell(dateToFocus);
           assert (cellOfPrevMonth instanceof HTMLTableCellElement); 
           cellOfPrevMonth.focus();
         }
         break;
       }
     }
+  }
+
+  addMonthSafely(d: Date, delta: number, minYear: number, maxYear:number) {
+    const nextPeriodLastDate = new Date(d.getFullYear(), d.getMonth() + delta + 1, 0);
+    const nextPeriodFirstDate = new Date(d.getFullYear(), d.getMonth() + delta );
+    const dateOfNextPeriod = new Date(d.getFullYear(), d.getMonth() + delta, d.getDate());
+
+    const nextPeriodYear = nextPeriodFirstDate.getFullYear();
+    if (nextPeriodYear < minYear || nextPeriodYear > maxYear) return null;
+
+    return new Date(Math.min(+dateOfNextPeriod, +nextPeriodLastDate));
   }
 
   moveDateFocus(nextDate: Date, host: CustomCalendar) {
@@ -487,7 +491,7 @@ export class CustomCalendar extends HTMLElement {
     if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
     host.render("month");
 
-    const nextTd = host.getSelectedDateCell(nextDate);
+    const nextTd = host.getDateCell(nextDate);
     assert(nextTd instanceof HTMLTableCellElement);
     nextTd.focus();
   }
@@ -554,7 +558,7 @@ export class CustomCalendar extends HTMLElement {
     nextMonthBtn.disabled = nextMonthDate.getFullYear() > maxYear;
   }
 
-  getSelectedDateCell(date: Date) {
+  getDateCell(date: Date) {
     return this.shadowRoot.querySelector(`[data-date="${date.toDateString()}"]`);
   }
 

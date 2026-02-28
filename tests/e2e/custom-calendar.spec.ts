@@ -281,7 +281,7 @@ test("Отбражение выделенного элемента в табли
   });
 });
 
-test.only("Дополнительные кнопки клавиатуры для по датам", async ({page}) => {
+test("Дополнительные кнопки клавиатуры для по датам", async ({page}) => {
   const resetCalendar = async () => {
     await page.evaluate(() => {
       const calendarNode = document.querySelector("[data-testid='basic']");
