@@ -17,6 +17,7 @@
   --color-disabled: #ccc;
 
   --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --bg-focus: #cfe2ff;
 
   width: 320px;
   height: var(--dialog-height, "auto");
@@ -30,6 +31,27 @@
 .tables-container {
   overflow: auto;
   max-height: var(--table-height, none);
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #aaa;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
 }
 
 table {
@@ -86,8 +108,8 @@ td {
     background-color: var(--bg-button-hover);
   }
 
-  &:focus-visible {
-    background-color: red;
+  &:focus-visible:not([aria-selected]) {
+    background-color: var(--bg-focus);
   }
 
   &[disabled] {
