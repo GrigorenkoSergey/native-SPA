@@ -459,9 +459,9 @@ export class CustomCalendar extends HTMLElement {
           host.setAttribute("month", String(dateToFocus.getMonth()));
           host.render("month");
 
-          const cellOfPrevMonth = host.getDateCell(dateToFocus);
-          assert (cellOfPrevMonth instanceof HTMLTableCellElement); 
-          cellOfPrevMonth.focus();
+          const cellToFocus = host.getDateCell(dateToFocus);
+          assert (cellToFocus instanceof HTMLTableCellElement); 
+          cellToFocus.focus();
         }
         break;
       }

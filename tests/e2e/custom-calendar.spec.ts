@@ -1,4 +1,4 @@
-import { test, expect, Locator } from "@playwright/test";
+import { test, expect, Locator, Page } from "@playwright/test";
 
 const expectSelected = async (locator: Locator, toBeSelected: boolean) => {
   if (toBeSelected) await expect(locator).toHaveAttribute("aria-selected", "true");
@@ -281,8 +281,8 @@ test("Отбражение выделенного элемента в табли
   });
 });
 
-test("Дополнительные кнопки клавиатуры для по датам", async ({page}) => {
-  const resetCalendar = async () => {
+test.describe("Дополнительные кнопки клавиатуры для по датам", async () => {
+  const resetCalendar = async (page: Page) => {
     await page.evaluate(() => {
       const calendarNode = document.querySelector("[data-testid='basic']");
       if (calendarNode) {
@@ -293,118 +293,120 @@ test("Дополнительные кнопки клавиатуры для по
     });
   };
 
-  await test.step("Home + End", async () => {
-    await page.getByRole("gridcell", { name: "14" }).focus();
+  test("Home + End", async ({page}) => {
+    await test.step("Home + End", async () => {
+      await page.getByRole("gridcell", { name: "14" }).focus();
 
-    await page.keyboard.down("Home");
-    await expect(page.getByRole("gridcell", { name: "9", exact: true })).toBeFocused();
+      await page.keyboard.down("Home");
+      await expect(page.getByRole("gridcell", { name: "9", exact: true })).toBeFocused();
 
-    await page.keyboard.down("End");
-    await expect(page.getByRole("gridcell", { name: "15" })).toBeFocused();
-    await expectSelected(page.getByRole("gridcell", { name: "15" }), false);
+      await page.keyboard.down("End");
+      await expect(page.getByRole("gridcell", { name: "15" })).toBeFocused();
+      await expectSelected(page.getByRole("gridcell", { name: "15" }), false);
+    });
   });
 
-  await resetCalendar();
+  test("PageUp", async ({page}) => {
+    await test.step("PageUp - переход на предыдущий месяц", async () => {
+      await page.getByRole("gridcell", { name: "14" }).focus();
 
-  await test.step("PageUp - переход на предыдущий месяц", async () => {
-    await page.getByRole("gridcell", { name: "14" }).focus();
+      await page.keyboard.down("PageUp");
 
-    await page.keyboard.down("PageUp");
+      await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
+      await expectSelected(page.getByRole("gridcell", { name: "14" }), false);
+      await expect(page.getByRole("gridcell", { name: "14" })).toBeFocused();
 
-    await expect(page.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
-    await expectSelected(page.getByRole("gridcell", { name: "14" }), false);
-    await expect(page.getByRole("gridcell", { name: "14" })).toBeFocused();
+      await page.getByRole("gridcell", { name: "31" }).last().click();
+      await page.keyboard.down("PageUp");
 
-    await page.getByRole("gridcell", { name: "31" }).last().click();
-    await page.keyboard.down("PageUp");
+      await expect(page.getByRole("heading", { name: "декабрь 2025 г" })).toBeVisible();
+      await expect(page.getByRole("gridcell", { name: "31" }).last()).toBeFocused();
+      await page.keyboard.down("PageUp");
 
-    await expect(page.getByRole("heading", { name: "декабрь 2025 г" })).toBeVisible();
-    await expect(page.getByRole("gridcell", { name: "31" }).last()).toBeFocused();
-    await page.keyboard.down("PageUp");
+      await expect(page.getByRole("heading", { name: "ноябрь 2025 г" })).toBeVisible();
 
-    await expect(page.getByRole("heading", { name: "ноябрь 2025 г" })).toBeVisible();
+      const lastCell = page.getByRole("gridcell", { name: "30" }).last();
+      await expect(lastCell).toBeFocused();
+      await expectSelected(lastCell, false);
 
-    const lastCell = page.getByRole("gridcell", { name: "30" }).last();
-    await expect(lastCell).toBeFocused();
-    await expectSelected(lastCell, false);
-
-    await page.keyboard.down("Space");
-    await expect(lastCell).toBeFocused();
-    await expectSelected(lastCell, true);
-  });
-
-  await resetCalendar();
-
-  await test.step("Shift + PageUp - переход на предыдущий год", async () => {
-    await page.getByRole("gridcell", { name: "14" }).focus();
-
-    await page.keyboard.down("Shift");
-    await page.keyboard.down("PageUp");
-    await page.keyboard.up("Shift");
-
-    // 2020 февраль - 29 дней
-    await expect(page.getByRole("heading", { name: "февраль 2025 г" })).toBeVisible();
-    await expect(page.getByRole("gridcell", { name: "14" })).toBeFocused();
-    await expectSelected(page.getByRole("gridcell", { name: "14" }), false);
-  });
-
-  await resetCalendar();
-
-  await test.step("Shift + PageUp - высокосный год", async () => {
-    await page.evaluate(() => {
-      const calendarNode = document.querySelector("[data-testid='basic']");
-      if (calendarNode) {
-        calendarNode.setAttribute("month", "1");
-        calendarNode.setAttribute("year", "2020");
-        calendarNode.setAttribute("date", "Sun Feb 29 2020");
-      }
+      await page.keyboard.down("Space");
+      await expect(lastCell).toBeFocused();
+      await expectSelected(lastCell, true);
     });
 
-    await page.getByRole("gridcell", { name: "29" }).nth(1).focus();
-    await page.keyboard.down("Shift");
-    await page.keyboard.down("PageUp");
-    await page.keyboard.up("Shift");
-    await expect(page.getByRole("heading", { name: "февраль 2019 г" })).toBeVisible();
-    await expect(page.getByRole("gridcell", { name: "28" }).nth(1)).toBeFocused();
-  });
+    await resetCalendar(page);
 
-  await resetCalendar();
+    await test.step("Shift + PageUp - переход на предыдущий год", async () => {
+      await page.getByRole("gridcell", { name: "14" }).focus();
 
-  await test.step("PageDown, переход на следующий месяц", async () => {
-    await page.getByRole("gridcell", { name: "14" }).focus();
+      await page.keyboard.down("Shift");
+      await page.keyboard.down("PageUp");
+      await page.keyboard.up("Shift");
 
-    await page.keyboard.down("PageDown");
-    await expect(page.getByRole("heading", { name: "март 2026 г" })).toBeVisible();
-    await expectSelected(page.getByRole("gridcell", { name: "14" }), false);
-    await expect(page.getByRole("gridcell", { name: "14" })).toBeFocused();
-
-    await page.getByRole("gridcell", { name: "31" }).last().click();
-    await page.keyboard.down("PageDown");
-
-    await expect(page.getByRole("heading", { name: "апрель 2026 г" })).toBeVisible();
-    const lastCell = page.getByRole("gridcell", { name: "30" }).last();
-    await expect(lastCell).toBeFocused();
-    await expectSelected(lastCell, false);
-    await page.keyboard.down("Enter");
-    await expectSelected(lastCell, true);
-  });
-
-  await test.step("Shift + PageDown, переход на следующий год", async () => {
-    await page.evaluate(() => {
-      const calendarNode = document.querySelector("[data-testid='basic']");
-      if (calendarNode) {
-        calendarNode.setAttribute("month", "1");
-        calendarNode.setAttribute("year", "2020");
-        calendarNode.setAttribute("date", "Sun Feb 29 2020");
-      }
+      // 2020 февраль - 29 дней
+      await expect(page.getByRole("heading", { name: "февраль 2025 г" })).toBeVisible();
+      await expect(page.getByRole("gridcell", { name: "14" })).toBeFocused();
+      await expectSelected(page.getByRole("gridcell", { name: "14" }), false);
     });
 
-    await page.getByRole("gridcell", { name: "29" }).last().focus();
-    await page.keyboard.down("Shift");
-    await page.keyboard.down("PageDown");
-    await page.keyboard.up("Shift");
-    await expect(page.getByRole("heading", { name: "февраль 2021 г" })).toBeVisible();
-    await expect(page.getByRole("gridcell", { name: "28" }).last()).toBeFocused();
+    await resetCalendar(page);
+
+    await test.step("Shift + PageUp - высокосный год", async () => {
+      await page.evaluate(() => {
+        const calendarNode = document.querySelector("[data-testid='basic']");
+        if (calendarNode) {
+          calendarNode.setAttribute("month", "1");
+          calendarNode.setAttribute("year", "2020");
+          calendarNode.setAttribute("date", "Sun Feb 29 2020");
+        }
+      });
+
+      await page.getByRole("gridcell", { name: "29" }).nth(1).focus();
+      await page.keyboard.down("Shift");
+      await page.keyboard.down("PageUp");
+      await page.keyboard.up("Shift");
+      await expect(page.getByRole("heading", { name: "февраль 2019 г" })).toBeVisible();
+      await expect(page.getByRole("gridcell", { name: "28" }).nth(1)).toBeFocused();
+    });
+  });
+
+  test("PageDown", async ({page}) => {
+    await test.step("PageDown, переход на следующий месяц", async () => {
+      await page.getByRole("gridcell", { name: "14" }).focus();
+
+      await page.keyboard.down("PageDown");
+      await expect(page.getByRole("heading", { name: "март 2026 г" })).toBeVisible();
+      await expectSelected(page.getByRole("gridcell", { name: "14" }), false);
+      await expect(page.getByRole("gridcell", { name: "14" })).toBeFocused();
+
+      await page.getByRole("gridcell", { name: "31" }).last().click();
+      await page.keyboard.down("PageDown");
+
+      await expect(page.getByRole("heading", { name: "апрель 2026 г" })).toBeVisible();
+      const lastCell = page.getByRole("gridcell", { name: "30" }).last();
+      await expect(lastCell).toBeFocused();
+      await expectSelected(lastCell, false);
+      await page.keyboard.down("Enter");
+      await expectSelected(lastCell, true);
+    });
+
+    await test.step("Shift + PageDown, переход на следующий год", async () => {
+      await page.evaluate(() => {
+        const calendarNode = document.querySelector("[data-testid='basic']");
+        if (calendarNode) {
+          calendarNode.setAttribute("month", "1");
+          calendarNode.setAttribute("year", "2020");
+          calendarNode.setAttribute("date", "Sun Feb 29 2020");
+        }
+      });
+
+      await page.getByRole("gridcell", { name: "29" }).last().focus();
+      await page.keyboard.down("Shift");
+      await page.keyboard.down("PageDown");
+      await page.keyboard.up("Shift");
+      await expect(page.getByRole("heading", { name: "февраль 2021 г" })).toBeVisible();
+      await expect(page.getByRole("gridcell", { name: "28" }).last()).toBeFocused();
+    });
   });
 });
 
