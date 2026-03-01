@@ -1,1 +1,19 @@
-<custom-calendar data-testid="basic"></custom-calendar>
+<section>
+
+  <h3>Базовый</h3>
+  <custom-calendar data-testid="basic"></custom-calendar>
+</section>
+
+<section>
+  <h3>Кастомизация</h3>
+  <p>
+    У каждого компонента есть свои исходные стили, написанные разработчиком.
+    Они хранятся в виде строке в статическом свойстве <code>CustomCalendar.defaultStyles</code>
+    В каждом инстансе элемента есть свойство <code>styles</code> которое можно переписать полностью, либо дополнить по
+    необходимости. Содержимое должно быть инстансом DOM Node. Т.е. ничего не мешает поместить туда целую таблицу стилей
+    или добавить тег style. В случае вставки нескольких тегов style (например, дефолтных, и дополнительных) нужно
+    использовать DocumentFragment.
+  </p>
+  <h4>Полностью перезаписанные стили</h4>
+  <custom-calendar data-testid="styles-custimezed-1"></custom-calendar>
+</section>

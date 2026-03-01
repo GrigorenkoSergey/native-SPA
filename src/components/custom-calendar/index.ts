@@ -1,7 +1,10 @@
 import template from "./template.html";
-import styles from "./style.css?raw";
-import { attachStyles, initCustomElement } from "@/utils/customElementHelpers";
+import css from "./style.css?raw";
+import { initCustomElement, attachStyles2 } from "@/utils/customElementHelpers";
 import { assert } from "@/utils/assert";
+
+const styles = document.createElement("style");
+styles.textContent = css;
 
 const msInDay = 24 * 60 * 60 * 1000;
 
@@ -50,6 +53,16 @@ export class CustomCalendar extends HTMLElement {
   observer!: IntersectionObserver;
   skipCb = true;
 
+  // для всех инстансов
+  static defaultStyles = styles;
+
+  // для модификации отдельных инстансов
+  set styles(nodes: (HTMLLinkElement|HTMLStyleElement)[]) {
+    [...this.shadowRoot.querySelectorAll("link[rel=stylesheet],style")]
+      .forEach(node => node.remove());
+    attachStyles2(this, nodes);
+  }
+
   constructor() {
     super();
     this.attachShadow({mode: "open"});
@@ -94,7 +107,7 @@ export class CustomCalendar extends HTMLElement {
 
   connectedCallback() {
     this.shadowRoot.innerHTML = template;
-    attachStyles(this, styles);
+    this.styles = [CustomCalendar.defaultStyles];
 
     this.attachHandlers();
     this.setDefaultAttributes();

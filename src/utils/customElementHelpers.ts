@@ -1,3 +1,4 @@
+import { assert } from "./assert";
 const propToAttr = (prop: string) => prop.replace(/[A-Z]/g, m => `_${m.toLowerCase()}`);
 const attrToProp = (attr: string) => attr.replace(/_[A-Z]/g, m => `${m.toUpperCase()}`);
 
@@ -149,6 +150,17 @@ export function attachStyles(
     if (customStyles) resultStyles.push(customStyles.cloneNode(true));
   }
 
+  ctx.shadowRoot?.prepend(...resultStyles);
+}
+
+/** Альтернативная реализация привязки стилей
+ **/
+export function attachStyles2(ctx: HTMLElement, nodes: (HTMLLinkElement|HTMLStyleElement)[]) {
+  const resultStyles = [];
+  const reset = document.getElementById("shadow-reset");
+  if (reset) resultStyles.push(reset.cloneNode(true));
+
+  resultStyles.push(...nodes.map(elem => elem.cloneNode(true)));
   ctx.shadowRoot?.prepend(...resultStyles);
 }
 
