@@ -1,4 +1,3 @@
-import { assert } from "./assert";
 const propToAttr = (prop: string) => prop.replace(/[A-Z]/g, m => `_${m.toLowerCase()}`);
 const attrToProp = (attr: string) => attr.replace(/_[A-Z]/g, m => `${m.toUpperCase()}`);
 
@@ -86,7 +85,7 @@ export function applyGetSet(
   ...props: string[]
 ) {
   props.forEach(prop => {
-    const hiddenKey = `_${prop}`;
+    const hiddenKey = `#${prop}`;
     ctx[hiddenKey] = ctx[prop];
 
     const attrName = propToAttr(prop);
@@ -155,7 +154,7 @@ export function attachStyles(
 
 /** Альтернативная реализация привязки стилей
  **/
-export function attachStyles2(ctx: HTMLElement, nodes: (HTMLLinkElement|HTMLStyleElement)[]) {
+export function attachStyles2(ctx: HTMLElement, nodes: (HTMLLinkElement | HTMLStyleElement)[]) {
   const resultStyles = [];
   const reset = document.getElementById("shadow-reset");
   if (reset) resultStyles.push(reset.cloneNode(true));

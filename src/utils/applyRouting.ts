@@ -24,7 +24,7 @@ interface ApplyRoutingArgs {
    * ```
    */
   dynamicRoutes?: DynamicRoutes,
-};
+}
 
 /**
  * Для определенных ссылок, помеченных атрибутов data-inner-link предотвращает действие по умолчанию.

@@ -3,8 +3,10 @@ import css from "./style.css?raw";
 import { initCustomElement, attachStyles2 } from "@/utils/customElementHelpers";
 import { assert } from "@/utils/assert";
 
-const styles = document.createElement("style");
-styles.textContent = css;
+// TODO можно вынести в хелперы
+const style = document.createElement("style");
+style.id = "default-style";
+style.textContent = css;
 
 const msInDay = 24 * 60 * 60 * 1000;
 
@@ -35,14 +37,11 @@ const getHost = (elem: Element) => {
   return host;
 };
 
-type View = "dates" | "months" |"years";
+type View = "dates" | "months" | "years";
 type ArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowDown" | "ArrowUp";
 
 const defaultMinYear = 1970;
 const defaultMaxYear = 2050;
-
-// пока забить на создание дополнительных свойств и синхронизацию их с атрибутами
-// пусть будет все проще, чем в custom-autocomplete
 
 // паттерн grid https://www.w3.org/WAI/ARIA/apg/patterns/grid/
 export class CustomCalendar extends HTMLElement {
@@ -54,18 +53,15 @@ export class CustomCalendar extends HTMLElement {
   skipCb = true;
 
   // для всех инстансов
-  static defaultStyles = styles;
-
-  // для модификации отдельных инстансов
-  set styles(nodes: (HTMLLinkElement|HTMLStyleElement)[]) {
-    [...this.shadowRoot.querySelectorAll("link[rel=stylesheet],style")]
-      .forEach(node => node.remove());
-    attachStyles2(this, nodes);
-  }
+  static defaultStyles: (HTMLStyleElement | HTMLLinkElement)[] = [style];
 
   constructor() {
     super();
     this.attachShadow({mode: "open"});
+  }
+
+  static init() {
+    initCustomElement("custom-calendar", CustomCalendar);
   }
 
   static get observedAttributes() {
@@ -85,8 +81,8 @@ export class CustomCalendar extends HTMLElement {
   }
 
   get date() {
-    return this.getAttribute("date") 
-    || new Date(this.year, this.month, Number(new Date().getDate())).toDateString();
+    return this.getAttribute("date") || 
+    new Date(this.year, this.month, Number(new Date().getDate())).toDateString();
   }
 
   get minYear() {
@@ -107,7 +103,7 @@ export class CustomCalendar extends HTMLElement {
 
   connectedCallback() {
     this.shadowRoot.innerHTML = template;
-    this.styles = [CustomCalendar.defaultStyles];
+    attachStyles2(this, CustomCalendar.defaultStyles);
 
     this.attachHandlers();
     this.setDefaultAttributes();
@@ -392,9 +388,9 @@ export class CustomCalendar extends HTMLElement {
     const { target: td, code } = event;
     if (!(td instanceof HTMLTableCellElement)) return;
 
-    // Universal keys for all views
+    // Универсальные ключи
     if (code === "Enter" || code === "Space") {
-      event.preventDefault(); // Prevent page scroll on space
+      event.preventDefault(); // Запретим прокрутку
       td.click();
       return;
     }
@@ -598,5 +594,3 @@ export class CustomCalendar extends HTMLElement {
     }
   }
 }
-
-initCustomElement("custom-calendar", CustomCalendar);

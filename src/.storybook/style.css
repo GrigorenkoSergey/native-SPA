@@ -12,6 +12,12 @@
   }
 }
 
+.storybook-layout__nav {
+  position: sticky;
+  top: 10px;
+  max-height: calc(100vh - 20px);
+}
+
 .storybook-layout__ul {
   list-style-type: none;
 }

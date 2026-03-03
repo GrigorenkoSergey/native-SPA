@@ -1,12 +1,14 @@
 import {CustomCalendar} from "@/components/custom-calendar";
 import fullyCustomizedCSS from "./fully-customized.css?raw";
-import { assert } from "@/utils/assert";
+import "./style.css";
 
-const customized = document.querySelector("[data-testid=\"styles-custimezed-1\"]");
+const additionalStyles = document.getElementById("additional-styles") as HTMLTemplateElement;
+CustomCalendar.defaultStyles
+  .push(additionalStyles.content.cloneNode(true) as HTMLStyleElement);
+CustomCalendar.init();
+
 const styleTag = document.createElement("style");
 styleTag.textContent = fullyCustomizedCSS;
 
-const newStyles = styleTag;
-
-assert(customized instanceof CustomCalendar);
-customized.styles = [newStyles];
+const fullyCustomized = document.querySelector("[data-testid='styles-customized-full']");
+fullyCustomized?.shadowRoot?.getElementById("default-style")?.replaceWith(styleTag);

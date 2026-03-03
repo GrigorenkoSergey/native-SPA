@@ -5,15 +5,92 @@
 </section>
 
 <section>
-  <h3>Кастомизация</h3>
+  <h3>Стилизация</h3>
+  <h4>Точно такой же, но с квадратными ячейками</h4>
+
+  <template id="additional-styles">
+    <style id="extended-style">
+      :host(.rect-cells) {
+
+        .date-cell,
+        .month-cell,
+        .year-cell,
+        button {
+          border-radius: 4px;
+        }
+      }
+    </style>
+  </template>
+
   <p>
     У каждого компонента есть свои исходные стили, написанные разработчиком.
-    Они хранятся в виде строке в статическом свойстве <code>CustomCalendar.defaultStyles</code>
-    В каждом инстансе элемента есть свойство <code>styles</code> которое можно переписать полностью, либо дополнить по
-    необходимости. Содержимое должно быть инстансом DOM Node. Т.е. ничего не мешает поместить туда целую таблицу стилей
-    или добавить тег style. В случае вставки нескольких тегов style (например, дефолтных, и дополнительных) нужно
-    использовать DocumentFragment.
+    Они хранятся в статическом свойстве <code>CustomCalendar.defaultStyles</code>
+    Это массив, который можно дополнить тегом <code>style</code> или добавить ссылку на таблицу стилей (вряд ли это
+    когда-нибудь понадобится, но возможность такая есть).
+    При необходимости, их можно дополнить или вообще полностью переписать для всего проекта.
+    Это нужно сделать в самом начале при первом подключении компонента.
+    Ничего не мешает добавить дополнительно классы для каждого компонента.
+
+    После этого, можно инициализировать компонент. Обычно это делается в самом начале приложения.
+    <xmp>
+      <template id="additional-styles">
+        <style id="extended-style">
+          :host(.rect-cells) {
+
+            .date-cell,
+            .month-cell,
+            .year-cell,
+            button {
+              border-radius: 4px;
+            }
+          }
+        </style>
+      </template>
+
+      <custom-calendar data-testid="styles-customized-rect" class="rect-cells"></custom-calendar>
+
+      <script defer>
+        const additionalStyles = document.getElementById("additional-styles");
+        CustomCalendar.defaultStyles // расширьте стили ДО инициализации компонента
+          .push(additionalStyles.content.cloneNode(true));
+        CustomCalendar.init();
+      </script>
+    </xmp>
   </p>
-  <h4>Полностью перезаписанные стили</h4>
-  <custom-calendar data-testid="styles-custimezed-1"></custom-calendar>
+
+  <section>
+    <custom-calendar data-testid="styles-customized-rect" class="rect-cells"></custom-calendar>
+
+  </section>
+  <section>
+    <h4>Полностью перезаписанные стили</h4>
+    <p>Можно перезаписать стили отдельно для уже существующего компонента. Для этого достаточно заменить тег
+      <code>style</code>, в
+      котором хранятся стили по умолчанию на свой собственный тег. Тег по умолчанию доступен по ID
+      <code>default-style</code> в теневом дереве.
+      <xmp>
+        <custom-calendar data-testid="styles-customized-full"></custom-calendar>
+
+        <script>
+          const styleTag = document.createElement("style");
+          styleTag.textContent = fullyCustomizedCSS; // например, строка, которую вы где-либо записали
+
+          const fullyCustomized = document.querySelector("[data-testid='styles-customized-full']");
+          fullyCustomized?.shadowRoot
+            .getElementById("default-style") // ID-шник по умолчанию
+            .replaceWith(styleTag); // полностью заменяем в отдельном компоненте
+        </script>
+      </xmp>
+      Однако, нужно иметь в виду, что если компонент будет перевоссоздан (сработает <code>connectedCallback</code>),
+      стили сбросятся к исходным. В подавляющем большинстве случаев следует предпочесть перезапись стилей по умолчанию с
+      дополнением классами.
+    </p>
+
+    <custom-calendar data-testid="styles-customized-full"></custom-calendar>
+
+    <p>
+      Альтернативно можно использовать свойство <code>adoptedStyleSheets</code>. Но я это не рекомендую, поскольку стили
+      в этом случае сложнее дебажить.
+    </p>
+  </section>
 </section>

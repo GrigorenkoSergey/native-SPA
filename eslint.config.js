@@ -5,6 +5,10 @@ import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
+  {
+    ignores: ["playwright-report/**"],
+  },
+
   // Apply recommended configs for JS and TS
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -24,6 +28,9 @@ export default defineConfig([
       "@stylistic/keyword-spacing": ["error", { "before": true, "after": true }],
       "@stylistic/function-call-spacing": ["error", "never"],
       "@stylistic/space-before-blocks": "error",
+      "@stylistic/space-infix-ops": "error",
+      "@stylistic/operator-linebreak": ["error", "after"],
+      "@stylistic/no-multiple-empty-lines": ["error", { "max": 1 }],
     },
   },
 
