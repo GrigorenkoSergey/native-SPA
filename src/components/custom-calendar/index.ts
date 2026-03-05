@@ -50,7 +50,6 @@ export class CustomCalendar extends HTMLElement {
 
   shadowRoot!: ShadowRoot;
   observer!: IntersectionObserver;
-  skipCb = true;
   lastChangedAttr = "";
 
   // для всех инстансов
@@ -129,8 +128,6 @@ export class CustomCalendar extends HTMLElement {
       }
     }, 
     { root: observerRoot, threshold: 1 }); 
-
-    this.render();
   }
 
   attributeChangedCallback(
@@ -138,12 +135,19 @@ export class CustomCalendar extends HTMLElement {
     oldValue: string | boolean,
     newValue: string | boolean,
   ) {
-    if (this.skipCb) return;
     if (oldValue === newValue) return;
 
     this.lastChangedAttr = name;
     queueMicrotask(() => {
-      if (this.lastChangedAttr === name) this.render();
+      if (this.lastChangedAttr !== name) return;
+
+      const noChanges = [...this.prerenderAttrs.entries()]
+        .every(([attr, value]) => this[attr] === value);
+      if (noChanges) return;
+
+      this.render();
+      this.lastChangedAttr = "";
+      this.prerenderAttrs.forEach((value, attr) => this.prerenderAttrs.set(attr, this[attr]));
     });
   }
 
@@ -177,7 +181,6 @@ export class CustomCalendar extends HTMLElement {
   }
 
   render() {
-    this.skipCb = true;
     const view = this.view;
 
     if (this.hasChanged("month") || this.hasChanged("year") && view === "dates") {
@@ -198,10 +201,6 @@ export class CustomCalendar extends HTMLElement {
 
     this.highlightSelected(this.view);
     this.disableMonthArrowIfNeeded();
-
-    this.skipCb = false;
-
-    this.prerenderAttrs.forEach((value, attr) => this.prerenderAttrs.set(attr, this[attr]));
   }
 
   renderDates() {
@@ -336,12 +335,10 @@ export class CustomCalendar extends HTMLElement {
     const isNextMonthBtn = this.id === "next-month";
     const next = isNextMonthBtn ? host.month + 1 : host.month - 1;
 
-    host.skipCb = true;
     if (next < 0) host.setAttribute("year", String(host.year - 1));
     else if (next > 11) host.setAttribute("year", String(host.year + 1));
 
     host.setAttribute("month", String((next + 12) % 12));
-    host.render();
   }
 
   onDateClick(event: PointerEvent) {
@@ -375,10 +372,8 @@ export class CustomCalendar extends HTMLElement {
 
     const host = getHost(target);
 
-    host.skipCb = true;
     host.setAttribute("year", target.textContent);
     host.setAttribute("view", "months");
-    host.render();
   }
 
   onMonthTdClick(event: PointerEvent) {
@@ -388,14 +383,12 @@ export class CustomCalendar extends HTMLElement {
 
     const host = getHost(target);
 
-    host.skipCb = true;
     host.setAttribute("month", String(target.dataset.month));
     host.setAttribute("view", "dates");
-    host.render();
 
     const yearToggler = host.shadowRoot.querySelector("#year-month-toggler");
     if (yearToggler instanceof HTMLButtonElement) {
-      setTimeout(() => yearToggler.focus());
+      queueMicrotask(() => yearToggler.focus());
     }
   }
   
@@ -466,14 +459,14 @@ export class CustomCalendar extends HTMLElement {
         const dateToFocus = host.addMonthSafely(new Date(date), monthDiff, host.minYear, host.maxYear);
         if (!dateToFocus) return;
 
-        host.skipCb = true;
         host.setAttribute("year", String(dateToFocus.getFullYear()));
         host.setAttribute("month", String(dateToFocus.getMonth()));
-        host.render();
 
-        const cellToFocus = host.getDateCell(dateToFocus);
-        assert(cellToFocus instanceof HTMLTableCellElement);
-        cellToFocus.focus();
+        queueMicrotask(() => {
+          const cellToFocus = host.getDateCell(dateToFocus);
+          assert(cellToFocus instanceof HTMLTableCellElement);
+          cellToFocus.focus();
+        });
         break;
       }
     }
@@ -512,14 +505,14 @@ export class CustomCalendar extends HTMLElement {
     const isNextDateFromOtherMonth = nextDate.getMonth() !== host.month;
     const isNextDateFromOtherYear = nextDate.getFullYear() !== host.year;
 
-    host.skipCb = true;
     if (isNextDateFromOtherYear) host.setAttribute("year", String(nextDate.getFullYear()));
     if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
-    host.render();
 
-    const nextTd = host.getDateCell(nextDate);
-    assert(nextTd instanceof HTMLTableCellElement);
-    nextTd.focus();
+    queueMicrotask(() => {
+      const nextTd = host.getDateCell(nextDate);
+      assert(nextTd instanceof HTMLTableCellElement);
+      nextTd.focus();
+    });
   }
 
   moveFocusFromTd(td: HTMLTableCellElement, code: ArrowKey) {
@@ -608,5 +601,5 @@ export class CustomCalendar extends HTMLElement {
       tablesContainer.style.setProperty(varName, "");
     }
   }
-
 }
+
