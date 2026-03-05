@@ -51,6 +51,7 @@ export class CustomCalendar extends HTMLElement {
   shadowRoot!: ShadowRoot;
   observer!: IntersectionObserver;
   skipCb = true;
+  lastChangedAttr = "";
 
   // для всех инстансов
   static defaultStyles: (HTMLStyleElement | HTMLLinkElement)[] = [style];
@@ -61,15 +62,24 @@ export class CustomCalendar extends HTMLElement {
   }
 
   static init() {
+    // @ts-expect-error FIXME
     initCustomElement("custom-calendar", CustomCalendar);
   }
 
-  static get observedAttributes() {
-    return ["year", "month","date", "view"];
+  static observedAttributes = ["year", "month","date", "view"] as const;
+
+  prerenderAttrs = new Map(CustomCalendar.observedAttributes
+    .map(attr => [attr, undefined as undefined | unknown]));
+
+  hasChanged(attr: typeof CustomCalendar.observedAttributes[number]) {
+    return this.prerenderAttrs.get(attr) !== this[attr];
   }
 
   get view(): View {
     return this.getAttribute("view") as View || "dates";
+  }
+  set view(value: View) {
+    this.setAttribute("view", value);
   }
 
   get year() {
@@ -120,7 +130,7 @@ export class CustomCalendar extends HTMLElement {
     }, 
     { root: observerRoot, threshold: 1 }); 
 
-    this.render("view");
+    this.render();
   }
 
   attributeChangedCallback(
@@ -131,7 +141,10 @@ export class CustomCalendar extends HTMLElement {
     if (this.skipCb) return;
     if (oldValue === newValue) return;
 
-    this.render(name);
+    this.lastChangedAttr = name;
+    queueMicrotask(() => {
+      if (this.lastChangedAttr === name) this.render();
+    });
   }
 
   attachHandlers() {
@@ -163,15 +176,15 @@ export class CustomCalendar extends HTMLElement {
     ensureAttribute("max-year", String(this.maxYear));
   }
 
-  render(attrName: string = "") {
+  render() {
     this.skipCb = true;
     const view = this.view;
 
-    if ((attrName === "month" || attrName === "year") && view === "dates") {
+    if (this.hasChanged("month") || this.hasChanged("year") && view === "dates") {
       this.renderDates();
     }
 
-    if (attrName === "view") {
+    if (this.hasChanged("view")) {
       const tbodies = [...this.shadowRoot.querySelectorAll("tbody")];
       tbodies.forEach(tbody => tbody.innerHTML = "");
 
@@ -187,6 +200,8 @@ export class CustomCalendar extends HTMLElement {
     this.disableMonthArrowIfNeeded();
 
     this.skipCb = false;
+
+    this.prerenderAttrs.forEach((value, attr) => this.prerenderAttrs.set(attr, this[attr]));
   }
 
   renderDates() {
@@ -326,7 +341,7 @@ export class CustomCalendar extends HTMLElement {
     else if (next > 11) host.setAttribute("year", String(host.year + 1));
 
     host.setAttribute("month", String((next + 12) % 12));
-    host.render("month");
+    host.render();
   }
 
   onDateClick(event: PointerEvent) {
@@ -363,7 +378,7 @@ export class CustomCalendar extends HTMLElement {
     host.skipCb = true;
     host.setAttribute("year", target.textContent);
     host.setAttribute("view", "months");
-    host.render("view");
+    host.render();
   }
 
   onMonthTdClick(event: PointerEvent) {
@@ -376,7 +391,7 @@ export class CustomCalendar extends HTMLElement {
     host.skipCb = true;
     host.setAttribute("month", String(target.dataset.month));
     host.setAttribute("view", "dates");
-    host.render("view");
+    host.render();
 
     const yearToggler = host.shadowRoot.querySelector("#year-month-toggler");
     if (yearToggler instanceof HTMLButtonElement) {
@@ -454,7 +469,7 @@ export class CustomCalendar extends HTMLElement {
         host.skipCb = true;
         host.setAttribute("year", String(dateToFocus.getFullYear()));
         host.setAttribute("month", String(dateToFocus.getMonth()));
-        host.render("month");
+        host.render();
 
         const cellToFocus = host.getDateCell(dateToFocus);
         assert(cellToFocus instanceof HTMLTableCellElement);
@@ -500,7 +515,7 @@ export class CustomCalendar extends HTMLElement {
     host.skipCb = true;
     if (isNextDateFromOtherYear) host.setAttribute("year", String(nextDate.getFullYear()));
     if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
-    host.render("month");
+    host.render();
 
     const nextTd = host.getDateCell(nextDate);
     assert(nextTd instanceof HTMLTableCellElement);
@@ -593,4 +608,5 @@ export class CustomCalendar extends HTMLElement {
       tablesContainer.style.setProperty(varName, "");
     }
   }
+
 }
