@@ -84,14 +84,23 @@ export class CustomCalendar extends HTMLElement {
   get year() {
     return Number(this.getAttribute("year") || new Date().getFullYear());
   }
+  set year(num: number) {
+    this.setAttribute("year", String(num));
+  }
 
   get month() {
     return Number(this.getAttribute("month") || new Date().getMonth());
   }
+  set month(value: number) {
+    this.setAttribute("month", String(value));
+  }
 
   get date() {
     return this.getAttribute("date") || 
-    new Date(this.year, this.month, Number(new Date().getDate())).toDateString();
+      new Date(this.year, this.month, Number(new Date().getDate())).toDateString();
+  }
+  set date(d: string) {
+    this.setAttribute("date", d);
   }
 
   get minYear() {
@@ -335,10 +344,10 @@ export class CustomCalendar extends HTMLElement {
     const isNextMonthBtn = this.id === "next-month";
     const next = isNextMonthBtn ? host.month + 1 : host.month - 1;
 
-    if (next < 0) host.setAttribute("year", String(host.year - 1));
-    else if (next > 11) host.setAttribute("year", String(host.year + 1));
+    if (next < 0) host.year -= 1;
+    else if (next > 11) host.year += 1;
 
-    host.setAttribute("month", String((next + 12) % 12));
+    host.month = (next + 12) % 12;
   }
 
   onDateClick(event: PointerEvent) {
@@ -348,21 +357,15 @@ export class CustomCalendar extends HTMLElement {
     if (!target.classList.contains("date-cell")) return;
 
     const host = getHost(this);
-    host.setAttribute(
-      "date", 
-      new Date(host.year, host.month, Number(target.textContent)).toDateString(),
-    );
+    host.date = new Date(host.year, host.month, Number(target.textContent)).toDateString();
   }
 
   onYearSelectorClick() {
     const host = getHost(this);
     host.restrictTableHeight(true);
 
-    if (host.view === "dates") {
-      host.setAttribute("view", "years");
-    } else {
-      host.setAttribute("view", "dates");
-    }
+    if (host.view === "dates") host.view = "years";
+    else host.view = "dates";
   }
 
   onYearTdClick(event: PointerEvent) {
@@ -372,8 +375,8 @@ export class CustomCalendar extends HTMLElement {
 
     const host = getHost(target);
 
-    host.setAttribute("year", target.textContent);
-    host.setAttribute("view", "months");
+    host.year = Number(target.textContent);
+    host.view = "months";
   }
 
   onMonthTdClick(event: PointerEvent) {
@@ -383,8 +386,8 @@ export class CustomCalendar extends HTMLElement {
 
     const host = getHost(target);
 
-    host.setAttribute("month", String(target.dataset.month));
-    host.setAttribute("view", "dates");
+    host.month = Number(target.dataset.month);
+    host.view = "dates";
 
     const yearToggler = host.shadowRoot.querySelector("#year-month-toggler");
     if (yearToggler instanceof HTMLButtonElement) {
@@ -459,8 +462,8 @@ export class CustomCalendar extends HTMLElement {
         const dateToFocus = host.addMonthSafely(new Date(date), monthDiff, host.minYear, host.maxYear);
         if (!dateToFocus) return;
 
-        host.setAttribute("year", String(dateToFocus.getFullYear()));
-        host.setAttribute("month", String(dateToFocus.getMonth()));
+        host.year = dateToFocus.getFullYear();
+        host.month = dateToFocus.getMonth();
 
         queueMicrotask(() => {
           const cellToFocus = host.getDateCell(dateToFocus);
@@ -505,8 +508,8 @@ export class CustomCalendar extends HTMLElement {
     const isNextDateFromOtherMonth = nextDate.getMonth() !== host.month;
     const isNextDateFromOtherYear = nextDate.getFullYear() !== host.year;
 
-    if (isNextDateFromOtherYear) host.setAttribute("year", String(nextDate.getFullYear()));
-    if (isNextDateFromOtherMonth) host.setAttribute("month", String(nextDate.getMonth()));
+    if (isNextDateFromOtherYear) host.year = nextDate.getFullYear();
+    if (isNextDateFromOtherMonth) host.month = nextDate.getMonth();
 
     queueMicrotask(() => {
       const nextTd = host.getDateCell(nextDate);
