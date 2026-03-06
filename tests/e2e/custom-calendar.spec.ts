@@ -281,19 +281,20 @@ test("Отбражение выделенного элемента в табли
     await problemCell.click();
     await calendar.getByRole("gridcell", { name: "февр" }).click();
 
-    await page.waitForTimeout(50);
+    const headingButton = calendar.locator("#year-month-toggler");
+    await expect(headingButton).toBeFocused();
     await page.keyboard.down("Enter");
     await expect(problemCell).toBeInViewport({ratio: 1});
   });
 
-  // await test.step("При этом прокрутка мышью не зацикливается на этом элементе", async () => {
-  //   await page.waitForTimeout(50); // дадим прокрутить к ячейке
-  //   await page.mouse.wheel(0, 1000);
-  //   await page.waitForTimeout(200); // убедимся, что браузер закончил прокрутку полностью
+  await test.step("При этом прокрутка мышью не зацикливается на этом элементе", async () => {
+    await page.waitForTimeout(50); // дадим прокрутить к ячейке
+    await page.mouse.wheel(0, 1000);
+    await page.waitForTimeout(200); // убедимся, что браузер закончил прокрутку полностью
 
-  //   const problemCell = calendar.getByRole("gridcell", { name: "1986" });
-  //   await expect(problemCell).not.toBeInViewport();
-  // });
+    const problemCell = calendar.getByRole("gridcell", { name: "1986" });
+    await expect(problemCell).not.toBeInViewport();
+  });
 });
 
 test.describe("Дополнительные кнопки клавиатуры для по датам", async () => {
