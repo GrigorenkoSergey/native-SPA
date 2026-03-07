@@ -51,7 +51,7 @@ export class CustomCalendar extends HTMLElement {
 
   shadowRoot!: ShadowRoot;
   observer!: IntersectionObserver;
-  lastChangedAttr = "";
+  pendingUpdates = new Set();
 
   // для всех инстансов
   static defaultStyles: (HTMLStyleElement | HTMLLinkElement)[] = [style];
@@ -66,13 +66,6 @@ export class CustomCalendar extends HTMLElement {
   }
 
   static observedAttributes = [...observedAttributes];
-
-  prerenderAttrs = new Map(observedAttributes
-    .map(attr => [attr, undefined as undefined | unknown]));
-
-  hasChanged(attr: (typeof observedAttributes)[number]) {
-    return this.prerenderAttrs.get(attr) !== this[attr];
-  }
 
   get view(): View {
     return this.getAttribute("view") as View || "dates";
@@ -146,18 +139,12 @@ export class CustomCalendar extends HTMLElement {
   ) {
     if (oldValue === newValue) return;
 
-    this.lastChangedAttr = name;
+    this.pendingUpdates.add(name);
+    if (this.pendingUpdates.size > 1) return;
+
     queueMicrotask(() => {
-      if (this.lastChangedAttr !== name) return;
-
-      const noChanges = [...this.prerenderAttrs.entries()]
-        .every(([attr, value]) => this[attr] === value);
-      if (noChanges) return;
-
-      this.render();
-
-      this.prerenderAttrs.forEach((value, attr) => this.prerenderAttrs.set(attr, this[attr]));
-      this.lastChangedAttr = "";
+      if (this.pendingUpdates.size) this.update();
+      this.pendingUpdates.clear();
     });
   }
 
@@ -193,17 +180,18 @@ export class CustomCalendar extends HTMLElement {
     ensureAttribute("max-year", String(this.maxYear));
   }
 
-  render() {
+  update() {
     const view = this.view;
+    const {pendingUpdates} = this;
 
-    if (this.hasChanged("month") || this.hasChanged("year")) {
-      if (view === "dates" && !this.hasChanged("view")) this.renderDates();
+    if (pendingUpdates.has("month") || pendingUpdates.has("year")) {
+      if (view === "dates" && !pendingUpdates.has("view")) this.renderDates();
       
       const h2 = this.shadowRoot.getElementById("month-year");
       if (h2) h2.textContent = this.formatYearMonth(this.year, this.month);
     }
 
-    if (this.hasChanged("view")) {
+    if (pendingUpdates.has("view")) {
       const tbodies = [...this.shadowRoot.querySelectorAll("tbody")];
       tbodies.forEach(tbody => tbody.innerHTML = "");
 
@@ -217,6 +205,8 @@ export class CustomCalendar extends HTMLElement {
 
     this.highlightSelected(this.view);
     this.disableMonthArrowIfNeeded();
+
+    pendingUpdates.clear();
   }
 
   renderDates() {

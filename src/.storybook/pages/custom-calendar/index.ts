@@ -14,11 +14,11 @@ assert(basic instanceof CustomCalendar);
 const renderCount = document.querySelector("[data-testid='basic-renders-count']");
 assert(renderCount);
 
-const originalRender = basic.render;
-basic.render = function (...args) {
+const originalUpdateFunc = basic.update;
+basic.update = function (...args) {
   const currentCount = +renderCount.textContent;
   renderCount.textContent = String(currentCount + 1);
-  return originalRender.call(basic, ...args);
+  return originalUpdateFunc.call(basic, ...args);
 };
 
 const styleTag = document.createElement("style");
