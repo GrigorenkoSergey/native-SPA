@@ -40,6 +40,7 @@ const getHost = (elem: Element) => {
 type View = "dates" | "months" | "years";
 type ArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowDown" | "ArrowUp";
 
+const observedAttributes = ["year", "month", "date", "view"] as const;
 const defaultMinYear = 1970;
 const defaultMaxYear = 2050;
 
@@ -61,16 +62,15 @@ export class CustomCalendar extends HTMLElement {
   }
 
   static init() {
-    // @ts-expect-error FIXME
     initCustomElement("custom-calendar", CustomCalendar);
   }
 
-  static observedAttributes = ["year", "month","date", "view"] as const;
+  static observedAttributes = [...observedAttributes];
 
-  prerenderAttrs = new Map(CustomCalendar.observedAttributes
+  prerenderAttrs = new Map(observedAttributes
     .map(attr => [attr, undefined as undefined | unknown]));
 
-  hasChanged(attr: typeof CustomCalendar.observedAttributes[number]) {
+  hasChanged(attr: (typeof observedAttributes)[number]) {
     return this.prerenderAttrs.get(attr) !== this[attr];
   }
 
@@ -155,8 +155,9 @@ export class CustomCalendar extends HTMLElement {
       if (noChanges) return;
 
       this.render();
-      this.lastChangedAttr = "";
+
       this.prerenderAttrs.forEach((value, attr) => this.prerenderAttrs.set(attr, this[attr]));
+      this.lastChangedAttr = "";
     });
   }
 
