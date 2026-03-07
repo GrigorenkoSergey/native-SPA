@@ -536,15 +536,35 @@ test.describe("Минимальные, максимальные года", async
 
 test("Кнопка 'Сегодня' выбирает текущую дату (14 февраля)", async ({page}) => {
   const calendar = page.getByTestId("basic");
-  await calendar.getByRole("button", { name: "next month" }).click();
-  await expect(calendar.getByRole("heading", { name: "март 2026 г" })).toBeVisible();
-  await calendar.getByRole("gridcell", { name: "19" }).click();
+  await test.step("С помощью мышки", async () => {
+    await calendar.getByRole("button", { name: "next month" }).click();
+    await expect(calendar.getByRole("heading", { name: "март 2026 г" })).toBeVisible();
+    await calendar.getByRole("gridcell", { name: "19" }).click();
 
-  const selected = calendar.locator("[aria-selected='true']");
-  await expect(selected).toContainText("19");
+    const selected = calendar.locator("[aria-selected='true']");
+    await expect(selected).toContainText("19");
 
-  await calendar.getByRole("button", { name: "Сегодня" }).click();
+    await calendar.getByRole("button", { name: "Сегодня" }).click();
 
-  await expect(calendar.getByRole("heading", { name: "февраль 2026 г" })).toBeVisible();
-  await expect(selected).toContainText("14");
+    await expect(calendar.getByRole("heading", { name: "февраль 2026 г" })).toBeVisible();
+    await expect(selected).toContainText("14");
+  });
+
+  await test.step("С помощью клавиатуры", async () => {
+    await calendar.getByRole("button", { name: "next month" }).focus();
+    await page.keyboard.down("Enter");
+
+    await expect(calendar.getByRole("heading", { name: "март 2026 г" })).toBeVisible();
+    await calendar.getByRole("gridcell", { name: "19" }).focus();
+    await page.keyboard.down("Enter");
+
+    const selected = calendar.locator("[aria-selected='true']");
+    await expect(selected).toContainText("19");
+
+    await page.keyboard.down("Tab"); 
+    await page.keyboard.down("Enter");
+
+    await expect(calendar.getByRole("heading", { name: "февраль 2026 г" })).toBeVisible();
+    await expect(selected).toContainText("14");
+  });
 });

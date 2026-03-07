@@ -323,28 +323,6 @@ export class CustomCalendar extends HTMLElement {
     }
   }
 
-  highlightSelected(view: View) {
-    const {shadowRoot} = this;
-
-    const selected = shadowRoot.querySelector("[aria-selected='true']");
-    if (selected instanceof HTMLElement) {
-      selected.ariaSelected = null;
-      selected.tabIndex = -1;
-    }
-
-    const field = view.slice(0, -1); // dates -> date, months -> month...
-    const selectedValue = this[field];
-    const cell = shadowRoot.querySelector(`[data-${field}="${selectedValue}"]`);
-
-    if (cell instanceof HTMLElement) {
-      cell.ariaSelected = "true";
-      cell.tabIndex = 0;
-    } else {
-      const firstTd = shadowRoot.querySelector("td:not([disabled])");
-      if (firstTd instanceof HTMLTableCellElement) firstTd.tabIndex = 0;
-    }
-  }
-
   onNextMonthClick() {
     const host = getHost(this);
 
@@ -414,20 +392,21 @@ export class CustomCalendar extends HTMLElement {
     }
 
     const host = getHost(td);
-    if (host.view === "dates") host.handleDatesKeyDown(event, td);
-    else host.handleGridViewKeyDown(event, td);
+    if (host.view === "dates") host.onDateCellKeyDown(event, td);
+    else host.onGridViewKeyDown(event, td);
   }
 
   onTodayClick() {
     const today = new Date();
     const host = getHost(this);
 
+    host.view = "dates";
     host.year = today.getFullYear();
     host.month = today.getMonth();
     host.date = today.toDateString();
   }
 
-  handleDatesKeyDown(event: KeyboardEvent, td: HTMLTableCellElement) {
+  onDateCellKeyDown(event: KeyboardEvent, td: HTMLTableCellElement) {
     const { code, shiftKey } = event;
     const tr = td.closest("tr");
     assert(tr instanceof HTMLTableRowElement);
@@ -491,7 +470,7 @@ export class CustomCalendar extends HTMLElement {
     }
   }
 
-  handleGridViewKeyDown(event: KeyboardEvent, td: HTMLTableCellElement) {
+  onGridViewKeyDown(event: KeyboardEvent, td: HTMLTableCellElement) {
     const { code } = event;
     const host = getHost(td);
 
@@ -515,6 +494,28 @@ export class CustomCalendar extends HTMLElement {
     if (nextPeriodYear < minYear || nextPeriodYear > maxYear) return null;
 
     return new Date(Math.min(+dateOfNextPeriod, +nextPeriodLastDate));
+  }
+
+  highlightSelected(view: View) {
+    const {shadowRoot} = this;
+
+    const selected = shadowRoot.querySelector("[aria-selected='true']");
+    if (selected instanceof HTMLElement) {
+      selected.ariaSelected = null;
+      selected.tabIndex = -1;
+    }
+
+    const field = view.slice(0, -1); // dates -> date, months -> month...
+    const selectedValue = this[field];
+    const cell = shadowRoot.querySelector(`[data-${field}="${selectedValue}"]`);
+
+    if (cell instanceof HTMLElement) {
+      cell.ariaSelected = "true";
+      cell.tabIndex = 0;
+    } else {
+      const firstTd = shadowRoot.querySelector("td:not([disabled])");
+      if (firstTd instanceof HTMLTableCellElement) firstTd.tabIndex = 0;
+    }
   }
 
   moveDateFocus(nextDate: Date, host: CustomCalendar) {
