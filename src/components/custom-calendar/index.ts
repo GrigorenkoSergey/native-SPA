@@ -175,6 +175,9 @@ export class CustomCalendar extends HTMLElement {
     this.shadowRoot.addEventListener("click", this.onMonthTdClick as EventListener);
 
     this.shadowRoot.addEventListener("keydown", this.onTdKeyDown as EventListener);
+
+    const todayButton = this.shadowRoot.getElementById("today");
+    todayButton?.addEventListener("click", this.onTodayClick as EventListener);
   }
 
   setDefaultAttributes() {
@@ -413,6 +416,15 @@ export class CustomCalendar extends HTMLElement {
     const host = getHost(td);
     if (host.view === "dates") host.handleDatesKeyDown(event, td);
     else host.handleGridViewKeyDown(event, td);
+  }
+
+  onTodayClick() {
+    const today = new Date();
+    const host = getHost(this);
+
+    host.year = today.getFullYear();
+    host.month = today.getMonth();
+    host.date = today.toDateString();
   }
 
   handleDatesKeyDown(event: KeyboardEvent, td: HTMLTableCellElement) {
