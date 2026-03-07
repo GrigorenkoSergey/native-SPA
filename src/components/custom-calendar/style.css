@@ -28,6 +28,11 @@
   box-shadow: var(--box-shadow);
 }
 
+:focus {
+  outline: 2px solid var(--bg-selected);
+  outline-offset: -2px;
+}
+
 .tables-container {
   overflow: auto;
   max-height: var(--table-height, none);
@@ -93,7 +98,6 @@ th {
   font-weight: 400;
   vertical-align: middle;
   text-align: center;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 th {
@@ -111,6 +115,7 @@ td {
   &:focus-visible:not([aria-selected]) {
     background-color: var(--bg-focus);
   }
+
 
   &[disabled] {
     color: var(--color-disabled);
@@ -140,6 +145,7 @@ td {
 
 [aria-selected="true"] {
   background-color: var(--bg-selected);
+  outline: none;
   color: var(--color-selected);
   font-weight: 500;
 

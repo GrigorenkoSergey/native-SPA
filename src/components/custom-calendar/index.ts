@@ -192,8 +192,11 @@ export class CustomCalendar extends HTMLElement {
   render() {
     const view = this.view;
 
-    if (this.hasChanged("month") || this.hasChanged("year") && view === "dates") {
-      this.renderDates();
+    if (this.hasChanged("month") || this.hasChanged("year")) {
+      if (view === "dates" && !this.hasChanged("view")) this.renderDates();
+      
+      const h2 = this.shadowRoot.querySelector("#month-year");
+      if (h2) h2.textContent = this.formatYearMonth(this.year, this.month);
     }
 
     if (this.hasChanged("view")) {
@@ -245,8 +248,6 @@ export class CustomCalendar extends HTMLElement {
     assert(oldTbody);
     oldTbody.replaceWith(tbody);
 
-    const h2 = this.shadowRoot.querySelector("#month-year");
-    if (h2) h2.textContent = this.formatYearMonth(this.year, this.month);
   }
 
   renderYears() {
