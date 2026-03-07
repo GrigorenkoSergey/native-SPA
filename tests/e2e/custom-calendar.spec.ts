@@ -5,6 +5,12 @@ const expectSelected = async (locator: Locator, toBeSelected: boolean) => {
   else await expect(locator).not.toHaveAttribute("aria-selected");
 };
 
+const checkFocusVisible = async (calendar: Locator, dateCellContent: string) => {
+  const focusedVisibleCell = calendar.locator("td:focus-visible");
+  await expect(focusedVisibleCell).toHaveCount(1);
+  await expect(focusedVisibleCell).toHaveText(dateCellContent);
+};
+
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date(2026, 1, 14));
   await page.goto("http://localhost:8082/pages/custom-calendar/");
@@ -201,7 +207,10 @@ test("Возможность выбирать даты с помощью кла�
 
   await test.step("При движении вниз, год так же может поменяться", async () => {
     await page.keyboard.down("ArrowDown");
+
     await expect(dateCellLocator(1).first()).toBeFocused();
+    await checkFocusVisible(calendar, "1");
+
     await expect(calendar.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
   });
 });
@@ -317,6 +326,7 @@ test.describe("Дополнительные кнопки клавиатуры д
 
       await page.keyboard.down("Home");
       await expect(calendar.getByRole("gridcell", { name: "9", exact: true })).toBeFocused();
+      await checkFocusVisible(calendar, "9");
 
       await page.keyboard.down("End");
       await expect(calendar.getByRole("gridcell", { name: "15" })).toBeFocused();
@@ -335,6 +345,7 @@ test.describe("Дополнительные кнопки клавиатуры д
       await expect(calendar.getByRole("heading", { name: "январь 2026 г" })).toBeVisible();
       await expectSelected(calendar.getByRole("gridcell", { name: "14" }), false);
       await expect(calendar.getByRole("gridcell", { name: "14" })).toBeFocused();
+      await checkFocusVisible(calendar, "14");
 
       await calendar.getByRole("gridcell", { name: "31" }).last().click();
       await page.keyboard.down("PageUp");
@@ -347,6 +358,7 @@ test.describe("Дополнительные кнопки клавиатуры д
 
       const lastCell = calendar.getByRole("gridcell", { name: "30" }).last();
       await expect(lastCell).toBeFocused();
+      await checkFocusVisible(calendar, "30");
       await expectSelected(lastCell, false);
 
       await page.keyboard.down("Space");
@@ -366,6 +378,7 @@ test.describe("Дополнительные кнопки клавиатуры д
       // 2020 февраль - 29 дней
       await expect(calendar.getByRole("heading", { name: "февраль 2025 г" })).toBeVisible();
       await expect(calendar.getByRole("gridcell", { name: "14" })).toBeFocused();
+      await checkFocusVisible(calendar, "14");
       await expectSelected(calendar.getByRole("gridcell", { name: "14" }), false);
     });
 
@@ -390,7 +403,6 @@ test.describe("Дополнительные кнопки клавиатуры д
     });
   });
 
-  // TODO проверить, что не только сфокусирован, но и содержит псевдокласс :focus-visible при передвижениях с клавиатуры
   test("PageDown", async ({page}) => {
     const calendar = page.getByTestId("basic");
 
@@ -401,6 +413,7 @@ test.describe("Дополнительные кнопки клавиатуры д
       await expect(calendar.getByRole("heading", { name: "март 2026 г" })).toBeVisible();
       await expectSelected(calendar.getByRole("gridcell", { name: "14" }), false);
       await expect(calendar.getByRole("gridcell", { name: "14" })).toBeFocused();
+      await checkFocusVisible(calendar, "14");
 
       await calendar.getByRole("gridcell", { name: "31" }).last().click();
       await page.keyboard.down("PageDown");
@@ -408,6 +421,7 @@ test.describe("Дополнительные кнопки клавиатуры д
       await expect(calendar.getByRole("heading", { name: "апрель 2026 г" })).toBeVisible();
       const lastCell = calendar.getByRole("gridcell", { name: "30" }).last();
       await expect(lastCell).toBeFocused();
+      await checkFocusVisible(calendar, "30");
       await expectSelected(lastCell, false);
       await page.keyboard.down("Enter");
       await expectSelected(lastCell, true);
@@ -429,6 +443,7 @@ test.describe("Дополнительные кнопки клавиатуры д
       await page.keyboard.up("Shift");
       await expect(calendar.getByRole("heading", { name: "февраль 2021 г" })).toBeVisible();
       await expect(calendar.getByRole("gridcell", { name: "28" }).last()).toBeFocused();
+      await checkFocusVisible(calendar, "28");
     });
   });
 });
