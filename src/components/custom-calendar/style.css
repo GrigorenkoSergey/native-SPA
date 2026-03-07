@@ -28,7 +28,7 @@
   box-shadow: var(--box-shadow);
 }
 
-:focus {
+:is(button, td):focus {
   outline: 2px solid var(--bg-selected);
   outline-offset: -2px;
 }
