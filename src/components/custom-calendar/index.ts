@@ -162,12 +162,12 @@ export class CustomCalendar extends HTMLElement {
   }
 
   attachHandlers() {
-    const nextMonthButton = this.shadowRoot.querySelector("#next-month");
-    const prevMonthButton = this.shadowRoot.querySelector("#prev-month");
+    const nextMonthButton = this.shadowRoot.getElementById("next-month");
+    const prevMonthButton = this.shadowRoot.getElementById("prev-month");
     nextMonthButton?.addEventListener("click", this.onNextMonthClick as EventListener);
     prevMonthButton?.addEventListener("click", this.onNextMonthClick as EventListener);
 
-    const yearMonthToggler = this.shadowRoot.querySelector("#year-month-toggler");
+    const yearMonthToggler = this.shadowRoot.getElementById("year-month-toggler");
     yearMonthToggler?.addEventListener("click", this.onYearSelectorClick as EventListener);
 
     this.shadowRoot.addEventListener("click", this.onDateClick as EventListener);
@@ -196,7 +196,7 @@ export class CustomCalendar extends HTMLElement {
     if (this.hasChanged("month") || this.hasChanged("year")) {
       if (view === "dates" && !this.hasChanged("view")) this.renderDates();
       
-      const h2 = this.shadowRoot.querySelector("#month-year");
+      const h2 = this.shadowRoot.getElementById("month-year");
       if (h2) h2.textContent = this.formatYearMonth(this.year, this.month);
     }
 
@@ -222,6 +222,7 @@ export class CustomCalendar extends HTMLElement {
 
     let ptr = 0;
     const tbody = document.createElement("tbody");
+    tbody.id = "dates-tbody";
 
     for (let week = 0; week < weeksInMonth; week++) {
       const tr = document.createElement("tr");
@@ -245,10 +246,9 @@ export class CustomCalendar extends HTMLElement {
       tbody.append(tr);
     }
 
-    const oldTbody = this.shadowRoot.querySelector("tbody");
+    const oldTbody = this.shadowRoot.getElementById("dates-tbody");
     assert(oldTbody);
     oldTbody.replaceWith(tbody);
-
   }
 
   renderYears() {
@@ -256,6 +256,7 @@ export class CustomCalendar extends HTMLElement {
     const yearsPerRow = 4;
     const maxRows = Math.ceil((maxYear + 1 - minYear) / yearsPerRow);
     const tbody = document.createElement("tbody");
+    tbody.id = "years-tbody";
 
     for (let row = 0; row < maxRows; row++) {
       const tr = document.createElement("tr");
@@ -277,7 +278,7 @@ export class CustomCalendar extends HTMLElement {
       tbody.append(tr);
     }
 
-    this.shadowRoot.querySelector("#years tbody")?.replaceWith(tbody);
+    this.shadowRoot.getElementById("years-tbody")?.replaceWith(tbody);
 
     const currentYearTd = tbody.querySelector(`[data-year="${this.year}"]`);
 
@@ -289,6 +290,7 @@ export class CustomCalendar extends HTMLElement {
 
   renderMonths() {
     const tbody = document.createElement("tbody");
+    tbody.id = "months-tbody";
     const rows = 4;
     const cols = 3;
 
@@ -310,7 +312,7 @@ export class CustomCalendar extends HTMLElement {
       tbody.append(tr);
     }
 
-    this.shadowRoot.querySelector("#months tbody")?.replaceWith(tbody);
+    this.shadowRoot.getElementById("months-tbody")?.replaceWith(tbody);
 
     const currentMonthTd = tbody.querySelector(`[data-month="${this.month}"]`);
     if (currentMonthTd instanceof HTMLTableCellElement) {
@@ -391,7 +393,7 @@ export class CustomCalendar extends HTMLElement {
     host.month = Number(target.dataset.month);
     host.view = "dates";
 
-    const yearToggler = host.shadowRoot.querySelector("#year-month-toggler");
+    const yearToggler = host.shadowRoot.getElementById("year-month-toggler");
     if (yearToggler instanceof HTMLButtonElement) {
       queueMicrotask(() => yearToggler.focus());
     }
